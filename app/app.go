@@ -30,13 +30,13 @@ func createApplication(opts Opts) (*Application, error) {
 	var apiCache cache.DataCache
 	var err error
 
-	if apiCache, err = cache.NewFakeCache(); err != nil {
+	if apiCache, err = cache.NewHashMapCache(); err != nil {
 		return nil, err
 	}
 
 	api := &api.TogglyAPI{
 		Cache:    apiCache,
-		BasePath: "/api",
+		BasePath: opts.BasePath,
 		Port:     opts.Port,
 	}
 

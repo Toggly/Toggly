@@ -34,6 +34,7 @@ func (a *TogglyAPI) Run() {
 	a.lock.Unlock()
 
 	log.Printf("[INFO] HTTP server listening on → \x1b[1m%s\x1b[0m", a.httpServer.Addr)
+	log.Printf("[INFO] API V.1 base path → \x1b[1m%s/v1\x1b[0m", a.BasePath)
 	err := a.httpServer.ListenAndServe()
 	log.Printf("[INFO] HTTP server terminated, %s", err)
 }

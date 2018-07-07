@@ -8,8 +8,12 @@ func NewRedisCache() (DataCache, error) {
 type redisCache struct {
 }
 
-func (c *redisCache) Get(key string, fn func() (interface{}, error)) (data interface{}, err error) {
+func (c *redisCache) Get(key string) (data []byte, err error) {
 	return nil, nil
+}
+
+func (c *redisCache) Set(key string, data []byte) error {
+	return nil
 }
 
 func (c *redisCache) Flush(scopes ...string) {

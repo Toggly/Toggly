@@ -1,13 +1,15 @@
 package api
 
 import (
+	"log"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/render"
 
 	"github.com/Toggly/backend/app/cache"
 	"github.com/Toggly/backend/app/rest"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/render"
 )
 
 func projects() []rest.Project {
@@ -34,6 +36,15 @@ func projects() []rest.Project {
 	return p
 }
 
+func find(id string) (*rest.Project, error) {
+	for _, v := range projects() {
+		if string(v.ID) == id {
+			return &v, nil
+		}
+	}
+	return nil, nil
+}
+
 // ProjectAPI servers project api namespace
 type ProjectAPI struct {
 	Cache cache.DataCache
@@ -44,34 +55,27 @@ func (p *ProjectAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(g chi.Router) {
 		g.Get("/", p.list)
-		g.Get("/{id}", p.getProject)
+		g.Get("/{id}", p.cached(p.getProject))
 	})
 	return router
 }
 
+func (p *ProjectAPI) cached(fn func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
+	return cache.Cached(fn, p.Cache)
+}
+
+// GET ../project
 func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, projects())
 }
 
+// GET ../project/{id}
 func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
-	key := r.URL.String()
-	data, err := p.Cache.Get(key, func() (interface{}, error) {
-		id := chi.URLParam(r, "id")
-		var p *rest.Project
-		for _, v := range projects() {
-			if string(v.ID) == id {
-				p = &v
-				return p, nil
-			}
-		}
-		return nil, nil
-	})
+	proj, err := find(chi.URLParam(r, "id"))
 	if err != nil {
-		render.Status(r, 500)
-		render.PlainText(w, r, err.Error())
+		log.Printf("[ERROR] %v", err)
+		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		return
 	}
-	if data == nil {
-		render.Status(r, 404)
-	}
-	render.JSON(w, r, data)
+	render.JSON(w, r, proj)
 }
