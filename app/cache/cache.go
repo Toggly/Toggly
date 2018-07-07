@@ -27,14 +27,6 @@ func findSplitter(data []byte, val byte) int {
 	return -1
 }
 
-func joinBytes(data1 []byte, data2 []byte, splitter byte) []byte {
-	d := make([]byte, 0)
-	d = append(d, data1...)
-	d = append(d, splitter)
-	d = append(d, data2...)
-	return d
-}
-
 // Cached implements http.HandlerFunc caching
 func Cached(fn func(wr http.ResponseWriter, req *http.Request), cache DataCache) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -80,7 +72,10 @@ func Cached(fn func(wr http.ResponseWriter, req *http.Request), cache DataCache)
 		w.Write(body)
 
 		h, _ := json.Marshal(&heareds)
-		d := joinBytes(h, body, 0)
+		d := make([]byte, 0)
+		d = append(d, h...)
+		d = append(d, 0)
+		d = append(d, body...)
 
 		cache.Set(key, d)
 	})
