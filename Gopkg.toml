@@ -30,9 +30,13 @@
   unused-packages = true
 
 [[constraint]]
+  name = "github.com/jessevdk/go-flags"
+  version = "1.4.0"
+
+[[constraint]]
   name = "github.com/go-chi/chi"
   version = "3.3.2"
 
 [[constraint]]
-  name = "github.com/jessevdk/go-flags"
-  version = "1.4.0"
+  name = "github.com/go-chi/render"
+  version = "1.0.1"

@@ -11,30 +11,40 @@ import (
 	flags "github.com/jessevdk/go-flags"
 )
 
+const logo = "\n\x1b[94m" +
+	"████████╗ ██████╗  ██████╗  ██████╗ ██╗  ██╗   ██╗\n" +
+	"╚══██╔══╝██╔═══██╗██╔════╝ ██╔════╝ ██║  ╚██╗ ██╔╝\n" + "\x1b[34m" +
+	"   ██║   ██║   ██║██║  ███╗██║  ███╗██║   ╚████╔╝ \n" +
+	"   ██║   ██║   ██║██║   ██║██║   ██║██║    ╚██╔╝  \n" +
+	"   ██║   ╚██████╔╝╚██████╔╝╚██████╔╝███████╗██║   \n" +
+	"   ╚═╝    ╚═════╝  ╚═════╝  ╚═════╝ ╚══════╝╚═╝   \n" +
+	"\x1b[0m\n"
+
 // Opts describes application command line arguments
 type Opts struct {
 	Port int `short:"p" long:"port" env:"TOGGLY_API_PORT" default:"8080" description:"port"`
 }
 
-var revision = "" //revision assigned on build
+var revision = "development" //revision assigned on build
 
 func main() {
-
-	fmt.Printf("Toggly API Server %s\n", revision)
-
+	fmt.Println(logo)
+	fmt.Printf("Toggly API Server (rev: %s)\n\n", revision)
+	fmt.Println("--------------------------------------------------")
 	var opts Opts
-	p := flags.NewParser(&opts, flags.Default)
-	if _, e := p.ParseArgs(os.Args[1:]); e != nil {
+
+	if _, e := flags.NewParser(&opts, flags.Default).ParseArgs(os.Args[1:]); e != nil {
 		os.Exit(1)
 	}
 
+	log.Print("[INFO] API server started \x1b[32m✔\x1b[0m")
 	ctx, cancel := context.WithCancel(context.Background())
 
 	go func() { // catch signal and invoke graceful termination
 		stop := make(chan os.Signal, 1)
 		signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 		<-stop
-		log.Print("[WARN] interrupt signal")
+		log.Print("[WARN] interrupt signal \x1b[31m✘\x1b[0m")
 		cancel()
 	}()
 
@@ -44,9 +54,5 @@ func main() {
 	}
 
 	err = app.Run(ctx)
-	log.Printf("[INFO] application terminated %s", err)
-}
-
-func createApplication(opts Opts) (*Application, error) {
-	return &Application{}, nil
+	log.Println("[INFO] application terminated")
 }
