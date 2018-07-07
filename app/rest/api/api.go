@@ -64,15 +64,23 @@ func (a *TogglyAPI) routes() chi.Router {
 		middleware.Timeout(60*time.Second),
 	)
 	router.Route(a.BasePath, func(r chi.Router) {
-		r.Mount("/v1", a.v1())
+		r.Route("/v1", func(r chi.Router) {
+			r.Use(apiVersionCtx("v1"))
+			p := &ProjectAPI{Cache: a.Cache}
+			r.Mount("/project", p.Routes())
+		})
 	})
 	return router
 }
 
-func (a *TogglyAPI) v1() chi.Router {
-	router := chi.NewRouter()
-	router.Group(func(g chi.Router) {
-		g.Get("/project", a.getProject)
-	})
-	return router
+type ctxVal string
+
+func apiVersionCtx(version string) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var key ctxVal = "api.version"
+			r = r.WithContext(context.WithValue(r.Context(), key, version))
+			next.ServeHTTP(w, r)
+		})
+	}
 }
