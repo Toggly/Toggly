@@ -8,7 +8,7 @@ func NewRedisCache() (DataCache, error) {
 type redisCache struct {
 }
 
-func (c *redisCache) Get(key string, fn func() ([]byte, error)) (data []byte, err error) {
+func (c *redisCache) Get(key string, fn func() (interface{}, error)) (data interface{}, err error) {
 	return nil, nil
 }
 

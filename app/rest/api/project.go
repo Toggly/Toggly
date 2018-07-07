@@ -39,7 +39,7 @@ type ProjectAPI struct {
 	Cache cache.DataCache
 }
 
-// Routes returns the project namespace router
+// Routes returns routes for project namespace
 func (p *ProjectAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(g chi.Router) {
@@ -54,13 +54,24 @@ func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	for _, v := range projects() {
-		if string(v.ID) == id {
-			render.JSON(w, r, v)
-			return
+	key := r.URL.String()
+	data, err := p.Cache.Get(key, func() (interface{}, error) {
+		id := chi.URLParam(r, "id")
+		var p *rest.Project
+		for _, v := range projects() {
+			if string(v.ID) == id {
+				p = &v
+				return p, nil
+			}
 		}
+		return nil, nil
+	})
+	if err != nil {
+		render.Status(r, 500)
+		render.PlainText(w, r, err.Error())
 	}
-	render.Status(r, 404)
-	render.PlainText(w, r, "Not found")
+	if data == nil {
+		render.Status(r, 404)
+	}
+	render.JSON(w, r, data)
 }

@@ -66,8 +66,7 @@ func (a *TogglyAPI) routes() chi.Router {
 	router.Route(a.BasePath, func(r chi.Router) {
 		r.Route("/v1", func(r chi.Router) {
 			r.Use(apiVersionCtx("v1"))
-			p := &ProjectAPI{Cache: a.Cache}
-			r.Mount("/project", p.Routes())
+			r.Mount("/project", (&ProjectAPI{Cache: a.Cache}).Routes())
 		})
 	})
 	return router

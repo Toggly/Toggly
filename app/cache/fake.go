@@ -8,11 +8,8 @@ func NewFakeCache() (DataCache, error) {
 type fakeCache struct {
 }
 
-func (c *fakeCache) Get(key string, fn func() ([]byte, error)) (data []byte, err error) {
-	if data, err = fn(); err != nil {
-		return data, err
-	}
-	return data, nil
+func (c *fakeCache) Get(key string, fn func() (interface{}, error)) (data interface{}, err error) {
+	return fn()
 }
 
 func (c *fakeCache) Flush(scopes ...string) {
