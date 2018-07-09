@@ -1,0 +1,51 @@
+###### DICTIONARY ##########
+
+# brand <- brand:ver <- tier <- tier:ver <- account <- user <- user:ver
+
+### Get brand
+GET http://localhost:8080/api/v1/dict/project/123/prod/brand?ver=1210
+
+### Get Tier
+GET http://localhost:8080/api/v1/dict/project/123/prod/tier?ver=4480
+
+### Get Account
+GET http://localhost:8080/api/v1/dict/project/123/prod/account
+
+### Get User
+GET http://localhost:8080/api/v1/dict/project/123/prod/user?ver=bot
+
+
+
+
+### Set object
+POST http://localhost:8080/api/v1/val/project/123/prod/user
+Authorization: Bearer 2849721895284567
+
+{
+ "version": "admin",
+ "options": [
+    {"key":"f1", "val": 2},
+    {"key":"f2", "val": 3}
+ ]
+}
+
+###### VALUES ##############
+
+### Get user flags
+GET http://localhost:8080/api/v1/val/project/123/prod/user/7625473246
+
+
+### Set user flags
+POST http://localhost:8080/api/v1/val/project/123/prod/user/7625473246
+Authorization: Bearer 2849721895284567
+
+{
+ "ver": "admin"
+ "f1": 2
+ "f2": "blahblah"
+}
+
+### Get account flags
+GET http://localhost:8080/api/v1/val/project/123/prod/account/12
+
+

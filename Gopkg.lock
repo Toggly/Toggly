@@ -2,6 +2,21 @@
 
 
 [[projects]]
+  name = "github.com/go-chi/chi"
+  packages = [
+    ".",
+    "middleware"
+  ]
+  revision = "e83ac2304db3c50cf03d96a2fcd39009d458bc35"
+  version = "v3.3.2"
+
+[[projects]]
+  name = "github.com/go-chi/render"
+  packages = ["."]
+  revision = "3215478343fbc559bd3fc08f7031bb134d6bdad5"
+  version = "v1.0.1"
+
+[[projects]]
   name = "github.com/jessevdk/go-flags"
   packages = ["."]
   revision = "c6ca198ec95c841fdb89fc0de7496fed11ab854e"
@@ -10,6 +25,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3e72692ce4a2d12b5ce3ac2f83ad89be6eb9ce02f7a592fd4ffa61b7cdd3ead0"
+  inputs-digest = "ca4e07d3a1e91ab0aff75229053ab4d49647ec4a1e95e9388e62ad9f38e24da0"
   solver-name = "gps-cdcl"
   solver-version = 1
