@@ -8,10 +8,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Toggly/backend/app/storage"
+
 	"github.com/Toggly/backend/app/cache"
-	"github.com/Toggly/backend/app/rest/api/admin"
-	"github.com/Toggly/backend/app/rest/api/dict"
-	"github.com/Toggly/backend/app/rest/api/val"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -19,6 +18,7 @@ import (
 // TogglyAPI implements rest API
 type TogglyAPI struct {
 	Cache      cache.DataCache
+	Storage    storage.DataStorage
 	Port       int
 	BasePath   string
 	httpServer *http.Server
@@ -66,9 +66,9 @@ func (a *TogglyAPI) routes() chi.Router {
 	router.Route(a.BasePath, func(r chi.Router) {
 		r.Route("/v1", func(r chi.Router) {
 			r.Use(apiVersionCtx("v1"))
-			r.Mount("/dict", (&dict.API{Cache: a.Cache}).Routes())
-			r.Mount("/val", (&val.API{Cache: a.Cache}).Routes())
-			r.Mount("/admin", (&admin.API{Cache: a.Cache}).Routes())
+			r.Mount("/project", (&ProjectAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
+			r.Mount("/project/{project_code}/object", (&ObjectAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
+			r.Mount("/project/{project_code}/env", (&EnvironmentAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
 		})
 	})
 	return router
