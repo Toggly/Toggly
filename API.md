@@ -177,7 +177,7 @@ Response:
     "objects": [
         {
             "code": "user",
-            "overrides": "user",
+            "inherits": "group",
             "description": ""
         }
     ]
@@ -201,7 +201,7 @@ Response:
 ```json
 {
     "code": "user",
-    "overrides": "group",
+    "inherits": "group",
     "description": "",
     "parameters": []
 }
@@ -220,7 +220,7 @@ POST http://HOST/api/v1/dict/project/my_project/object
 
 {
     "code": "user",
-    "overrides": "group",
+    "inherits": "group",
     "description": "",
     "parameters": []
 }
