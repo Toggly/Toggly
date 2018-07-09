@@ -5,11 +5,13 @@ import (
 
 	"github.com/Toggly/backend/app/cache"
 	"github.com/Toggly/backend/app/rest/api"
+	"github.com/Toggly/backend/app/storage"
 )
 
 //Application contains all internal components
 type Application struct {
-	api *api.TogglyAPI
+	api     *api.TogglyAPI
+	storage *storage.DataStorage
 }
 
 //Run application
@@ -25,16 +27,21 @@ func (a *Application) Run(ctx context.Context) error {
 
 func createApplication(opts Opts) (*Application, error) {
 	var apiCache cache.DataCache
+	var dataStorage storage.DataStorage
 	var err error
 	if apiCache, err = cache.NewHashMapCache(); err != nil {
 		return nil, err
 	}
-	api := &api.TogglyAPI{
+	if dataStorage, err = storage.NewFakeStorage(); err != nil {
+		return nil, err
+	}
+	api := api.TogglyAPI{
 		Cache:    apiCache,
+		Storage:  dataStorage,
 		BasePath: opts.BasePath,
 		Port:     opts.Port,
 	}
 	return &Application{
-		api: api,
+		api: &api,
 	}, nil
 }
