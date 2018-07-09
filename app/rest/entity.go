@@ -5,14 +5,6 @@ import "time"
 // ObjectID is an unique object identifier
 type ObjectID string
 
-// Account represents an account data structure
-type Account struct {
-	ID      ObjectID  `json:"id"`
-	Name    string    `json:"name"`
-	OAuthID string    `json:"oauth_id"`
-	RegDate time.Time `json:"reg_date"`
-}
-
 // Project represents a project data structure
 type Project struct {
 	ID             ObjectID  `json:"id"`
@@ -29,21 +21,43 @@ type Environment struct {
 	Protected bool     `json:"protected"`
 }
 
-// FlagType type
-type FlagType int
+// OptionType type
+type OptionType int
 
-// flag types enum
+// Option types enum
 const (
-	FlagBool FlagType = iota
-	FlagString
-	FlagInt
-	FlagEnum
+	OptionBool OptionType = iota
+	OptionString
+	OptionInt
+	OptionEnum
 )
 
-// Flag represents a flag data structure
-type Flag struct {
-	ID        ObjectID `json:"id"`
-	Name      string   `json:"name"`
-	Type      FlagType `json:"type"`
-	Protected bool     `json:"protected"`
+// ParameterCode type
+type ParameterCode string
+
+// Parameter represents a flag data structure
+type Parameter struct {
+	Code        ParameterCode `json:"code"`
+	Description string        `json:"description"`
+	Type        OptionType    `json:"type"`
+	Value       interface{}
+}
+
+// ObjectCode type
+type ObjectCode string
+
+// Object describes dictionary object
+type Object struct {
+	Code      ObjectCode
+	Name      string
+	Overrides ObjectCode
+	Props     map[string]interface{}
+}
+
+// Account represents an account data structure
+type Account struct {
+	ID      ObjectID  `json:"id"`
+	Name    string    `json:"name"`
+	OAuthID string    `json:"oauth_id"`
+	RegDate time.Time `json:"reg_date"`
 }

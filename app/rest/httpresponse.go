@@ -6,15 +6,6 @@ import (
 	"github.com/go-chi/render"
 )
 
-// DataCachedStatus type
-type DataCachedStatus string
-
-// Cached status enum
-const (
-	DataCached    DataCachedStatus = "Yes"
-	DataNotCached DataCachedStatus = "No"
-)
-
 // ErrorResponse creates {error: message} json body and responds with error code
 func ErrorResponse(w http.ResponseWriter, r *http.Request, err error, code int) {
 	render.Status(r, code)
@@ -24,12 +15,6 @@ func ErrorResponse(w http.ResponseWriter, r *http.Request, err error, code int) 
 // JSONResponse creates json body
 func JSONResponse(w http.ResponseWriter, r *http.Request, data interface{}) {
 	render.JSON(w, r, data)
-}
-
-// JSONResponseFromBytes creates json body
-func JSONResponseFromBytes(w http.ResponseWriter, r *http.Request, data []byte) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Write(data)
 }
 
 // NotFoundResponse creates empty json body and responds with 404 code

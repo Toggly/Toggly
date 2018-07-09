@@ -25,14 +25,12 @@ type TogglyAPI struct {
 // Run rest api
 func (a *TogglyAPI) Run() {
 	router := a.routes()
-
 	a.lock.Lock()
 	a.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", a.Port),
 		Handler: router,
 	}
 	a.lock.Unlock()
-
 	log.Printf("[INFO] HTTP server listening on → \x1b[1m%s\x1b[0m", a.httpServer.Addr)
 	log.Printf("[INFO] API V.1 base path → \x1b[1m%s/v1\x1b[0m", a.BasePath)
 	err := a.httpServer.ListenAndServe()
@@ -56,14 +54,12 @@ func (a *TogglyAPI) Stop() {
 
 func (a *TogglyAPI) routes() chi.Router {
 	router := chi.NewRouter()
-	router.Use(
-		middleware.RequestID,
-		middleware.RealIP,
-		middleware.Logger,
-		middleware.Recoverer,
-		middleware.Throttle(1000),
-		middleware.Timeout(60*time.Second),
-	)
+	router.Use(middleware.RequestID)
+	router.Use(middleware.RealIP)
+	router.Use(middleware.Logger)
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.Throttle(1000))
+	router.Use(middleware.Timeout(60 * time.Second))
 	router.Route(a.BasePath, func(r chi.Router) {
 		r.Route("/v1", func(r chi.Router) {
 			r.Use(apiVersionCtx("v1"))
