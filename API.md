@@ -342,7 +342,7 @@ Response:
 #### Save parameter
 
 ```http
-POST http://HOST/api/v1/project/{project_code}/object/{object_code}/parameter/{param_code}
+POST http://HOST/api/v1/project/{project_code}/object/{object_code}/parameter
 ```
 
 Example:
