@@ -9,6 +9,9 @@ import (
 	"time"
 
 	"github.com/Toggly/backend/app/cache"
+	"github.com/Toggly/backend/app/rest/api/admin"
+	"github.com/Toggly/backend/app/rest/api/dict"
+	"github.com/Toggly/backend/app/rest/api/val"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -63,7 +66,9 @@ func (a *TogglyAPI) routes() chi.Router {
 	router.Route(a.BasePath, func(r chi.Router) {
 		r.Route("/v1", func(r chi.Router) {
 			r.Use(apiVersionCtx("v1"))
-			r.Mount("/project", (&ProjectAPI{Cache: a.Cache}).Routes())
+			r.Mount("/dict", (&dict.API{Cache: a.Cache}).Routes())
+			r.Mount("/val", (&val.API{Cache: a.Cache}).Routes())
+			r.Mount("/admin", (&admin.API{Cache: a.Cache}).Routes())
 		})
 	})
 	return router

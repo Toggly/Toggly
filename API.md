@@ -1,147 +1,369 @@
 # API
 
-## Account
-
-Data hierarchy
-
-```
-Account
- |
- - Role
- |
- - User
-```
-
-## Dictionary
-
-Data hierarchy
-
-```
-Project
- |
- - Object
- | |
- | - Parameter 
- |
- - Environment
-   | 
-   - Object
-     |
-     - Parameter
-```
+## Public API
 
 ### Project
 
-Get project
+#### Projects list
 
-```
-GET http://HOST/api/v1/dict/project/{project_id}
-```
-
-Response:
-```
-{
-    "name": "project1",
-    "environments": ["dev", "test", "prod"]
-}
-```
-
-Save project
-
-```
-POST http://HOST/api/v1/dict/project
-
-{
-    "name": "project1",
-    "environments": ["dev", "test", "prod"]
-}
-```
-
-### Object
-
-Get object
-
-```
-GET http://HOST/api/v1/dict/project/{project_id}/object/{object_code}
+```http
+GET http://HOST/api/v1/project
 ```
 
 Response:
 
-```
+```json
 {
-    "code": "user",
-    "parameters": []
-    "overrides": Null
+    "projects": [
+        {
+            "code": "my_project",
+            "description": "Project description",
+            "status": 0,
+            "reg_date": "2018-07-08T21:42:31.236594677-07:00"
+        }
+    ]
 }
 ```
 
-Save object
+#### Get project
 
+```http
+GET http://HOST/api/v1/project/{project_code}
 ```
-POST http://HOST/api/v1/dict/project/{project_id}/object
+
+Example
+
+```http
+GET http://HOST/api/v1/project/my_project
+```
+
+Response:
+
+```json
+{
+    "code": "my_project",
+    "description": "Project description",
+    "status": 0,
+    "reg_date": "2018-07-08T21:42:31.236594677-07:00"
+}
+```
+
+#### Save project
+
+```http
+POST http://HOST/api/v1/project
+```
+
+Example:
+
+```http
+POST http://HOST/api/v1/project
 
 {
-    "code": "user",
-    "parameters": []
-    "overrides": Null
+    "code": "my_project",
+    "description": "",
+    "status": 0,
+    "reg_date": "2018-07-08T21:42:31.236594677-07:00"
+}
+```
+
+Response
+
+```json
+{
+    "status": "ok"
 }
 ```
 
 ### Environment
 
-Get environment
+#### Environments list
 
-```
-GET http://HOST/api/v1/dict/project/{project_id}/env/{env_code}
-```
-
-Response:
-
-```
-{
-    "code": "dev"
-    "description": "Description",
-    "protected": true
-}
+```http
+GET http://HOST/api/v1/project/{project_id}/env
 ```
 
-Save environment
+Example:
 
-```
-POST http://HOST/api/v1/dict/project/{project_id}/env
-
-{
-    "code": "dev",
-    "description": "Description",
-    "protected": true
-}
-```
-
-
-### Environment Object
-
-Get object
-
-```
-GET http://HOST/api/v1/dict/project/{project_id}/env/{env_code}/object/{object_code}
+```http
+GET http://HOST/api/v1/project/my_project/env
 ```
 
 Response:
 
+```json
+{
+    "environments": [
+        {
+            "code": "dev",
+            "description": "Development environment",
+            "protected": false
+        },
+        {
+            "code": "prod",
+            "description": "Production environment",
+            "protected": true
+        }
+    ]
+}
 ```
+
+#### Get environment
+
+```http
+GET http://HOST/api/v1/project/{project_code}/env/{env_code}
+```
+
+Example:
+
+```http
+GET http://HOST/api/v1/project/my_project/env/prod
+```
+
+Response:
+
+```json
+{
+    "code": "prod",
+    "description": "Production environment",
+    "protected": true
+}
+```
+
+#### Save environment
+
+```http
+POST http://HOST/api/v1/dict/project/{project_code}/env
+```
+
+Example:
+
+```http
+POST http://HOST/api/v1/dict/project/my_project/env
+
+{
+    "code": "test",
+    "description": "Test environment",
+    "protected": false
+}
+```
+
+Response
+
+```json
+{
+    "status": "ok"
+}
+```
+
+### Object
+
+#### Get objects list
+
+```http
+GET http://HOST/api/v1/project/{project_code}/object
+```
+
+Example:
+
+```http
+GET http://HOST/api/v1/project/my_project/object
+```
+
+Response:
+
+```json
+{
+    "objects": [
+        {
+            "code": "user",
+            "overrides": "user",
+            "description": ""
+        }
+    ]
+}
+```
+
+#### Get object description
+
+```http
+GET http://HOST/api/v1/project/{project_code}/object/{object_code}
+```
+
+Example:
+
+```http
+GET http://HOST/api/v1/project/my_project/object/user
+```
+
+Response:
+
+```json
 {
     "code": "user",
+    "overrides": "group",
+    "description": "",
     "parameters": []
 }
 ```
 
-Save object
+#### Save object description
 
+```http
+POST http://HOST/api/v1/dict/project/{project_id}/object
 ```
-POST http://HOST/api/v1/dict/project/{project_id}/env/{env_code}/object
+
+Example:
+
+```http
+POST http://HOST/api/v1/dict/project/my_project/object
 
 {
     "code": "user",
+    "overrides": "group",
+    "description": "",
     "parameters": []
 }
 ```
+
+Response
+
+```json
+{
+    "status": "ok"
+}
+```
+
+#### Get object value
+
+```http
+GET http://HOST/api/v1/project/{project_code}/object/{object_code}?id=object_id&env=default
+```
+
+Example
+
+```http
+GET http://HOST/api/v1/project/my_project/object/user?id=1234&env=prod
+```
+
+Response:
+
+```json
+{
+    "parameters": [
+        {
+            "code": "active",
+            "value": false
+        }
+    ]
+}
+```
+
+#### Save object value
+
+```http
+POST http://HOST/api/v1/project/{project_code}/object/{object_code}
+```
+
+Example:
+
+```http
+POST http://HOST/api/v1/project/my_project/object/user
+
+{
+    "id": 1234,
+    "env": "prod",
+    "parameters": [
+        {
+            "code": "active",
+            "value": true
+        }
+    ]
+}
+```
+
+### Parameter
+
+#### Get parameters list
+
+```http
+GET http://HOST/api/v1/project/{project_code}/object/{object_code}/parameter
+```
+
+Example:
+
+```http
+GET http://HOST/api/v1/project/my_project/object/user/parameter
+```
+
+Response:
+
+```json
+{
+    "parameters": [
+        {
+            "code": "active",
+            "type": "bool",
+            "value": true
+        },
+        {
+            "code": "role",
+            "type": "enum",
+            "value": "user",
+            "enum": "user,editor,admin"
+        }
+    ]
+}
+```
+
+#### Get parameter
+
+```http
+GET http://HOST/api/v1/project/{project_code}/object/{object_code}/parameter/{param_code}
+```
+
+Example:
+
+```http
+GET http://HOST/api/v1/project/my_project/object/user/parameter/role
+```
+
+Response:
+
+```json
+{
+    "code": "role",
+    "type": "enum",
+    "value": "user",
+    "enum": "user,editor,admin"
+}
+```
+
+#### Save parameter
+
+```http
+POST http://HOST/api/v1/project/{project_code}/object/{object_code}/parameter/{param_code}
+```
+
+Example:
+
+```http
+POST http://HOST/api/v1/project/my_project/object/user/parameter
+
+{
+    "code": "role",
+    "type": "enum",
+    "value": "user",
+    "enum": "user,editor,admin"
+}
+```
+
+Response
+
+```json
+{
+    "status": "ok"
+}
+```
+
+## Admin API : TBD

@@ -1,24 +1,16 @@
-package rest
+package data
 
 import "time"
 
 // ObjectID is an unique object identifier
 type ObjectID string
 
-// Project represents a project data structure
-type Project struct {
-	ID             ObjectID  `json:"id"`
-	Name           string    `json:"name,omitempty"`
-	Collaboratives []int     `json:"collaboratives,omitempty"`
-	RegDate        time.Time `json:"reg_date,omitempty"`
-	Status         int       `json:"status"`
-}
-
 // Environment represents an environment data structure
 type Environment struct {
-	ID        ObjectID `json:"id"`
-	Name      string   `json:"name"`
-	Protected bool     `json:"protected"`
+	ID        ObjectID  `json:"_id"`
+	Name      string    `json:"name"`
+	Protected bool      `json:"protected"`
+	RegDate   time.Time `json:"reg_date,omitempty"`
 }
 
 // OptionType type
@@ -46,12 +38,12 @@ type Parameter struct {
 // ObjectCode type
 type ObjectCode string
 
-// Object describes dictionary object
+// Object describes object configuration
 type Object struct {
-	Code      ObjectCode
-	Name      string
-	Overrides ObjectCode
-	Props     map[string]interface{}
+	Code       ObjectCode
+	Name       string
+	Overrides  ObjectCode
+	Parameters []Parameter
 }
 
 // Account represents an account data structure
