@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Toggly/backend/app/storage"
+	"github.com/Toggly/core/app/storage"
 
-	"github.com/Toggly/backend/app/cache"
+	"github.com/Toggly/core/app/cache"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )

@@ -3,11 +3,11 @@ package storage
 import (
 	"time"
 
-	"github.com/Toggly/backend/app/data"
+	"github.com/Toggly/core/app/data"
 )
 
-// NewFakeStorage returns fake storage implementation
-func NewFakeStorage() (DataStorage, error) {
+// NewFake returns fake storage implementation
+func NewFake() (DataStorage, error) {
 	return &fakeStorage{}, nil
 }
 

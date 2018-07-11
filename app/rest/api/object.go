@@ -4,12 +4,12 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Toggly/backend/app/data"
+	"github.com/Toggly/core/app/data"
 
-	"github.com/Toggly/backend/app/storage"
+	"github.com/Toggly/core/app/storage"
 
-	"github.com/Toggly/backend/app/cache"
-	"github.com/Toggly/backend/app/rest"
+	"github.com/Toggly/core/app/cache"
+	"github.com/Toggly/core/app/rest"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 )

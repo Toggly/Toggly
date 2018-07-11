@@ -3,41 +3,5 @@
 GET http://localhost:8080/api/v1/project
 
 ### Get project by id
-GET http://localhost:8080/api/v1/project/1
-
-
-
-###### DICTIONARY ##########
-GET http://localhost:8080/api/v1/dict/project/123/prod/user?ver=admin
-
-POST http://localhost:8080/api/v1/val/project/123/prod/user
-Authorization: Bearer 2849721895284567
-
-{
- "version": "admin",
- "options": [
-    {"key":"f1", "val": 2},
-    {"key":"f2", "val": 3}
- ]
-}
-
-###### VALUES ##############
-
-### Get user flags
-GET http://localhost:8080/api/v1/val/project/123/prod/user/7625473246
-
-
-### Set user flags
-POST http://localhost:8080/api/v1/val/project/123/prod/user/7625473246
-Authorization: Bearer 2849721895284567
-
-{
- "ver": "admin"
- "f1": 2
- "f2": "blahblah"
-}
-
-### Get account flags
-GET http://localhost:8080/api/v1/val/project/123/prod/account/12
-
+GET http://localhost:8080/api/v1/project/project1
 

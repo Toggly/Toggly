@@ -1,9 +1,9 @@
 package storage
 
-import "github.com/Toggly/backend/app/data"
+import "github.com/Toggly/core/app/data"
 
-// NewMongoDBStorage returns MongoDB storage implementation
-func NewMongoDBStorage() (DataStorage, error) {
+// NewMongo returns MongoDB storage implementation
+func NewMongo() (DataStorage, error) {
 	return &mongoStorage{}, nil
 }
 
