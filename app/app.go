@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 
-	"github.com/Toggly/backend/app/cache"
-	"github.com/Toggly/backend/app/rest/api"
-	"github.com/Toggly/backend/app/storage"
+	"github.com/Toggly/core/app/cache"
+	"github.com/Toggly/core/app/rest/api"
+	"github.com/Toggly/core/app/storage"
 )
 
 //Application contains all internal components

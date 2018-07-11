@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/Toggly/backend/app/data"
+import "github.com/Toggly/core/app/data"
 
 // DataStorage defines storage interface for dictionary
 type DataStorage interface {

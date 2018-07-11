@@ -3,7 +3,7 @@ package storage
 import (
 	"time"
 
-	"github.com/Toggly/backend/app/data"
+	"github.com/Toggly/core/app/data"
 )
 
 // NewFake returns fake storage implementation
