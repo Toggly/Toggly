@@ -32,7 +32,7 @@ func createApplication(opts Opts) (*Application, error) {
 	if apiCache, err = cache.NewHashMapCache(); err != nil {
 		return nil, err
 	}
-	if dataStorage, err = storage.NewFakeStorage(); err != nil {
+	if dataStorage, err = storage.NewFake(); err != nil {
 		return nil, err
 	}
 	api := api.TogglyAPI{

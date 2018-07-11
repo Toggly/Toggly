@@ -4,8 +4,7 @@ import "time"
 
 // Account represents an account data structure
 type Account struct {
-	ID      ObjectID  `json:"id"`
+	ID      ObjectID  `json:"id" bson:"_id"`
 	Name    string    `json:"name"`
-	OAuthID string    `json:"oauth_id"`
 	RegDate time.Time `json:"reg_date"`
 }
