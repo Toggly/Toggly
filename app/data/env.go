@@ -7,6 +7,7 @@ type EnvironmentCode string
 
 // Environment represents an environment data structure
 type Environment struct {
+	ID          string          `json:"id" bson:"_id"`
 	Code        EnvironmentCode `json:"code"`
 	Description string          `json:"description"`
 	Protected   bool            `json:"protected"`
