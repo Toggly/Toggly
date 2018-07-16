@@ -35,7 +35,8 @@ func (p *ObjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 
 func (p *ObjectAPI) list(w http.ResponseWriter, r *http.Request) {
 	proj := data.ProjectCode(chi.URLParam(r, "project_code"))
-	list, err := p.Storage.Projects().For(&proj).Environments().For(nil).Objects().List()
+	env := data.EnvironmentCode(chi.URLParam(r, "env_code"))
+	list, err := p.Storage.Projects().For(proj).Environments().For(env).Objects().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -51,7 +52,8 @@ func (p *ObjectAPI) list(w http.ResponseWriter, r *http.Request) {
 func (p *ObjectAPI) getObject(w http.ResponseWriter, r *http.Request) {
 	proj := data.ProjectCode(chi.URLParam(r, "project_code"))
 	obj := data.ObjectCode(chi.URLParam(r, "code"))
-	o, err := p.Storage.Projects().For(&proj).Environments().For(nil).Objects().Get(&obj)
+	env := data.EnvironmentCode(chi.URLParam(r, "env_code"))
+	o, err := p.Storage.Projects().For(proj).Environments().For(env).Objects().Get(obj)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)

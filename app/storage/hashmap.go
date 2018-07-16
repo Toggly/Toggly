@@ -23,7 +23,7 @@ func (s *hmProjectStorage) List() ([]*data.Project, error) {
 	return projects(), nil
 }
 
-func (s *hmProjectStorage) Get(code *data.ProjectCode) (*data.Project, error) {
+func (s *hmProjectStorage) Get(code data.ProjectCode) (*data.Project, error) {
 	return findProj(code), nil
 }
 
@@ -31,14 +31,14 @@ func (s *hmProjectStorage) Save(project data.Project) error {
 	return nil
 }
 
-func (s *hmProjectStorage) For(project *data.ProjectCode) ForProject {
+func (s *hmProjectStorage) For(project data.ProjectCode) ForProject {
 	return &hmForProject{
 		project: project,
 	}
 }
 
 type hmForProject struct {
-	project *data.ProjectCode
+	project data.ProjectCode
 }
 
 func (s *hmForProject) Environments() EnvironmentStorage {
@@ -48,20 +48,20 @@ func (s *hmForProject) Environments() EnvironmentStorage {
 }
 
 type hmEnvironmentStorage struct {
-	project *data.ProjectCode
+	project data.ProjectCode
 }
 
 func (s *hmEnvironmentStorage) List() ([]*data.Environment, error) {
 	return envs(), nil
 }
-func (s *hmEnvironmentStorage) Get(code *data.EnvironmentCode) (*data.Environment, error) {
+func (s *hmEnvironmentStorage) Get(code data.EnvironmentCode) (*data.Environment, error) {
 	return findEnv(code), nil
 }
 func (s *hmEnvironmentStorage) Save(env data.Environment) error {
 	return nil
 }
 
-func (s *hmEnvironmentStorage) For(code *data.EnvironmentCode) ForEnvironment {
+func (s *hmEnvironmentStorage) For(code data.EnvironmentCode) ForEnvironment {
 	return &hmForEnvironment{}
 }
 
@@ -76,7 +76,7 @@ type hmObjectStorage struct{}
 func (s *hmObjectStorage) List() ([]*data.Object, error) {
 	return objects(), nil
 }
-func (s *hmObjectStorage) Get(code *data.ObjectCode) (*data.Object, error) {
+func (s *hmObjectStorage) Get(code data.ObjectCode) (*data.Object, error) {
 	return findObj(code), nil
 }
 func (s *hmObjectStorage) Save(object data.Object) error {
@@ -102,9 +102,9 @@ func objects() []*data.Object {
 	return p
 }
 
-func findObj(code *data.ObjectCode) *data.Object {
+func findObj(code data.ObjectCode) *data.Object {
 	for _, v := range objects() {
-		if v.Code == *code {
+		if v.Code == code {
 			return v
 		}
 	}
@@ -135,9 +135,9 @@ func projects() []*data.Project {
 	return p
 }
 
-func findProj(code *data.ProjectCode) *data.Project {
+func findProj(code data.ProjectCode) *data.Project {
 	for _, v := range projects() {
-		if v.Code == *code {
+		if v.Code == code {
 			return v
 		}
 	}
@@ -159,9 +159,9 @@ func envs() []*data.Environment {
 	return p
 }
 
-func findEnv(code *data.EnvironmentCode) *data.Environment {
+func findEnv(code data.EnvironmentCode) *data.Environment {
 	for _, v := range envs() {
-		if v.Code == *code {
+		if v.Code == code {
 			return v
 		}
 	}

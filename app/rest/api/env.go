@@ -34,7 +34,7 @@ func (p *EnvironmentAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 
 func (p *EnvironmentAPI) list(w http.ResponseWriter, r *http.Request) {
 	proj := data.ProjectCode(chi.URLParam(r, "project_code"))
-	list, err := p.Storage.Projects().For(&proj).Environments().List()
+	list, err := p.Storage.Projects().For(proj).Environments().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -50,7 +50,7 @@ func (p *EnvironmentAPI) list(w http.ResponseWriter, r *http.Request) {
 func (p *EnvironmentAPI) getEnvironment(w http.ResponseWriter, r *http.Request) {
 	envID := data.EnvironmentCode(chi.URLParam(r, "code"))
 	proj := data.ProjectCode(chi.URLParam(r, "project_code"))
-	env, err := p.Storage.Projects().For(&proj).Environments().Get(&envID)
+	env, err := p.Storage.Projects().For(proj).Environments().Get(envID)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)

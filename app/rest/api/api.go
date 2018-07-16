@@ -84,4 +84,5 @@ func (a *TogglyAPI) v1(r chi.Router) {
 	r.Mount("/project", (&ProjectAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
 	r.Mount("/project/{project_code}/object", (&ObjectAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
 	r.Mount("/project/{project_code}/env", (&EnvironmentAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
+	r.Mount("/project/{project_code}/env/{env_code}/object", (&ObjectAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
 }

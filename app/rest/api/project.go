@@ -50,7 +50,7 @@ func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 
 func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 	id := data.ProjectCode(chi.URLParam(r, "id"))
-	proj, err := p.Storage.Projects().Get(&id)
+	proj, err := p.Storage.Projects().Get(id)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)

@@ -10,9 +10,9 @@ type DataStorage interface {
 // ProjectStorage defines projects storage interface
 type ProjectStorage interface {
 	List() ([]*data.Project, error)
-	Get(code *data.ProjectCode) (*data.Project, error)
+	Get(code data.ProjectCode) (*data.Project, error)
 	Save(project data.Project) error
-	For(project *data.ProjectCode) ForProject
+	For(project data.ProjectCode) ForProject
 }
 
 // ForProject defines project dependencies interface
@@ -23,9 +23,9 @@ type ForProject interface {
 // EnvironmentStorage defines environment storage interface
 type EnvironmentStorage interface {
 	List() ([]*data.Environment, error)
-	Get(code *data.EnvironmentCode) (*data.Environment, error)
+	Get(code data.EnvironmentCode) (*data.Environment, error)
 	Save(env data.Environment) error
-	For(*data.EnvironmentCode) ForEnvironment
+	For(data.EnvironmentCode) ForEnvironment
 }
 
 // ForEnvironment defines environment dependencies interface
@@ -36,6 +36,6 @@ type ForEnvironment interface {
 // ObjectStorage defines object structure storage interface
 type ObjectStorage interface {
 	List() ([]*data.Object, error)
-	Get(code *data.ObjectCode) (*data.Object, error)
+	Get(code data.ObjectCode) (*data.Object, error)
 	Save(object data.Object) error
 }
