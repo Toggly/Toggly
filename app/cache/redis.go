@@ -1,11 +1,18 @@
 package cache
 
 // NewRedisCache returns Redis cache implementation
-func NewRedisCache() (DataCache, error) {
-	return &redisCache{}, nil
+func NewRedisCache(enabled bool) (DataCache, error) {
+	return &redisCache{
+		enabled: enabled,
+	}, nil
 }
 
 type redisCache struct {
+	enabled bool
+}
+
+func (c *redisCache) Enabled() bool {
+	return c.enabled
 }
 
 func (c *redisCache) Get(key string) (data []byte, err error) {

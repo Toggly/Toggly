@@ -11,9 +11,12 @@ const (
 	ParameterEnum
 )
 
+// ParameterCode type
+type ParameterCode string
+
 // Parameter represents a flag data structure
 type Parameter struct {
-	Code        CodeType      `json:"code"`
+	Code        ParameterCode `json:"code"`
 	Description string        `json:"description"`
 	Type        ParameterType `json:"type"`
 	Value       interface{}

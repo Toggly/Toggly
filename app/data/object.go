@@ -1,9 +1,12 @@
 package data
 
+// ObjectCode type
+type ObjectCode string
+
 // Object describes object configuration
 type Object struct {
-	Code        CodeType    `json:"code"`
+	Code        ObjectCode  `json:"code"`
 	Description string      `json:"description"`
-	Inherits    CodeType    `json:"inherits"`
+	Inherits    ObjectCode  `json:"inherits"`
 	Parameters  []Parameter `json:"parameters"`
 }

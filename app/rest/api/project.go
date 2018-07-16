@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/Toggly/core/app/data"
-
 	"github.com/Toggly/core/app/storage"
 
 	"github.com/go-chi/render"
@@ -31,26 +30,34 @@ func (p *ProjectAPI) Routes() chi.Router {
 	return router
 }
 
-func (p *ProjectAPI) cached(fn func(w http.ResponseWriter, r *http.Request)) http.HandlerFunc {
+func (p *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 	return cache.Cached(fn, p.Cache)
 }
 
 func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := p.Storage.ListProjects()
+	list, err := p.Storage.Projects().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		return
+	}
+	if list == nil {
+		rest.NotFoundResponse(w, r)
 		return
 	}
 	render.JSON(w, r, list)
 }
 
 func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
-	id := data.CodeType(chi.URLParam(r, "id"))
-	proj, err := p.Storage.GetProject(id)
+	id := data.ProjectCode(chi.URLParam(r, "id"))
+	proj, err := p.Storage.Projects().Get(&id)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		return
+	}
+	if proj == nil {
+		rest.NotFoundResponse(w, r)
 		return
 	}
 	render.JSON(w, r, proj)

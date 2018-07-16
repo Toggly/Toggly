@@ -17,12 +17,14 @@ import (
 
 // TogglyAPI implements rest API
 type TogglyAPI struct {
+	Version    string
 	Cache      cache.DataCache
 	Storage    storage.DataStorage
 	Port       int
 	BasePath   string
 	httpServer *http.Server
 	lock       sync.Mutex
+	IsDebug    bool
 }
 
 // Run rest api
@@ -57,31 +59,29 @@ func (a *TogglyAPI) Stop() {
 
 func (a *TogglyAPI) routes() chi.Router {
 	router := chi.NewRouter()
-	router.Use(middleware.RequestID)
 	router.Use(middleware.RealIP)
-	router.Use(middleware.Logger)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Throttle(1000))
 	router.Use(middleware.Timeout(60 * time.Second))
-	router.Route(a.BasePath, func(r chi.Router) {
-		r.Route("/v1", func(r chi.Router) {
-			r.Use(apiVersionCtx("v1"))
-			r.Mount("/project", (&ProjectAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
-			r.Mount("/project/{project_code}/object", (&ObjectAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
-			r.Mount("/project/{project_code}/env", (&EnvironmentAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
-		})
-	})
+	router.Use(middleware.Heartbeat("/ping"))
+	router.Use(ServiceInfo("Toggly", a.Version))
+	router.Route(a.BasePath, a.versions)
+	if a.IsDebug {
+		log.Println("[DEBUG] Profiler enabled on \x1b[1m/debug\x1b[0m path")
+		router.Mount("/debug", middleware.Profiler())
+	}
 	return router
 }
 
-type ctxVal string
+func (a *TogglyAPI) versions(r chi.Router) {
+	r.Route("/v1", a.v1)
+}
 
-func apiVersionCtx(version string) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var key ctxVal = "api.version"
-			r = r.WithContext(context.WithValue(r.Context(), key, version))
-			next.ServeHTTP(w, r)
-		})
-	}
+func (a *TogglyAPI) v1(r chi.Router) {
+	r.Use(RequestIDCtx)
+	r.Use(middleware.Logger)
+	r.Use(VersionCtx("v1"))
+	r.Mount("/project", (&ProjectAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
+	r.Mount("/project/{project_code}/object", (&ObjectAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
+	r.Mount("/project/{project_code}/env", (&EnvironmentAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
 }

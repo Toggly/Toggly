@@ -12,6 +12,7 @@ type DataCache interface {
 	Get(key string) ([]byte, error)
 	Set(key string, data []byte) error
 	Flush(scopes ...string)
+	Enabled() bool
 }
 
 func getKeyFromRequest(r *http.Request) string {
@@ -28,9 +29,13 @@ func findSplitter(data []byte, val byte) int {
 }
 
 // Cached implements http.HandlerFunc caching
-func Cached(fn func(wr http.ResponseWriter, req *http.Request), cache DataCache) http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func Cached(next http.HandlerFunc, cache DataCache) http.HandlerFunc {
 
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !cache.Enabled() {
+			next.ServeHTTP(w, r)
+			return
+		}
 		key := getKeyFromRequest(r)
 		log.Printf("[DEBUG] Cache search for key: %s", key)
 
@@ -59,7 +64,7 @@ func Cached(fn func(wr http.ResponseWriter, req *http.Request), cache DataCache)
 
 		log.Printf("[DEBUG] Cache NOT found for key: %s", key)
 		c := httptest.NewRecorder()
-		fn(c, r)
+		next.ServeHTTP(c, r)
 
 		heareds := make(map[string][]string)
 		for k, v := range c.HeaderMap {
@@ -79,4 +84,5 @@ func Cached(fn func(wr http.ResponseWriter, req *http.Request), cache DataCache)
 
 		cache.Set(key, d)
 	})
+
 }

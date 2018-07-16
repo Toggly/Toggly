@@ -19,6 +19,6 @@ func JSONResponse(w http.ResponseWriter, r *http.Request, data interface{}) {
 
 // NotFoundResponse creates empty json body and responds with 404 code
 func NotFoundResponse(w http.ResponseWriter, r *http.Request) {
-	render.Status(r, 404)
+	render.Status(r, http.StatusNotFound)
 	render.JSON(w, r, map[string]interface{}{})
 }
