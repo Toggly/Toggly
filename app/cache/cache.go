@@ -31,12 +31,13 @@ func findSplitter(data []byte, val byte) int {
 // Cached implements http.HandlerFunc caching
 func Cached(next http.HandlerFunc, cache DataCache) http.HandlerFunc {
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	fn := func(w http.ResponseWriter, r *http.Request) {
 		if !cache.Enabled() {
 			next.ServeHTTP(w, r)
 			return
 		}
 		key := getKeyFromRequest(r)
+
 		log.Printf("[DEBUG] Cache search for key: %s", key)
 
 		data, err := cache.Get(key)
@@ -46,43 +47,57 @@ func Cached(next http.HandlerFunc, cache DataCache) http.HandlerFunc {
 		}
 
 		if data != nil {
-			log.Printf("[DEBUG] Cache found for key: %s", key)
-			sp := findSplitter(data, 0)
-			if sp > -1 {
-				h := make(map[string][]string)
-				if err = json.Unmarshal(data[:sp], &h); err != nil {
-					log.Printf("[ERROR] %v", err)
-				}
-				for k, v := range h {
-					w.Header()[k] = v
-				}
-				data = data[sp+1:]
-			}
-			w.Write(data)
+			decomposeAndWriteData(key, data, w)
 			return
 		}
 
 		log.Printf("[DEBUG] Cache NOT found for key: %s", key)
-		c := httptest.NewRecorder()
-		next.ServeHTTP(c, r)
+
+		recorder := httptest.NewRecorder()
+		next.ServeHTTP(recorder, r)
 
 		heareds := make(map[string][]string)
-		for k, v := range c.HeaderMap {
+		for k, v := range recorder.HeaderMap {
 			w.Header()[k] = v
 			heareds[k] = v
 		}
-		w.WriteHeader(c.Code)
+		w.WriteHeader(recorder.Code)
 
-		body := c.Body.Bytes()
+		body := recorder.Body.Bytes()
 		w.Write(body)
 
-		h, _ := json.Marshal(&heareds)
-		d := make([]byte, 0)
-		d = append(d, h...)
-		d = append(d, 0)
-		d = append(d, body...)
+		h, err := json.Marshal(&heareds)
+		if err != nil {
+			log.Printf("[ERROR] Can't parse response headers: %v", err)
+			return
+		}
 
-		cache.Set(key, d)
-	})
+		cache.Set(key, composeData(h, body))
+	}
 
+	return http.HandlerFunc(fn)
+}
+
+func composeData(headers []byte, body []byte) []byte {
+	d := make([]byte, 0)
+	d = append(d, headers...)
+	d = append(d, 0)
+	d = append(d, body...)
+	return d
+}
+
+func decomposeAndWriteData(key string, data []byte, w http.ResponseWriter) {
+	log.Printf("[DEBUG] Cache found for key: %s", key)
+	sp := findSplitter(data, 0)
+	if sp > -1 {
+		h := make(map[string][]string)
+		if err := json.Unmarshal(data[:sp], &h); err != nil {
+			log.Printf("[ERROR] %v", err)
+		}
+		for k, v := range h {
+			w.Header()[k] = v
+		}
+		data = data[sp+1:]
+	}
+	w.Write(data)
 }

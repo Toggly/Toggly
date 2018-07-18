@@ -54,9 +54,11 @@ type hmEnvironmentStorage struct {
 func (s *hmEnvironmentStorage) List() ([]*data.Environment, error) {
 	return envs(), nil
 }
+
 func (s *hmEnvironmentStorage) Get(code data.EnvironmentCode) (*data.Environment, error) {
 	return findEnv(code), nil
 }
+
 func (s *hmEnvironmentStorage) Save(env data.Environment) error {
 	return nil
 }
@@ -115,18 +117,21 @@ func projects() []*data.Project {
 	p := make([]*data.Project, 3)
 
 	p[0] = &data.Project{
+		ID:          "0",
 		Code:        "project1",
 		Description: "Simple Project 1",
 		RegDate:     time.Now(),
 		Status:      0,
 	}
 	p[1] = &data.Project{
+		ID:          "1",
 		Code:        "project2",
 		Description: "Simple Project 2",
 		RegDate:     time.Now(),
 		Status:      0,
 	}
 	p[2] = &data.Project{
+		ID:          "2",
 		Code:        "project3",
 		Description: "Simple Project 3",
 		RegDate:     time.Now(),

@@ -24,4 +24,5 @@ func (c *redisCache) Set(key string, data []byte) error {
 }
 
 func (c *redisCache) Flush(scopes ...string) {
+	// TODO implement
 }

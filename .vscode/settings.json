@@ -3,6 +3,8 @@
         "Toggly",
         "bson",
         "envs",
-        "jessevdk"
-    ]
+        "jessevdk",
+        "stretchr"
+    ],
+    "todo-tree.flat": true
 }

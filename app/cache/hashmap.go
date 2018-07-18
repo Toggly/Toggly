@@ -27,4 +27,5 @@ func (c *fakeCache) Set(key string, data []byte) error {
 }
 
 func (c *fakeCache) Flush(scopes ...string) {
+	// TODO implement
 }

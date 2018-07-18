@@ -1,3 +1,6 @@
 .idea/
+sonar-coverage.out
+sonar-report.json
+.scannerwork
 .DS_Store
 vendor
