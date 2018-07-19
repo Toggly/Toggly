@@ -38,15 +38,22 @@ func centered(txt string, width int) string {
 
 // Opts describes application command line arguments
 type Opts struct {
-	Port          int    `short:"p" long:"port" env:"TOGGLY_API_PORT" default:"8080" description:"port"`
-	BasePath      string `long:"base-path" env:"TOGGLY_API_BASE_PATH" default:"/api" description:"Base API Path"`
-	Debug         bool   `long:"debug" description:"Run in DEBUG mode"`
-	CacheDisabled bool   `long:"no-cache" description:"Disable cache"`
-	Store         struct {
-		Mongo struct {
-			URL string `long:"url" env:"URL" description:"mongo url"`
-		} `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
-	} `group:"store" namespace:"store" env-namespace:"STORE"`
+	Toggly struct {
+		Port     int    `short:"p" long:"port" env:"API_PORT" default:"8080" description:"port"`
+		BasePath string `long:"base-path" env:"API_BASE_PATH" default:"/api" description:"Base API Path"`
+		Debug    bool   `long:"debug" description:"Run in DEBUG mode"`
+		Store    struct {
+			Mongo struct {
+				URL string `long:"url" env:"URL" description:"mongo connection url"`
+			} `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
+		} `group:"store" namespace:"store" env-namespace:"STORE"`
+		Cache struct {
+			Disabled bool `long:"disable" description:"Disable cache"`
+			Redis    struct {
+				URL string `long:"url" env:"URL" description:"redis connection url"`
+			} `group:"redis" namespace:"redis" env-namespace:"REDIS"`
+		} `group:"cache" namespace:"cache" env-namespace:"CACHE"`
+	} `group:"toggly" env-namespace:"TOGGLY"`
 }
 
 func main() {
@@ -72,7 +79,7 @@ func main() {
 	}
 
 	log.Print("[INFO] API server started \x1b[32m✔\x1b[0m")
-	if opts.CacheDisabled {
+	if opts.Toggly.Cache.Disabled {
 		log.Print("[WARN] \x1b[1mCache disabled\x1b[0m")
 	}
 	app.Run(ctx)
@@ -100,19 +107,19 @@ func createApplication(opts Opts) (*Application, error) {
 	var apiCache cache.DataCache
 	var dataStorage storage.DataStorage
 	var err error
-	if apiCache, err = cache.NewHashMapCache(!opts.CacheDisabled); err != nil {
+	if apiCache, err = cache.NewHashMapCache(!opts.Toggly.Cache.Disabled); err != nil {
 		return nil, err
 	}
-	if dataStorage, err = storage.NewMongoStorage(opts.Store.Mongo.URL); err != nil {
+	if dataStorage, err = storage.NewMongoStorage(opts.Toggly.Store.Mongo.URL); err != nil {
 		return nil, err
 	}
 	api := api.TogglyAPI{
 		Version:  revision,
 		Cache:    apiCache,
 		Storage:  dataStorage,
-		BasePath: opts.BasePath,
-		Port:     opts.Port,
-		IsDebug:  opts.Debug,
+		BasePath: opts.Toggly.BasePath,
+		Port:     opts.Toggly.Port,
+		IsDebug:  opts.Toggly.Debug,
 	}
 	return &Application{
 		api: &api,
