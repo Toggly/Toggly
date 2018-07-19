@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
+
+	"github.com/Toggly/core/app/rest"
 )
 
 // DataCache defines cache interface
@@ -16,7 +18,7 @@ type DataCache interface {
 }
 
 func getKeyFromRequest(r *http.Request) string {
-	return r.URL.String()
+	return rest.CtxOwner(r) + "::" + r.URL.String()
 }
 
 func findSplitter(data []byte, val byte) int {

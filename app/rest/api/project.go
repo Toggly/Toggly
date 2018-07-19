@@ -9,8 +9,8 @@ import (
 
 	"github.com/go-chi/render"
 
-	"github.com/Toggly/core/app/cache"
 	"github.com/Toggly/core/app/rest"
+	"github.com/Toggly/core/app/rest/cache"
 	"github.com/go-chi/chi"
 )
 
@@ -35,7 +35,7 @@ func (p *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := p.Storage.Projects().List()
+	list, err := p.Storage.Projects(rest.CtxOwner(r)).List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -50,7 +50,7 @@ func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 
 func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 	id := data.ProjectCode(chi.URLParam(r, "id"))
-	proj, err := p.Storage.Projects().Get(id)
+	proj, err := p.Storage.Projects(rest.CtxOwner(r)).Get(id)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)

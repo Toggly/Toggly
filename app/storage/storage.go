@@ -2,9 +2,18 @@ package storage
 
 import "github.com/Toggly/core/app/data"
 
+// UniqueIndexError type
+type UniqueIndexError struct {
+	err string
+}
+
+func (e *UniqueIndexError) Error() string {
+	return e.err
+}
+
 // DataStorage defines storage interface for dictionary
 type DataStorage interface {
-	Projects() ProjectStorage
+	Projects(ownerID string) ProjectStorage
 }
 
 // ProjectStorage defines projects storage interface

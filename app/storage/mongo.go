@@ -1,22 +1,46 @@
 package storage
 
-import "github.com/Toggly/core/app/data"
+import (
+	"strings"
+
+	"github.com/Toggly/core/app/data"
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
+)
 
 // NewMongoStorage implements DataStorage interface for MongoDB
-func NewMongoStorage() (DataStorage, error) {
-	return &mgStorage{}, nil
+func NewMongoStorage(url string) (DataStorage, error) {
+	session, err := mgo.Dial(url)
+	if err != nil {
+		panic(err)
+	}
+	return &mgStorage{
+		session: session,
+	}, nil
 }
 
-type mgStorage struct{}
-
-func (s *mgStorage) Projects() ProjectStorage {
-	return &mgProjectStorage{}
+type mgStorage struct {
+	session *mgo.Session
 }
 
-type mgProjectStorage struct{}
+func (s *mgStorage) Projects(ownerID string) ProjectStorage {
+	return &mgProjectStorage{
+		owner:   ownerID,
+		storage: s,
+	}
+}
 
-func (s *mgProjectStorage) List() ([]*data.Project, error) {
-	return nil, nil
+type mgProjectStorage struct {
+	owner   string
+	storage *mgStorage
+}
+
+func (s *mgProjectStorage) List() (items []*data.Project, err error) {
+	conn := s.storage.session.Copy()
+	defer conn.Close()
+
+	err = conn.DB("").C("project").Find(bson.M{"owner": s.owner}).All(&items)
+	return items, err
 }
 
 func (s *mgProjectStorage) Get(code data.ProjectCode) (*data.Project, error) {
@@ -24,7 +48,21 @@ func (s *mgProjectStorage) Get(code data.ProjectCode) (*data.Project, error) {
 }
 
 func (s *mgProjectStorage) Save(project data.Project) error {
-	return nil
+	conn := s.storage.session.Copy()
+	defer conn.Close()
+	project.OwnerID = s.owner
+	collection := conn.DB("").C("project")
+	idx := mgo.Index{
+		Key:    []string{"owner", "code"},
+		Unique: true,
+	}
+	collection.EnsureIndex(idx)
+
+	err := collection.Insert(project)
+	if err != nil && strings.Contains(err.Error(), "E11000") {
+		return &UniqueIndexError{err.Error()}
+	}
+	return err
 }
 
 func (s *mgProjectStorage) For(project data.ProjectCode) ForProject {

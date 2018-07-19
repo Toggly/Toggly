@@ -22,3 +22,9 @@ func NotFoundResponse(w http.ResponseWriter, r *http.Request) {
 	render.Status(r, http.StatusNotFound)
 	render.PlainText(w, r, "")
 }
+
+// UnauthorizedResponse creates empty json body and responds with 401 code
+func UnauthorizedResponse(w http.ResponseWriter, r *http.Request) {
+	render.Status(r, http.StatusUnauthorized)
+	render.PlainText(w, r, "")
+}

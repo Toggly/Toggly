@@ -7,8 +7,8 @@ import (
 	"github.com/Toggly/core/app/data"
 	"github.com/Toggly/core/app/storage"
 
-	"github.com/Toggly/core/app/cache"
 	"github.com/Toggly/core/app/rest"
+	"github.com/Toggly/core/app/rest/cache"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 )
@@ -36,7 +36,7 @@ func (p *ObjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 func (p *ObjectAPI) list(w http.ResponseWriter, r *http.Request) {
 	proj := data.ProjectCode(chi.URLParam(r, "project_code"))
 	env := data.EnvironmentCode(chi.URLParam(r, "env_code"))
-	list, err := p.Storage.Projects().For(proj).Environments().For(env).Objects().List()
+	list, err := p.Storage.Projects(rest.CtxOwner(r)).For(proj).Environments().For(env).Objects().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -53,7 +53,7 @@ func (p *ObjectAPI) getObject(w http.ResponseWriter, r *http.Request) {
 	proj := data.ProjectCode(chi.URLParam(r, "project_code"))
 	obj := data.ObjectCode(chi.URLParam(r, "code"))
 	env := data.EnvironmentCode(chi.URLParam(r, "env_code"))
-	o, err := p.Storage.Projects().For(proj).Environments().For(env).Objects().Get(obj)
+	o, err := p.Storage.Projects(rest.CtxOwner(r)).For(proj).Environments().For(env).Objects().Get(obj)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)

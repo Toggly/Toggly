@@ -30,8 +30,8 @@
   unused-packages = true
 
 [[constraint]]
+  branch = "master"
   name = "github.com/jessevdk/go-flags"
-  version = "1.4.0"
 
 [[constraint]]
   name = "github.com/go-chi/chi"

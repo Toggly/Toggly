@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Toggly/core/app/rest/cache"
 	"github.com/Toggly/core/app/storage"
 
-	"github.com/Toggly/core/app/cache"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -33,7 +33,7 @@ func (a *TogglyAPI) Run() {
 	a.lock.Lock()
 	a.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", a.Port),
-		Handler: router,
+		Handler: chi.ServerBaseContext(context.Background(), router),
 	}
 	a.lock.Unlock()
 	log.Printf("[INFO] HTTP server listening on → \x1b[1m%s\x1b[0m", a.httpServer.Addr)
@@ -78,6 +78,8 @@ func (a *TogglyAPI) versions(r chi.Router) {
 }
 
 func (a *TogglyAPI) v1(r chi.Router) {
+	r.Use(AuthCtx)
+	r.Use(OwnerCtx)
 	r.Use(RequestIDCtx)
 	r.Use(middleware.Logger)
 	r.Use(VersionCtx("v1"))

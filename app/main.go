@@ -9,8 +9,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/Toggly/core/app/cache"
 	"github.com/Toggly/core/app/rest/api"
+	"github.com/Toggly/core/app/rest/cache"
 	"github.com/Toggly/core/app/storage"
 	flags "github.com/jessevdk/go-flags"
 )
@@ -42,6 +42,11 @@ type Opts struct {
 	BasePath      string `long:"base-path" env:"TOGGLY_API_BASE_PATH" default:"/api" description:"Base API Path"`
 	Debug         bool   `long:"debug" description:"Run in DEBUG mode"`
 	CacheDisabled bool   `long:"no-cache" description:"Disable cache"`
+	Store         struct {
+		Mongo struct {
+			URL string `long:"url" env:"URL" description:"mongo url"`
+		} `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
+	} `group:"store" namespace:"store" env-namespace:"STORE"`
 }
 
 func main() {
@@ -98,7 +103,7 @@ func createApplication(opts Opts) (*Application, error) {
 	if apiCache, err = cache.NewHashMapCache(!opts.CacheDisabled); err != nil {
 		return nil, err
 	}
-	if dataStorage, err = storage.NewHashMapStorage(); err != nil {
+	if dataStorage, err = storage.NewMongoStorage(opts.Store.Mongo.URL); err != nil {
 		return nil, err
 	}
 	api := api.TogglyAPI{
