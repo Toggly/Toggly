@@ -49,6 +49,7 @@ func Cached(next http.HandlerFunc, cache DataCache) http.HandlerFunc {
 		}
 
 		if data != nil {
+			log.Printf("[DEBUG] Cache found for key: %s", key)
 			decomposeAndWriteData(key, data, w)
 			return
 		}
@@ -63,43 +64,42 @@ func Cached(next http.HandlerFunc, cache DataCache) http.HandlerFunc {
 			w.Header()[k] = v
 			heareds[k] = v
 		}
-		w.WriteHeader(recorder.Code)
 
-		body := recorder.Body.Bytes()
-		w.Write(body)
-
-		h, err := json.Marshal(&heareds)
-		if err != nil {
-			log.Printf("[ERROR] Can't parse response headers: %v", err)
-			return
+		item := &cacheItem{
+			Headers: heareds,
+			Body:    recorder.Body.Bytes(),
+			Code:    recorder.Code,
 		}
 
-		cache.Set(key, composeData(h, body))
+		w.WriteHeader(recorder.Code)
+		w.Write(item.Body)
+
+		itemBytes, err := json.Marshal(item)
+		if err != nil {
+			log.Printf("[ERROR] Can't marshal cached item: %v", err)
+			return
+		}
+		cache.Set(key, itemBytes)
 	}
 
 	return http.HandlerFunc(fn)
 }
 
-func composeData(headers []byte, body []byte) []byte {
-	d := make([]byte, 0)
-	d = append(d, headers...)
-	d = append(d, 0)
-	d = append(d, body...)
-	return d
+type cacheItem struct {
+	Headers map[string][]string `json:"headers"`
+	Body    []byte              `json:"body"`
+	Code    int                 `json:"code"`
 }
 
 func decomposeAndWriteData(key string, data []byte, w http.ResponseWriter) {
-	log.Printf("[DEBUG] Cache found for key: %s", key)
-	sp := findSplitter(data, 0)
-	if sp > -1 {
-		h := make(map[string][]string)
-		if err := json.Unmarshal(data[:sp], &h); err != nil {
-			log.Printf("[ERROR] %v", err)
-		}
-		for k, v := range h {
-			w.Header()[k] = v
-		}
-		data = data[sp+1:]
+	var item cacheItem
+	if err := json.Unmarshal(data, &item); err != nil {
+		log.Printf("[ERROR] Can't unmarshal cached item: %v", err)
+		return
 	}
-	w.Write(data)
+	for k, v := range item.Headers {
+		w.Header()[k] = v
+	}
+	w.WriteHeader(item.Code)
+	w.Write(item.Body)
 }

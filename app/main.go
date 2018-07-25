@@ -60,7 +60,7 @@ func main() {
 	printLogo()
 	var opts Opts
 	if _, e := flags.NewParser(&opts, flags.Default).ParseArgs(os.Args[1:]); e != nil {
-		os.Exit(1)
+		os.Exit(0)
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
