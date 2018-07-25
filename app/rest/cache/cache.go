@@ -21,15 +21,6 @@ func getKeyFromRequest(r *http.Request) string {
 	return rest.CtxOwner(r) + "::" + r.URL.String()
 }
 
-func findSplitter(data []byte, val byte) int {
-	for i, v := range data {
-		if v == val {
-			return i
-		}
-	}
-	return -1
-}
-
 // Cached implements http.HandlerFunc caching
 func Cached(next http.HandlerFunc, cache DataCache) http.HandlerFunc {
 
