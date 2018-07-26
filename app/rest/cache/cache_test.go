@@ -20,23 +20,6 @@ func TestCacheKey(t *testing.T) {
 	assert.Equal(key, url)
 }
 
-func TestCacheFindSplitter(t *testing.T) {
-	assert := assert.New(t)
-	b1 := []byte("a")
-	b2 := []byte("b")
-
-	d := make([]byte, 0)
-	d = append(d, b1...)
-	d = append(d, 0)
-	d = append(d, b2...)
-
-	s := findSplitter(d, 0)
-	assert.Equal(s, 1)
-
-	s2 := findSplitter(d, 10)
-	assert.Equal(s2, -1)
-}
-
 func mockBody() string {
 	j, _ := json.Marshal(struct {
 		A string `json:"a"`
