@@ -1,6 +1,6 @@
 package storage
 
-import "github.com/Toggly/core/app/data"
+import "github.com/Toggly/core/internal/domain"
 
 // UniqueIndexError type
 type UniqueIndexError struct {
@@ -18,10 +18,10 @@ type DataStorage interface {
 
 // ProjectStorage defines projects storage interface
 type ProjectStorage interface {
-	List() ([]*data.Project, error)
-	Get(code data.ProjectCode) (*data.Project, error)
-	Save(project data.Project) error
-	For(project data.ProjectCode) ForProject
+	List() ([]*domain.Project, error)
+	Get(code domain.ProjectCode) (*domain.Project, error)
+	Save(project domain.Project) error
+	For(project domain.ProjectCode) ForProject
 }
 
 // ForProject defines project dependencies interface
@@ -31,10 +31,10 @@ type ForProject interface {
 
 // EnvironmentStorage defines environment storage interface
 type EnvironmentStorage interface {
-	List() ([]*data.Environment, error)
-	Get(code data.EnvironmentCode) (*data.Environment, error)
-	Save(env data.Environment) error
-	For(data.EnvironmentCode) ForEnvironment
+	List() ([]*domain.Environment, error)
+	Get(code domain.EnvironmentCode) (*domain.Environment, error)
+	Save(env domain.Environment) error
+	For(domain.EnvironmentCode) ForEnvironment
 }
 
 // ForEnvironment defines environment dependencies interface
@@ -44,7 +44,7 @@ type ForEnvironment interface {
 
 // ObjectStorage defines object structure storage interface
 type ObjectStorage interface {
-	List() ([]*data.Object, error)
-	Get(code data.ObjectCode) (*data.Object, error)
-	Save(object data.Object) error
+	List() ([]*domain.Object, error)
+	Get(code domain.ObjectCode) (*domain.Object, error)
+	Save(object domain.Object) error
 }

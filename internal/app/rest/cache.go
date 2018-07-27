@@ -1,4 +1,4 @@
-package cache
+package rest
 
 import (
 	"encoding/json"
@@ -6,30 +6,24 @@ import (
 	"net/http"
 	"net/http/httptest"
 
-	"github.com/Toggly/core/app/rest"
+	"github.com/Toggly/core/internal/pkg/cache"
+	"github.com/Toggly/core/internal/pkg/ctx"
 )
 
-// DataCache defines cache interface
-type DataCache interface {
-	Get(key string) ([]byte, error)
-	Set(key string, data []byte) error
-	Flush(scopes ...string)
-	Enabled() bool
-}
-
-func getKeyFromRequest(r *http.Request) string {
-	return rest.CtxOwner(r) + "::" + r.URL.String()
+//GetKeyFromRequest composes the key based on owner id and url
+func GetKeyFromRequest(r *http.Request) string {
+	return ctx.CtxOwner(r) + "::" + r.URL.String()
 }
 
 // Cached implements http.HandlerFunc caching
-func Cached(next http.HandlerFunc, cache DataCache) http.HandlerFunc {
+func Cached(next http.HandlerFunc, cache cache.DataCache) http.HandlerFunc {
 
 	fn := func(w http.ResponseWriter, r *http.Request) {
 		if !cache.Enabled() {
 			next.ServeHTTP(w, r)
 			return
 		}
-		key := getKeyFromRequest(r)
+		key := GetKeyFromRequest(r)
 
 		data, err := cache.Get(key)
 		if err != nil {

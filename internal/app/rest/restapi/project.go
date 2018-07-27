@@ -1,16 +1,16 @@
-package api
+package restapi
 
 import (
 	"log"
 	"net/http"
 
-	"github.com/Toggly/core/app/data"
-	"github.com/Toggly/core/app/storage"
+	"github.com/Toggly/core/internal/app/rest"
+	"github.com/Toggly/core/internal/domain"
+	"github.com/Toggly/core/internal/pkg/cache"
+	"github.com/Toggly/core/internal/pkg/storage"
 
 	"github.com/go-chi/render"
 
-	"github.com/Toggly/core/app/rest"
-	"github.com/Toggly/core/app/rest/cache"
 	"github.com/go-chi/chi"
 )
 
@@ -24,14 +24,16 @@ type ProjectAPI struct {
 func (p *ProjectAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(g chi.Router) {
+		// g.Get("/", p.list)
+		// g.Get("/{id}", p.getProject)
 		g.Get("/", p.cached(p.list))
-		g.Get("/{id}", p.cached(p.getProject))
+		// g.Get("/{id}", p.cached(p.getProject))
 	})
 	return router
 }
 
 func (p *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return cache.Cached(fn, p.Cache)
+	return rest.Cached(fn, p.Cache)
 }
 
 func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +51,7 @@ func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
-	id := data.ProjectCode(chi.URLParam(r, "id"))
+	id := domain.ProjectCode(chi.URLParam(r, "id"))
 	proj, err := p.Storage.Projects(rest.CtxOwner(r)).Get(id)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)

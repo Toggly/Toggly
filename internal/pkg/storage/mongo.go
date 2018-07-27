@@ -3,7 +3,7 @@ package storage
 import (
 	"strings"
 
-	"github.com/Toggly/core/app/data"
+	"github.com/Toggly/core/internal/domain"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
@@ -35,7 +35,7 @@ type mgProjectStorage struct {
 	storage *mgStorage
 }
 
-func (s *mgProjectStorage) List() (items []*data.Project, err error) {
+func (s *mgProjectStorage) List() (items []*domain.Project, err error) {
 	conn := s.storage.session.Copy()
 	defer conn.Close()
 
@@ -43,11 +43,11 @@ func (s *mgProjectStorage) List() (items []*data.Project, err error) {
 	return items, err
 }
 
-func (s *mgProjectStorage) Get(code data.ProjectCode) (*data.Project, error) {
+func (s *mgProjectStorage) Get(code domain.ProjectCode) (*domain.Project, error) {
 	return nil, nil
 }
 
-func (s *mgProjectStorage) Save(project data.Project) error {
+func (s *mgProjectStorage) Save(project domain.Project) error {
 	conn := s.storage.session.Copy()
 	defer conn.Close()
 	project.OwnerID = s.owner
@@ -65,14 +65,14 @@ func (s *mgProjectStorage) Save(project data.Project) error {
 	return err
 }
 
-func (s *mgProjectStorage) For(project data.ProjectCode) ForProject {
+func (s *mgProjectStorage) For(project domain.ProjectCode) ForProject {
 	return &mgForProject{
 		project: project,
 	}
 }
 
 type mgForProject struct {
-	project data.ProjectCode
+	project domain.ProjectCode
 }
 
 func (s *mgForProject) Environments() EnvironmentStorage {
@@ -82,22 +82,22 @@ func (s *mgForProject) Environments() EnvironmentStorage {
 }
 
 type mgEnvironmentStorage struct {
-	project data.ProjectCode
+	project domain.ProjectCode
 }
 
-func (s *mgEnvironmentStorage) List() ([]*data.Environment, error) {
+func (s *mgEnvironmentStorage) List() ([]*domain.Environment, error) {
 	return nil, nil
 }
 
-func (s *mgEnvironmentStorage) Get(code data.EnvironmentCode) (*data.Environment, error) {
+func (s *mgEnvironmentStorage) Get(code domain.EnvironmentCode) (*domain.Environment, error) {
 	return nil, nil
 }
 
-func (s *mgEnvironmentStorage) Save(env data.Environment) error {
+func (s *mgEnvironmentStorage) Save(env domain.Environment) error {
 	return nil
 }
 
-func (s *mgEnvironmentStorage) For(code data.EnvironmentCode) ForEnvironment {
+func (s *mgEnvironmentStorage) For(code domain.EnvironmentCode) ForEnvironment {
 	return &mgForEnvironment{}
 }
 
@@ -109,12 +109,12 @@ func (s *mgForEnvironment) Objects() ObjectStorage {
 
 type mgObjectStorage struct{}
 
-func (s *mgObjectStorage) List() ([]*data.Object, error) {
+func (s *mgObjectStorage) List() ([]*domain.Object, error) {
 	return nil, nil
 }
-func (s *mgObjectStorage) Get(code data.ObjectCode) (*data.Object, error) {
+func (s *mgObjectStorage) Get(code domain.ObjectCode) (*domain.Object, error) {
 	return nil, nil
 }
-func (s *mgObjectStorage) Save(object data.Object) error {
+func (s *mgObjectStorage) Save(object domain.Object) error {
 	return nil
 }

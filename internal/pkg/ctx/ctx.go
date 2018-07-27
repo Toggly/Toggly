@@ -1,4 +1,4 @@
-package rest
+package ctx
 
 import "net/http"
 
@@ -14,5 +14,9 @@ const (
 
 // CtxOwner returns context value for project owner
 func CtxOwner(r *http.Request) string {
-	return r.Context().Value(CtxValueOwner).(string)
+	owner := r.Context().Value(CtxValueOwner)
+	if owner == nil {
+		return ""
+	}
+	return owner.(string)
 }

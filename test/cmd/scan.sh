@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-go test ./app/... -coverprofile=sonar-coverage.out -json > sonar-report.json
-
 sonar-scanner \
   -Dsonar.projectKey=TooglyCore \
   -Dsonar.sources=app \

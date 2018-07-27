@@ -1,13 +1,13 @@
-package api
+package restapi
 
 import (
 	"log"
 	"net/http"
 
-	"github.com/Toggly/core/app/data"
-	"github.com/Toggly/core/app/rest"
-	"github.com/Toggly/core/app/rest/cache"
-	"github.com/Toggly/core/app/storage"
+	"github.com/Toggly/core/internal/app/rest"
+	"github.com/Toggly/core/internal/domain"
+	"github.com/Toggly/core/internal/pkg/cache"
+	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 )
@@ -29,11 +29,11 @@ func (p *EnvironmentAPI) Routes() chi.Router {
 }
 
 func (p *EnvironmentAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return cache.Cached(fn, p.Cache)
+	return rest.Cached(fn, p.Cache)
 }
 
 func (p *EnvironmentAPI) list(w http.ResponseWriter, r *http.Request) {
-	proj := data.ProjectCode(chi.URLParam(r, "project_code"))
+	proj := domain.ProjectCode(chi.URLParam(r, "project_code"))
 	list, err := p.Storage.Projects(rest.CtxOwner(r)).For(proj).Environments().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
@@ -48,8 +48,8 @@ func (p *EnvironmentAPI) list(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *EnvironmentAPI) getEnvironment(w http.ResponseWriter, r *http.Request) {
-	envID := data.EnvironmentCode(chi.URLParam(r, "code"))
-	proj := data.ProjectCode(chi.URLParam(r, "project_code"))
+	envID := domain.EnvironmentCode(chi.URLParam(r, "code"))
+	proj := domain.ProjectCode(chi.URLParam(r, "project_code"))
 	env, err := p.Storage.Projects(rest.CtxOwner(r)).For(proj).Environments().Get(envID)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
