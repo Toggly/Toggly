@@ -31,8 +31,6 @@ func Cached(next http.HandlerFunc, cache DataCache) http.HandlerFunc {
 		}
 		key := getKeyFromRequest(r)
 
-		log.Printf("[DEBUG] Cache search for key: %s", key)
-
 		data, err := cache.Get(key)
 		if err != nil {
 			log.Printf("[ERROR] Cache error: %v", err)
@@ -40,12 +38,12 @@ func Cached(next http.HandlerFunc, cache DataCache) http.HandlerFunc {
 		}
 
 		if data != nil {
-			log.Printf("[DEBUG] Cache found for key: %s", key)
+			log.Printf("[DEBUG] 🔥 From cache: %s", key)
 			decomposeAndWriteData(key, data, w)
 			return
 		}
 
-		log.Printf("[DEBUG] Cache NOT found for key: %s", key)
+		log.Printf("[DEBUG] 📀 From DB: %s", key)
 
 		recorder := httptest.NewRecorder()
 		next.ServeHTTP(recorder, r)
