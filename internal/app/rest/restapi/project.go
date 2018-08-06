@@ -4,10 +4,9 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Toggly/core/internal/app/api"
 	"github.com/Toggly/core/internal/app/rest"
-	"github.com/Toggly/core/internal/domain"
 	"github.com/Toggly/core/internal/pkg/cache"
-	"github.com/Toggly/core/internal/pkg/storage"
 
 	"github.com/go-chi/render"
 
@@ -16,18 +15,16 @@ import (
 
 // ProjectAPI servers project api namespace
 type ProjectAPI struct {
-	Cache   cache.DataCache
-	Storage storage.DataStorage
+	Cache  cache.DataCache
+	Engine *api.Engine
 }
 
 // Routes returns routes for project namespace
 func (p *ProjectAPI) Routes() chi.Router {
 	router := chi.NewRouter()
-	router.Group(func(g chi.Router) {
-		// g.Get("/", p.list)
-		// g.Get("/{id}", p.getProject)
-		g.Get("/", p.cached(p.list))
-		// g.Get("/{id}", p.cached(p.getProject))
+	router.Group(func(group chi.Router) {
+		group.Get("/", p.cached(p.list))
+		group.Get("/{id}", p.cached(p.getProject))
 	})
 	return router
 }
@@ -37,7 +34,7 @@ func (p *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := p.Storage.Projects(rest.CtxOwner(r)).List()
+	list, err := p.Engine.Project.List(rest.OwnerFromContext(r))
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -51,8 +48,8 @@ func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
-	id := domain.ProjectCode(chi.URLParam(r, "id"))
-	proj, err := p.Storage.Projects(rest.CtxOwner(r)).Get(id)
+	id := chi.URLParam(r, "id")
+	proj, err := p.Engine.Project.Get(rest.OwnerFromContext(r), id)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)

@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Toggly/core/internal/app/api"
 	"github.com/Toggly/core/internal/app/rest"
 	"github.com/Toggly/core/internal/pkg/cache"
-	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -19,7 +19,7 @@ import (
 type APIRouter struct {
 	Version    string
 	Cache      cache.DataCache
-	Storage    storage.DataStorage
+	Engine     *api.Engine
 	Port       int
 	BasePath   string
 	httpServer *http.Server
@@ -83,7 +83,7 @@ func (a *APIRouter) v1(r chi.Router) {
 	r.Use(rest.RequestIDCtx)
 	r.Use(middleware.Logger)
 	r.Use(rest.VersionCtx("v1"))
-	r.Mount("/project", (&ProjectAPI{Cache: a.Cache, Storage: a.Storage}).Routes())
+	r.Mount("/project", (&ProjectAPI{Cache: a.Cache, Engine: a.Engine}).Routes())
 	// r.Mount("/project/{project_code}/object", (&ObjectAPIRouter{Cache: a.Cache, Storage: a.Storage}).Routes())
 	// r.Mount("/project/{project_code}/env", (&EnvironmentAPIRouter{Cache: a.Cache, Storage: a.Storage}).Routes())
 	// r.Mount("/project/{project_code}/env/{env_code}/object", (&ObjectAPIRouter{Cache: a.Cache, Storage: a.Storage}).Routes())

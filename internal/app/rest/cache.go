@@ -7,24 +7,26 @@ import (
 	"net/http/httptest"
 
 	"github.com/Toggly/core/internal/pkg/cache"
-	"github.com/Toggly/core/internal/pkg/ctx"
 )
 
 //GetKeyFromRequest composes the key based on owner id and url
 func GetKeyFromRequest(r *http.Request) string {
-	return ctx.CtxOwner(r) + "::" + r.URL.String()
+	return OwnerFromContext(r) + "::" + r.URL.String()
 }
 
 // Cached implements http.HandlerFunc caching
 func Cached(next http.HandlerFunc, cache cache.DataCache) http.HandlerFunc {
 
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		if !cache.Enabled() {
+	if cache == nil {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			key := GetKeyFromRequest(r)
+			log.Printf("[DEBUG] CACHE DISABLED! 📀 From DB: %s", key)
 			next.ServeHTTP(w, r)
-			return
-		}
-		key := GetKeyFromRequest(r)
+		})
+	}
 
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		key := GetKeyFromRequest(r)
 		data, err := cache.Get(key)
 		if err != nil {
 			log.Printf("[ERROR] Cache error: %v", err)

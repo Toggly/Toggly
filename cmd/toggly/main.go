@@ -10,6 +10,7 @@ import (
 	"syscall"
 
 	"github.com/Toggly/core/internal/app"
+	"github.com/Toggly/core/internal/app/api"
 	"github.com/Toggly/core/internal/app/rest/restapi"
 
 	"github.com/Toggly/core/internal/pkg/cache"
@@ -50,8 +51,8 @@ func main() {
     #+#    #+#    #+# #+#    #+# #+#    #+# #+#        #+#    
     ###     ########   ########   ########  ########## ###    
 	`)
-	fmt.Println(centered("-= Core API Server =-", 63))
-	fmt.Println(centered(fmt.Sprintf("ver: %s", revision), 63))
+	fmt.Println(centeredText("-= Core API Server =-", 63))
+	fmt.Println(centeredText(fmt.Sprintf("ver: %s", revision), 63))
 	fmt.Print("--------------------------------------------------------------\n\n")
 
 	var apiCache cache.DataCache
@@ -73,16 +74,25 @@ func main() {
 		cancel()
 	}()
 
-	if apiCache, err = cache.NewHashMapCache(!opts.Toggly.Cache.Disabled); err != nil {
-		log.Fatalf("Can't connect to cache service: %v", err)
+	if opts.Toggly.Cache.Disabled {
+		log.Print("[WARN] \x1b[1mCACHE DISABLED\x1b[0m 😱")
+	} else {
+		if apiCache, err = cache.NewHashMapCache(); err != nil {
+			log.Fatalf("Can't connect to cache service: %v", err)
+		}
 	}
+
 	if dataStorage, err = storage.NewMongoStorage(opts.Toggly.Store.Mongo.URL); err != nil {
+		log.Printf("Mongo URL: %s", opts.Toggly.Store.Mongo.URL)
 		log.Fatalf("Can't connect to storeage: %v", err)
 	}
+
+	apiEngine := api.NewEngine(dataStorage)
+
 	apiRouter := restapi.APIRouter{
 		Version:  revision,
 		Cache:    apiCache,
-		Storage:  dataStorage,
+		Engine:   apiEngine,
 		BasePath: opts.Toggly.BasePath,
 		Port:     opts.Toggly.Port,
 		IsDebug:  opts.Toggly.Debug,
@@ -97,14 +107,12 @@ func main() {
 	}
 
 	log.Print("[INFO] API server started \x1b[32m✔\x1b[0m")
-	if opts.Toggly.Cache.Disabled {
-		log.Print("[WARN] \x1b[1mCache disabled\x1b[0m")
-	}
+
 	app.Run(ctx)
 	log.Println("[INFO] application terminated")
 	log.Println("[INFO] Bye! 🖐")
 }
 
-func centered(txt string, width int) string {
+func centeredText(txt string, width int) string {
 	return strings.Repeat(" ", (width-len(txt))/2) + txt
 }

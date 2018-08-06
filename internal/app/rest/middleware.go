@@ -29,9 +29,14 @@ const (
 	XServiceVersion  string = "X-Service-Version"
 )
 
-// CtxOwner returns context value for project owner
-func CtxOwner(r *http.Request) string {
-	return r.Context().Value(CtxValueOwner).(string)
+// OwnerFromContext returns context value for project owner
+func OwnerFromContext(r *http.Request) string {
+	owner := r.Context().Value(CtxValueOwner)
+	if owner == nil {
+		log.Print("[ERROR] Context Value Owner is not specified")
+		return ""
+	}
+	return owner.(string)
 }
 
 // VersionCtx adds api version to context

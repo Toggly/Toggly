@@ -12,7 +12,7 @@ import (
 func NewMongoStorage(url string) (DataStorage, error) {
 	session, err := mgo.Dial(url)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return &mgStorage{
 		session: session,

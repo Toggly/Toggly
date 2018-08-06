@@ -1,20 +1,14 @@
 package cache
 
 // NewHashMapCache returns in-memory hashmap cache implementation. For development purposes
-func NewHashMapCache(enabled bool) (DataCache, error) {
+func NewHashMapCache() (DataCache, error) {
 	return &fakeCache{
-		enabled: enabled,
 		storage: make(map[string][]byte, 0),
 	}, nil
 }
 
 type fakeCache struct {
 	storage map[string][]byte
-	enabled bool
-}
-
-func (c *fakeCache) Enabled() bool {
-	return c.enabled
 }
 
 func (c *fakeCache) Get(key string) (data []byte, err error) {

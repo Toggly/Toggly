@@ -10,7 +10,6 @@ import (
 
 	"github.com/Toggly/core/internal/app/rest"
 	"github.com/Toggly/core/internal/pkg/cache"
-	"github.com/Toggly/core/internal/pkg/ctx"
 	"github.com/go-chi/render"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +19,7 @@ func TestCacheKey(t *testing.T) {
 	url := "http://localhost/?a=1"
 	req, err := http.NewRequest("GET", url, nil)
 
-	c := context.WithValue(context.Background(), ctx.CtxValueOwner, "ow1")
+	c := context.WithValue(context.Background(), rest.CtxValueOwner, "ow1")
 	req = req.WithContext(c)
 
 	assert.Nil(err)
@@ -43,12 +42,16 @@ func mockFunction(w http.ResponseWriter, r *http.Request) {
 
 func TestCached(t *testing.T) {
 	assert := assert.New(t)
-	cache, _ := cache.NewHashMapCache(true)
+	cache, _ := cache.NewHashMapCache()
 	cfn := rest.Cached(mockFunction, cache)
 	req, _ := http.NewRequest("GET", "http://localhost", nil)
+
+	c := context.WithValue(context.Background(), rest.CtxValueOwner, "ow1")
+	req = req.WithContext(c)
+
 	w := httptest.NewRecorder()
 	b := mockBody()
 	cfn(w, req)
 	assert.Equal(b, strings.TrimSpace(w.Body.String()))
-
+	//TODO make more proper testing
 }
