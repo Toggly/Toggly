@@ -71,8 +71,7 @@ func (s *mgProjectStorage) Save(project domain.Project) error {
 
 	err := collection.Insert(project)
 	if err != nil {
-		lastErr := err.(*mgo.LastError)
-		if lastErr.Code == 11000 {
+		if mgo.IsDup(err) {
 			return &UniqueIndexError{
 				Type: "Project",
 				Key:  fmt.Sprintf("owner:%s, code: %s", project.OwnerID, project.Code),
