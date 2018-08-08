@@ -1,14 +1,19 @@
 package storage
 
-import "github.com/Toggly/core/internal/domain"
+import (
+	"fmt"
+
+	"github.com/Toggly/core/internal/domain"
+)
 
 // UniqueIndexError type
 type UniqueIndexError struct {
-	err string
+	Type string
+	Key  string
 }
 
 func (e *UniqueIndexError) Error() string {
-	return e.err
+	return fmt.Sprintf("Unique index error: %s [%s]", e.Type, e.Key)
 }
 
 // DataStorage defines storage interface for dictionary

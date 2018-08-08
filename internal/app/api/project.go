@@ -20,3 +20,8 @@ func (p *ProjectAPI) List(owner string) ([]*domain.Project, error) {
 func (p *ProjectAPI) Get(owner string, id string) (*domain.Project, error) {
 	return p.Storage.Projects(owner).Get(domain.ProjectCode(id))
 }
+
+// Save Project
+func (p *ProjectAPI) Save(owner string, project *domain.Project) error {
+	return p.Storage.Projects(owner).Save(*project)
+}

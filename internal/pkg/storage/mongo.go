@@ -1,7 +1,7 @@
 package storage
 
 import (
-	"strings"
+	"fmt"
 
 	"github.com/Toggly/core/internal/domain"
 	"github.com/globalsign/mgo"
@@ -35,6 +35,10 @@ type mgProjectStorage struct {
 	storage *mgStorage
 }
 
+func getCollection(conn *mgo.Session, name string) *mgo.Collection {
+	return conn.DB("").C(name)
+}
+
 func (s *mgProjectStorage) List() (items []*domain.Project, err error) {
 	conn := s.storage.session.Copy()
 	defer conn.Close()
@@ -43,8 +47,14 @@ func (s *mgProjectStorage) List() (items []*domain.Project, err error) {
 	return items, err
 }
 
-func (s *mgProjectStorage) Get(code domain.ProjectCode) (*domain.Project, error) {
-	return nil, nil
+func (s *mgProjectStorage) Get(code domain.ProjectCode) (project *domain.Project, err error) {
+	conn := s.storage.session.Copy()
+	defer conn.Close()
+
+	collection := getCollection(conn, "project")
+	err = collection.Find(bson.M{"owner": s.owner, "code": code}).One(&project)
+
+	return project, err
 }
 
 func (s *mgProjectStorage) Save(project domain.Project) error {
@@ -52,7 +62,7 @@ func (s *mgProjectStorage) Save(project domain.Project) error {
 	defer conn.Close()
 
 	project.OwnerID = s.owner
-	collection := conn.DB("").C("project")
+	collection := getCollection(conn, "project")
 	idx := mgo.Index{
 		Key:    []string{"owner", "code"},
 		Unique: true,
@@ -60,10 +70,17 @@ func (s *mgProjectStorage) Save(project domain.Project) error {
 	collection.EnsureIndex(idx)
 
 	err := collection.Insert(project)
-	if err != nil && strings.Contains(err.Error(), "E11000") {
-		return &UniqueIndexError{err.Error()}
+	if err != nil {
+		lastErr := err.(*mgo.LastError)
+		if lastErr.Code == 11000 {
+			return &UniqueIndexError{
+				Type: "Project",
+				Key:  fmt.Sprintf("owner:%s, code: %s", project.OwnerID, project.Code),
+			}
+		}
+		return err
 	}
-	return err
+	return nil
 }
 
 func (s *mgProjectStorage) For(project domain.ProjectCode) ForProject {
