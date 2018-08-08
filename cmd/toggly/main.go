@@ -32,7 +32,7 @@ type Opts struct {
 			} `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
 		} `group:"store" namespace:"store" env-namespace:"STORE"`
 		Cache struct {
-			Disabled bool `long:"disable" description:"Disable cache"`
+			Disabled bool `long:"disable" description:"Disable cache" env:"DISABLE"`
 			Redis    struct {
 				URL string `long:"url" env:"URL" description:"redis connection url"`
 			} `group:"redis" namespace:"redis" env-namespace:"REDIS"`

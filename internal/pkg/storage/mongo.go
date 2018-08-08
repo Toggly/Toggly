@@ -50,6 +50,7 @@ func (s *mgProjectStorage) Get(code domain.ProjectCode) (*domain.Project, error)
 func (s *mgProjectStorage) Save(project domain.Project) error {
 	conn := s.storage.session.Copy()
 	defer conn.Close()
+
 	project.OwnerID = s.owner
 	collection := conn.DB("").C("project")
 	idx := mgo.Index{
