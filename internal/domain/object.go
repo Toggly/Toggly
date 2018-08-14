@@ -1,4 +1,4 @@
-package data
+package domain
 
 // ObjectCode type
 type ObjectCode string

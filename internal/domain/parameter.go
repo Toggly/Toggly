@@ -1,4 +1,4 @@
-package data
+package domain
 
 // ParameterType type
 type ParameterType int
