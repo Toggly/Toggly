@@ -13,17 +13,17 @@ type ProjectAPI struct {
 
 //List returns list of projects
 func (p *ProjectAPI) List() ([]*domain.Project, error) {
-	return (*p.Storage).Projects(p.Owner).List()
+	return (*p.Storage).ForOwner(p.Owner).Projects().List()
 }
 
 // Get Project By code
 func (p *ProjectAPI) Get(code domain.ProjectCode) (*domain.Project, error) {
-	return (*p.Storage).Projects(p.Owner).Get(code)
+	return (*p.Storage).ForOwner(p.Owner).Projects().Get(code)
 }
 
 // Save Project
 func (p *ProjectAPI) Save(project *domain.Project) error {
-	return (*p.Storage).Projects(p.Owner).Save(*project)
+	return (*p.Storage).ForOwner(p.Owner).Projects().Save(*project)
 }
 
 // For returns environment api for specified project

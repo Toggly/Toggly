@@ -35,7 +35,7 @@ func (p *ObjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 func (p *ObjectAPI) list(w http.ResponseWriter, r *http.Request) {
 	proj := domain.ProjectCode(chi.URLParam(r, "project_code"))
 	env := domain.EnvironmentCode(chi.URLParam(r, "env_code"))
-	list, err := p.Storage.Projects(rest.OwnerFromContext(r)).For(proj).Environments().For(env).Objects().List()
+	list, err := p.Storage.ForOwner(rest.OwnerFromContext(r)).Projects().For(proj).Environments().For(env).Objects().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -52,7 +52,7 @@ func (p *ObjectAPI) getObject(w http.ResponseWriter, r *http.Request) {
 	proj := domain.ProjectCode(chi.URLParam(r, "project_code"))
 	obj := domain.ObjectCode(chi.URLParam(r, "code"))
 	env := domain.EnvironmentCode(chi.URLParam(r, "env_code"))
-	o, err := p.Storage.Projects(rest.OwnerFromContext(r)).For(proj).Environments().For(env).Objects().Get(obj)
+	o, err := p.Storage.ForOwner(rest.OwnerFromContext(r)).Projects().For(proj).Environments().For(env).Objects().Get(obj)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)

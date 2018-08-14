@@ -16,9 +16,14 @@ func (e *UniqueIndexError) Error() string {
 	return fmt.Sprintf("Unique index error: %s [%s]", e.Type, e.Key)
 }
 
-// DataStorage defines storage interface for dictionary
+// DataStorage defines storage interface
 type DataStorage interface {
-	Projects(ownerID string) ProjectStorage
+	ForOwner(ownerID string) OwnerStorage
+}
+
+// OwnerStorage defines owner storage interface
+type OwnerStorage interface {
+	Projects() ProjectStorage
 }
 
 // ProjectStorage defines projects storage interface

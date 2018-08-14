@@ -23,10 +23,19 @@ type mgStorage struct {
 	session *mgo.Session
 }
 
-func (s *mgStorage) Projects(ownerID string) ProjectStorage {
+func (s *mgStorage) ForOwner(ownerID string) OwnerStorage {
+	return &mgOwnerStorage{owner: ownerID, storage: s}
+}
+
+type mgOwnerStorage struct {
+	owner   string
+	storage *mgStorage
+}
+
+func (s *mgOwnerStorage) Projects() ProjectStorage {
 	return &mgProjectStorage{
-		owner:   ownerID,
-		storage: s,
+		owner:   s.owner,
+		storage: s.storage,
 	}
 }
 

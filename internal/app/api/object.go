@@ -15,7 +15,7 @@ type ObjectAPI struct {
 
 //List returns list of objects
 func (o *ObjectAPI) List() (objects []*domain.Object, err error) {
-	objects, err = (*o.Storage).Projects(o.Owner).For(o.Project).Environments().For("").Objects().List()
+	objects, err = (*o.Storage).ForOwner(o.Owner).Projects().For(o.Project).Environments().For("").Objects().List()
 	_ = objects
 	return objects, err
 }
