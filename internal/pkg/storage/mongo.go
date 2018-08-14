@@ -43,7 +43,7 @@ func (s *mgProjectStorage) List() (items []*domain.Project, err error) {
 	conn := s.storage.session.Copy()
 	defer conn.Close()
 
-	err = conn.DB("").C("project").Find(bson.M{"owner": s.owner}).All(&items)
+	err = getCollection(conn, "project").Find(bson.M{"owner": s.owner}).All(&items)
 	return items, err
 }
 
@@ -53,7 +53,6 @@ func (s *mgProjectStorage) Get(code domain.ProjectCode) (project *domain.Project
 
 	collection := getCollection(conn, "project")
 	err = collection.Find(bson.M{"owner": s.owner, "code": code}).One(&project)
-
 	return project, err
 }
 
