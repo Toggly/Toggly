@@ -2,26 +2,35 @@ package api
 
 import (
 	"github.com/Toggly/core/internal/domain"
-
 	"github.com/Toggly/core/internal/pkg/storage"
 )
 
 // ProjectAPI servers project api namespace
 type ProjectAPI struct {
-	Storage storage.DataStorage
+	Owner   string
+	Storage *storage.DataStorage
 }
 
 //List returns list of projects
-func (p *ProjectAPI) List(owner string) ([]*domain.Project, error) {
-	return p.Storage.Projects(owner).List()
+func (p *ProjectAPI) List() ([]*domain.Project, error) {
+	return (*p.Storage).Projects(p.Owner).List()
 }
 
-// Get Project By ID
-func (p *ProjectAPI) Get(owner string, id string) (*domain.Project, error) {
-	return p.Storage.Projects(owner).Get(domain.ProjectCode(id))
+// Get Project By code
+func (p *ProjectAPI) Get(code domain.ProjectCode) (*domain.Project, error) {
+	return (*p.Storage).Projects(p.Owner).Get(code)
 }
 
 // Save Project
-func (p *ProjectAPI) Save(owner string, project *domain.Project) error {
-	return p.Storage.Projects(owner).Save(*project)
+func (p *ProjectAPI) Save(project *domain.Project) error {
+	return (*p.Storage).Projects(p.Owner).Save(*project)
+}
+
+// For returns environment api for specified project
+func (p *ProjectAPI) For(code domain.ProjectCode) *EnvironmentAPI {
+	return &EnvironmentAPI{
+		Owner:       p.Owner,
+		ProjectCode: code,
+		Storage:     p.Storage,
+	}
 }

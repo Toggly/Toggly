@@ -7,12 +7,15 @@ import (
 
 // ObjectAPI servers object api namespace
 type ObjectAPI struct {
-	Storage storage.DataStorage
+	Owner   string
+	Project domain.ProjectCode
+	Env     domain.EnvironmentCode
+	Storage *storage.DataStorage
 }
 
 //List returns list of objects
-func (o *ObjectAPI) List(owner string, project domain.ProjectCode, env domain.EnvironmentCode) (objects []*domain.Object, err error) {
-	objects, err = o.Storage.Projects(owner).For(project).Environments().For("").Objects().List()
+func (o *ObjectAPI) List() (objects []*domain.Object, err error) {
+	objects, err = (*o.Storage).Projects(o.Owner).For(o.Project).Environments().For("").Objects().List()
 	_ = objects
 	return objects, err
 }

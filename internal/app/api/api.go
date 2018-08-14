@@ -6,12 +6,27 @@ import (
 
 // Engine type
 type Engine struct {
-	Project ProjectAPI
+	Storage *storage.DataStorage
 }
 
-// NewEngine creates new API engine
-func NewEngine(storage storage.DataStorage) *Engine {
-	return &Engine{
-		Project: ProjectAPI{Storage: storage},
+// ForOwner returns owner api
+func (e *Engine) ForOwner(owner string) *OwnerAPI {
+	return &OwnerAPI{
+		Owner:   owner,
+		Storage: e.Storage,
+	}
+}
+
+// OwnerAPI type
+type OwnerAPI struct {
+	Owner   string
+	Storage *storage.DataStorage
+}
+
+// Project returns project api
+func (o *OwnerAPI) Project() *ProjectAPI {
+	return &ProjectAPI{
+		Owner:   o.Owner,
+		Storage: o.Storage,
 	}
 }

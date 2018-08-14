@@ -42,7 +42,7 @@ func (p *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := p.Engine.Project.List(rest.OwnerFromContext(r))
+	list, err := p.Engine.ForOwner(rest.OwnerFromContext(r)).Project().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -57,7 +57,7 @@ func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 
 func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	proj, err := p.Engine.Project.Get(rest.OwnerFromContext(r), id)
+	proj, err := p.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Get(domain.ProjectCode(id))
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -82,7 +82,7 @@ func (p *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 		rest.ErrorResponse(w, r, errors.New("Bad request"), 400)
 		return
 	}
-	err = p.Engine.Project.Save(rest.OwnerFromContext(r), proj)
+	err = p.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Save(proj)
 	if err != nil {
 		switch err.(type) {
 		case *storage.UniqueIndexError:

@@ -87,12 +87,10 @@ func main() {
 		log.Fatalf("Can't connect to storeage: %v", err)
 	}
 
-	apiEngine := api.NewEngine(dataStorage)
-
 	apiRouter := restapi.APIRouter{
 		Version:  revision,
 		Cache:    apiCache,
-		Engine:   apiEngine,
+		Engine:   &api.Engine{Storage: &dataStorage},
 		BasePath: opts.Toggly.BasePath,
 		Port:     opts.Toggly.Port,
 		IsDebug:  opts.Toggly.Debug,
