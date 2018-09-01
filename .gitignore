@@ -4,6 +4,5 @@ sonar-coverage.out
 sonar-report.json
 .scannerwork
 .DS_Store
-vendor
 Gopkg.lock
 *.mongo
