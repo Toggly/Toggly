@@ -1,0 +1,225 @@
+openapi: 3.0.0
+servers:
+# Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/vasmik/Toggly/1.0.0
+  - url: /v1
+    description: V1
+
+info:
+  description: This is a Toggly API
+  version: "1.0.0"
+  title: Toggly Core Service API
+  contact:
+    email: vasmik@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+paths:
+
+  # Project
+
+  '/project':
+
+    get:
+      summary: projects list
+      tags:
+        - project
+      description: |
+        Returns the list of projects for current owner
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+      responses:
+        '200':
+          description: list of projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+        '400':
+          description: bad request
+
+    post:
+      summary: save project
+      tags:
+        - project
+      description: |
+        Saves the project
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ownerId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+
+      responses:
+        '200':
+          description: blahblah
+        '400':
+          description: bad request
+
+
+  '/project/{project_code}':
+
+    get:
+      summary: get project information
+      tags:
+        - project
+      description: |
+        Returns the project information
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+      responses:
+        '200':
+          description: project information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          description: bad request
+        '404':
+          description: project not found
+
+    delete:
+      summary: delete project
+      tags:
+        - project
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+      responses:
+        '200':
+          description: project succesfully deleted
+        '400':
+          description: bad request
+        '404':
+          description: project not found
+
+
+  # Environment
+
+  '/project/{project_code}/env':
+
+    get:
+      summary: list of environments for project
+      tags:
+        - environment
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/projectCode'
+      responses:
+        '200':
+          description: project information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Environment'
+        '400':
+          description: not found
+
+  '/project/{project_code}/env/{env_code}':
+
+    get:
+      summary: list of environments for project
+      tags:
+        - environment
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/projectCode'
+      responses:
+        '200':
+          description: project information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Environment'
+        '400':
+          description: not found
+
+
+components:
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Toggly-Api-Key
+
+  parameters:
+
+    ownerId:
+      in: header
+      name: X-Toggly-Owner-Id
+      schema:
+        type: string
+
+    requestId:
+      in: header
+      name: X-Toggly-Request-Id
+      schema:
+        type: string
+
+    projectCode:
+      in: path
+      name: project_code
+      required: true
+      schema:
+        type: string
+
+  schemas:
+
+    Project:
+      type: object
+      properties:
+        code:
+          type: string
+          example: my_project_1
+        description:
+          type: string
+          example: Project description
+        status:
+          type: integer
+          example: 0
+        reg_date:
+          type: integer
+          example: '2018-07-08T21:42:31.236594677-07:00'
+
+    Environment:
+      type: object
+      properties:
+        code:
+          type: string
+          example: dev
+        description:
+          type: string
+          example: Development environment
+        reg_date:
+          type: integer
+          example: '2018-07-08T21:42:31.236594677-07:00'
+

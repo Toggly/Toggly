@@ -1,35 +1,44 @@
-# API
+# Toggly API
 
-## Public API
-
-### Project
-
-#### Projects list
-
-```http
-GET http://HOST/api/v1/project
-```
-
-Response:
+All responses will have the form
 
 ```json
 {
-    "projects": [
-        {
-            "code": "my_project",
-            "description": "Project description",
-            "status": 0,
-            "reg_date": "2018-07-08T21:42:31.236594677-07:00"
-        }
-    ]
+    "data": "Mixed type"
 }
 ```
 
-#### Get project
+## Project
 
-```http
-GET http://HOST/api/v1/project/{project_code}
+### Projects list
+
+**Definition**
+
+`GET /api/v1/project`
+
+**Response**
+
+- `200 OK` on success
+
+```json
+[
+    {
+        "code": "my_project",
+        "description": "Project description",
+        "status": 0,
+        "reg_date": "2018-07-08T21:42:31.236594677-07:00"
+    },
+    ...
+]
 ```
+
+### Get project
+
+**Definition**
+
+`GET http://HOST/api/v1/project/{project_code}`
+
+**Response**
 
 Example
 
