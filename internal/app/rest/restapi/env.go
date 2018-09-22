@@ -9,7 +9,6 @@ import (
 	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/render"
 )
 
 // EnvironmentAPI servers objects
@@ -44,7 +43,7 @@ func (p *EnvironmentAPI) list(w http.ResponseWriter, r *http.Request) {
 		rest.NotFoundResponse(w, r)
 		return
 	}
-	render.JSON(w, r, list)
+	rest.JSONResponse(w, r, list)
 }
 
 func (p *EnvironmentAPI) getEnvironment(w http.ResponseWriter, r *http.Request) {
@@ -60,5 +59,5 @@ func (p *EnvironmentAPI) getEnvironment(w http.ResponseWriter, r *http.Request) 
 		rest.NotFoundResponse(w, r)
 		return
 	}
-	render.JSON(w, r, env)
+	rest.JSONResponse(w, r, env)
 }

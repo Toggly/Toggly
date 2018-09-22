@@ -36,8 +36,8 @@ func (a *APIRouter) Run() {
 		Handler: chi.ServerBaseContext(context.Background(), router),
 	}
 	a.lock.Unlock()
-	log.Printf("[INFO] HTTP server listening on → \x1b[1m%s\x1b[0m", a.httpServer.Addr)
-	log.Printf("[INFO] APIRouter V.1 base path → \x1b[1m%s/v1\x1b[0m", a.BasePath)
+	log.Printf("[INFO] HTTP server listening on -> %s", a.httpServer.Addr)
+	log.Printf("[INFO] APIRouter V.1 base path -> %s/v1", a.BasePath)
 	err := a.httpServer.ListenAndServe()
 	log.Printf("[INFO] HTTP server terminated, %s", err)
 }
@@ -67,7 +67,7 @@ func (a *APIRouter) routes() chi.Router {
 	router.Use(rest.ServiceInfo("Toggly", a.Version))
 	router.Route(a.BasePath, a.versions)
 	if a.IsDebug {
-		log.Println("[DEBUG] Profiler enabled on \x1b[1m/debug\x1b[0m path")
+		log.Println("[DEBUG] Profiler enabled on /debug path")
 		router.Mount("/debug", middleware.Profiler())
 	}
 	return router

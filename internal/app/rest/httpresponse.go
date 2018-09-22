@@ -9,7 +9,7 @@ import (
 // ErrorResponse creates {error: message} json body and responds with error code
 func ErrorResponse(w http.ResponseWriter, r *http.Request, err error, code int) {
 	render.Status(r, code)
-	render.JSON(w, r, map[string]interface{}{"error": err.Error()})
+	JSONResponse(w, r, map[string]interface{}{"error": err.Error()})
 }
 
 // JSONResponse creates json body

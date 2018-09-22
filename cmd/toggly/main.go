@@ -70,12 +70,12 @@ func main() {
 		stop := make(chan os.Signal, 1)
 		signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 		<-stop
-		log.Print("[WARN] interrupt signal \x1b[31m✘\x1b[0m")
+		log.Print("[WARN] interrupt signal")
 		cancel()
 	}()
 
 	if opts.Toggly.Cache.Disabled {
-		log.Print("[WARN] \x1b[1mCACHE DISABLED\x1b[0m 😱")
+		log.Print("[WARN] CACHE DISABLED")
 	} else {
 		if apiCache, err = cache.NewHashMapCache(); err != nil {
 			log.Fatalf("Can't connect to cache service: %v", err)
@@ -104,11 +104,11 @@ func main() {
 		log.Fatalf("[ERROR] failed to setup application, %+v", err)
 	}
 
-	log.Print("[INFO] API server started \x1b[32m✔\x1b[0m")
+	log.Print("[INFO] API server started")
 
 	app.Run(ctx)
 	log.Println("[INFO] application terminated")
-	log.Println("[INFO] Bye! 🖐")
+	log.Println("[INFO] Bye!")
 }
 
 func centeredText(txt string, width int) string {

@@ -9,7 +9,6 @@ import (
 	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/go-chi/chi"
-	"github.com/go-chi/render"
 )
 
 // ObjectAPI servers objects
@@ -45,7 +44,7 @@ func (p *ObjectAPI) list(w http.ResponseWriter, r *http.Request) {
 		rest.NotFoundResponse(w, r)
 		return
 	}
-	render.JSON(w, r, list)
+	rest.JSONResponse(w, r, list)
 }
 
 func (p *ObjectAPI) getObject(w http.ResponseWriter, r *http.Request) {
@@ -62,5 +61,5 @@ func (p *ObjectAPI) getObject(w http.ResponseWriter, r *http.Request) {
 		rest.NotFoundResponse(w, r)
 		return
 	}
-	render.JSON(w, r, o)
+	rest.JSONResponse(w, r, o)
 }

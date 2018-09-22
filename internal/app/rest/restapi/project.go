@@ -15,8 +15,6 @@ import (
 	"github.com/Toggly/core/internal/app/rest"
 	"github.com/Toggly/core/internal/pkg/cache"
 
-	"github.com/go-chi/render"
-
 	"github.com/go-chi/chi"
 )
 
@@ -52,7 +50,7 @@ func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 		rest.NotFoundResponse(w, r)
 		return
 	}
-	render.JSON(w, r, list)
+	rest.JSONResponse(w, r, list)
 }
 
 func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
@@ -67,7 +65,7 @@ func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 		rest.NotFoundResponse(w, r)
 		return
 	}
-	render.JSON(w, r, proj)
+	rest.JSONResponse(w, r, proj)
 }
 
 func (p *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {

@@ -9,6 +9,11 @@ import (
 	"github.com/Toggly/core/internal/pkg/cache"
 )
 
+// Headers
+const (
+	XTogglyResponseFromCache string = "X-Toggly-Response-From-Cache"
+)
+
 //GetKeyFromRequest composes the key based on owner id and url
 func GetKeyFromRequest(r *http.Request) string {
 	return OwnerFromContext(r) + "::" + r.URL.String()
@@ -20,7 +25,8 @@ func Cached(next http.HandlerFunc, cache cache.DataCache) http.HandlerFunc {
 	if cache == nil {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			key := GetKeyFromRequest(r)
-			log.Printf("[DEBUG] CACHE DISABLED! 📀 From DB: %s", key)
+			log.Printf("[DEBUG] CACHE DISABLED! From DB: %s", key)
+			w.Header().Set(http.CanonicalHeaderKey(XTogglyResponseFromCache), "No")
 			next.ServeHTTP(w, r)
 		})
 	}
@@ -34,12 +40,14 @@ func Cached(next http.HandlerFunc, cache cache.DataCache) http.HandlerFunc {
 		}
 
 		if data != nil {
-			log.Printf("[DEBUG] 🔥 From cache: %s", key)
+			log.Printf("[DEBUG] From cache: %s", key)
+			w.Header().Set(http.CanonicalHeaderKey(XTogglyResponseFromCache), "Yes")
 			decomposeAndWriteData(key, data, w)
 			return
 		}
 
-		log.Printf("[DEBUG] 📀 From DB: %s", key)
+		log.Printf("[DEBUG] From DB: %s", key)
+		w.Header().Set(http.CanonicalHeaderKey(XTogglyResponseFromCache), "No")
 
 		recorder := httptest.NewRecorder()
 		next.ServeHTTP(recorder, r)
