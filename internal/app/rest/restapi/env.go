@@ -18,22 +18,22 @@ type EnvironmentAPI struct {
 }
 
 // Routes returns routes for environments
-func (p *EnvironmentAPI) Routes() chi.Router {
+func (api *EnvironmentAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(g chi.Router) {
-		g.Get("/", p.cached(p.list))
-		g.Get("/{code}", p.cached(p.getEnvironment))
+		g.Get("/", api.cached(api.list))
+		g.Get("/{code}", api.cached(api.getEnvironment))
 	})
 	return router
 }
 
-func (p *EnvironmentAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return rest.Cached(fn, p.Cache)
+func (api *EnvironmentAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
+	return rest.Cached(fn, api.Cache)
 }
 
-func (p *EnvironmentAPI) list(w http.ResponseWriter, r *http.Request) {
+func (api *EnvironmentAPI) list(w http.ResponseWriter, r *http.Request) {
 	proj := domain.ProjectCode(chi.URLParam(r, "project_code"))
-	list, err := p.Storage.ForOwner(rest.OwnerFromContext(r)).Projects().For(proj).Environments().List()
+	list, err := api.Storage.ForOwner(rest.OwnerFromContext(r)).Projects().For(proj).Environments().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -46,10 +46,10 @@ func (p *EnvironmentAPI) list(w http.ResponseWriter, r *http.Request) {
 	rest.JSONResponse(w, r, list)
 }
 
-func (p *EnvironmentAPI) getEnvironment(w http.ResponseWriter, r *http.Request) {
+func (api *EnvironmentAPI) getEnvironment(w http.ResponseWriter, r *http.Request) {
 	envID := domain.EnvironmentCode(chi.URLParam(r, "code"))
 	proj := domain.ProjectCode(chi.URLParam(r, "project_code"))
-	env, err := p.Storage.ForOwner(rest.OwnerFromContext(r)).Projects().For(proj).Environments().Get(envID)
+	env, err := api.Storage.ForOwner(rest.OwnerFromContext(r)).Projects().For(proj).Environments().Get(envID)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)

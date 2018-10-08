@@ -26,6 +26,11 @@ func (p *ProjectAPI) Save(project *domain.Project) error {
 	return (*p.Storage).ForOwner(p.Owner).Projects().Save(*project)
 }
 
+// Delete Project
+func (p *ProjectAPI) Delete(project *domain.Project) error {
+	return nil
+}
+
 // For returns environment api for specified project
 func (p *ProjectAPI) For(code domain.ProjectCode) *EnvironmentAPI {
 	return &EnvironmentAPI{

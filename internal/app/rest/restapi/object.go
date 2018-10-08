@@ -18,23 +18,23 @@ type ObjectAPI struct {
 }
 
 // Routes returns routes for objects
-func (p *ObjectAPI) Routes() chi.Router {
+func (api *ObjectAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(g chi.Router) {
-		g.Get("/", p.cached(p.list))
-		g.Get("/{code}", p.cached(p.getObject))
+		g.Get("/", api.cached(api.list))
+		g.Get("/{code}", api.cached(api.getObject))
 	})
 	return router
 }
 
-func (p *ObjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return rest.Cached(fn, p.Cache)
+func (api *ObjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
+	return rest.Cached(fn, api.Cache)
 }
 
-func (p *ObjectAPI) list(w http.ResponseWriter, r *http.Request) {
+func (api *ObjectAPI) list(w http.ResponseWriter, r *http.Request) {
 	proj := domain.ProjectCode(chi.URLParam(r, "project_code"))
 	env := domain.EnvironmentCode(chi.URLParam(r, "env_code"))
-	list, err := p.Storage.ForOwner(rest.OwnerFromContext(r)).Projects().For(proj).Environments().For(env).Objects().List()
+	list, err := api.Storage.ForOwner(rest.OwnerFromContext(r)).Projects().For(proj).Environments().For(env).Objects().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -47,11 +47,11 @@ func (p *ObjectAPI) list(w http.ResponseWriter, r *http.Request) {
 	rest.JSONResponse(w, r, list)
 }
 
-func (p *ObjectAPI) getObject(w http.ResponseWriter, r *http.Request) {
+func (api *ObjectAPI) getObject(w http.ResponseWriter, r *http.Request) {
 	proj := domain.ProjectCode(chi.URLParam(r, "project_code"))
 	obj := domain.ObjectCode(chi.URLParam(r, "code"))
 	env := domain.EnvironmentCode(chi.URLParam(r, "env_code"))
-	o, err := p.Storage.ForOwner(rest.OwnerFromContext(r)).Projects().For(proj).Environments().For(env).Objects().Get(obj)
+	o, err := api.Storage.ForOwner(rest.OwnerFromContext(r)).Projects().For(proj).Environments().For(env).Objects().Get(obj)
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)

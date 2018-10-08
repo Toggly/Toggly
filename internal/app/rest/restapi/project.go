@@ -25,22 +25,22 @@ type ProjectAPI struct {
 }
 
 // Routes returns routes for project namespace
-func (p *ProjectAPI) Routes() chi.Router {
+func (api *ProjectAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(group chi.Router) {
-		group.Get("/", p.cached(p.list))
-		group.Get("/{id}", p.cached(p.getProject))
-		group.Post("/", p.saveProject)
+		group.Get("/", api.cached(api.list))
+		group.Get("/{id}", api.cached(api.getProject))
+		group.Post("/", api.saveProject)
 	})
 	return router
 }
 
-func (p *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return rest.Cached(fn, p.Cache)
+func (api *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
+	return rest.Cached(fn, api.Cache)
 }
 
-func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := p.Engine.ForOwner(rest.OwnerFromContext(r)).Project().List()
+func (api *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
+	list, err := api.Engine.ForOwner(rest.OwnerFromContext(r)).Project().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -53,9 +53,9 @@ func (p *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 	rest.JSONResponse(w, r, list)
 }
 
-func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
+func (api *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	proj, err := p.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Get(domain.ProjectCode(id))
+	proj, err := api.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Get(domain.ProjectCode(id))
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -68,7 +68,7 @@ func (p *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 	rest.JSONResponse(w, r, proj)
 }
 
-func (p *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
+func (api *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		rest.ErrorResponse(w, r, err, 500)
@@ -80,7 +80,7 @@ func (p *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 		rest.ErrorResponse(w, r, errors.New("Bad request"), 400)
 		return
 	}
-	err = p.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Save(proj)
+	err = api.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Save(proj)
 	if err != nil {
 		switch err.(type) {
 		case *storage.UniqueIndexError:
@@ -88,6 +88,5 @@ func (p *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 		default:
 			rest.ErrorResponse(w, r, err, 500)
 		}
-
 	}
 }

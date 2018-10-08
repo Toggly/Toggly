@@ -28,9 +28,9 @@ paths:
         - project
       description: |
         Returns the list of projects for current owner
-      security:
+      security: 
         - ApiKeyAuth: []
-      parameters:
+      parameters: 
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
       responses:
@@ -51,10 +51,11 @@ paths:
         - project
       description: |
         Saves the project
-      security:
+      security: 
         - ApiKeyAuth: []
-      parameters:
+      parameters: 
         - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
       requestBody:
         required: true
         content:
@@ -77,9 +78,9 @@ paths:
         - project
       description: |
         Returns the project information
-      security:
+      security: 
         - ApiKeyAuth: []
-      parameters:
+      parameters: 
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -94,14 +95,14 @@ paths:
           description: bad request
         '404':
           description: project not found
-
+          
     delete:
       summary: delete project
       tags:
         - project
-      security:
+      security: 
         - ApiKeyAuth: []
-      parameters:
+      parameters: 
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -117,19 +118,20 @@ paths:
   # Environment
 
   '/project/{project_code}/env':
-
+  
     get:
       summary: list of environments for project
       tags:
         - environment
-      security:
+      security: 
         - ApiKeyAuth: []
-      parameters:
+      parameters: 
         - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
       responses:
         '200':
-          description: project information
+          description: list of environments
           content:
             application/json:
               schema:
@@ -138,30 +140,165 @@ paths:
                   $ref: '#/components/schemas/Environment'
         '400':
           description: not found
+
+    post:
+      summary: save environment
+      tags:
+        - environment
+      security: 
+        - ApiKeyAuth: []
+      parameters: 
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Environment'
+      responses:
+        '200':
+          description: blahblah
+        '400':
+          description: bad request
 
   '/project/{project_code}/env/{env_code}':
 
     get:
-      summary: list of environments for project
+      summary: environment information
       tags:
         - environment
       security:
         - ApiKeyAuth: []
       parameters:
         - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
+        - $ref: '#/components/parameters/envCode'
       responses:
         '200':
           description: project information
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Environment'
+                $ref: '#/components/schemas/Environment'
         '400':
           description: not found
 
+    delete:
+      summary: delete environment
+      tags:
+        - environment
+      security: 
+        - ApiKeyAuth: []
+      parameters: 
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+        - $ref: '#/components/parameters/envCode'
+      responses:
+        '200':
+          description: environment succesfully deleted
+        '400':
+          description: bad request
+        '404':
+          description: environment not found
+
+
+  # Object
+
+  '/project/{project_code}/env/{env_code}/object':
+  
+    get:
+      summary: list of objects for environment
+      tags:
+        - object
+      security: 
+        - ApiKeyAuth: []
+      parameters: 
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+        - $ref: '#/components/parameters/envCode'
+      responses:
+        '200':
+          description: list of objects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Object'
+        '400':
+          description: not found
+
+    post:
+      summary: save object
+      tags:
+        - object
+      security: 
+        - ApiKeyAuth: []
+      parameters: 
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+        - $ref: '#/components/parameters/envCode'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Object'
+      responses:
+        '200':
+          description: blahblah
+        '400':
+          description: bad request
+
+  '/project/{project_code}/env/{env_code}/object/{obj_code}':
+  
+    get:
+      summary: list of objects for environment
+      tags:
+        - object
+      security: 
+        - ApiKeyAuth: []
+      parameters: 
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+        - $ref: '#/components/parameters/envCode'
+        - $ref: '#/components/parameters/objectCode'
+      responses:
+        '200':
+          description: object information
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Object'
+        '400':
+          description: not found
+
+    delete:
+      summary: delete object
+      tags:
+        - object
+      security: 
+        - ApiKeyAuth: []
+      parameters: 
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+        - $ref: '#/components/parameters/envCode'
+        - $ref: '#/components/parameters/objectCode'
+      responses:
+        '200':
+          description: object succesfully deleted
+        '400':
+          description: bad request
+        '404':
+          description: object not found
 
 components:
 
@@ -192,8 +329,22 @@ components:
       schema:
         type: string
 
-  schemas:
+    envCode:
+      in: path
+      name: env_code
+      required: true
+      schema:
+        type: string
 
+    objectCode:
+      in: path
+      name: obj_code
+      required: true
+      schema:
+        type: string
+
+  schemas:
+  
     Project:
       type: object
       properties:
@@ -223,3 +374,9 @@ components:
           type: integer
           example: '2018-07-08T21:42:31.236594677-07:00'
 
+    Object:
+      type: object
+      properties:
+        code:
+          type: string
+          example: user
