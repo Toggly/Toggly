@@ -84,7 +84,7 @@ func main() {
 
 	if dataStorage, err = storage.NewMongoStorage(opts.Toggly.Store.Mongo.URL); err != nil {
 		log.Printf("Mongo URL: %s", opts.Toggly.Store.Mongo.URL)
-		log.Fatalf("Can't connect to storeage: %v", err)
+		log.Fatalf("Can't connect to storage: %v", err)
 	}
 
 	apiRouter := restapi.APIRouter{

@@ -25,37 +25,38 @@ type ProjectAPI struct {
 }
 
 // Routes returns routes for project namespace
-func (api *ProjectAPI) Routes() chi.Router {
+func (a *ProjectAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(group chi.Router) {
-		group.Get("/", api.cached(api.list))
-		group.Get("/{id}", api.cached(api.getProject))
-		group.Post("/", api.saveProject)
+		group.Get("/", a.cached(a.list))
+		group.Get("/{id}", a.cached(a.getProject))
+		group.Delete("/{id}", a.cached(a.deleteProject))
+		group.Post("/", a.saveProject)
 	})
 	return router
 }
 
-func (api *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return rest.Cached(fn, api.Cache)
+func (a *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
+	return rest.Cached(fn, a.Cache)
 }
 
-func (api *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := api.Engine.ForOwner(rest.OwnerFromContext(r)).Project().List()
+func (a *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
+	list, err := a.Engine.ForOwner(rest.OwnerFromContext(r)).Project().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
 		return
 	}
-	if list == nil {
-		rest.NotFoundResponse(w, r)
-		return
-	}
 	rest.JSONResponse(w, r, list)
 }
 
-func (api *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
+func (a *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 	id := chi.URLParam(r, "id")
-	proj, err := api.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Get(domain.ProjectCode(id))
+	proj, err := a.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Get(domain.ProjectCode(id))
+	if err == api.ErrNotFound {
+		rest.NotFoundResponse(w, r)
+		return
+	}
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -68,7 +69,22 @@ func (api *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 	rest.JSONResponse(w, r, proj)
 }
 
-func (api *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
+func (a *ProjectAPI) deleteProject(w http.ResponseWriter, r *http.Request) {
+	id := chi.URLParam(r, "id")
+	err := a.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Delete(domain.ProjectCode(id))
+	if err == api.ErrNotFound {
+		rest.NotFoundResponse(w, r)
+		return
+	}
+	if err != nil {
+		log.Printf("[ERROR] %v", err)
+		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		return
+	}
+	rest.JSONResponse(w, r, nil)
+}
+
+func (a *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		rest.ErrorResponse(w, r, err, 500)
@@ -80,7 +96,7 @@ func (api *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 		rest.ErrorResponse(w, r, errors.New("Bad request"), 400)
 		return
 	}
-	err = api.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Save(proj)
+	p, err := a.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Save(proj)
 	if err != nil {
 		switch err.(type) {
 		case *storage.UniqueIndexError:
@@ -88,5 +104,7 @@ func (api *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 		default:
 			rest.ErrorResponse(w, r, err, 500)
 		}
+		return
 	}
+	rest.JSONResponse(w, r, p)
 }

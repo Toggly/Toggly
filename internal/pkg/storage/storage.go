@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/Toggly/core/internal/domain"
@@ -11,6 +12,11 @@ type UniqueIndexError struct {
 	Type string
 	Key  string
 }
+
+var (
+	// ErrNotFound error
+	ErrNotFound = errors.New("not found")
+)
 
 func (e *UniqueIndexError) Error() string {
 	return fmt.Sprintf("Unique index error: %s [%s]", e.Type, e.Key)
@@ -30,7 +36,8 @@ type OwnerStorage interface {
 type ProjectStorage interface {
 	List() ([]*domain.Project, error)
 	Get(code domain.ProjectCode) (*domain.Project, error)
-	Save(project domain.Project) error
+	Delete(code domain.ProjectCode) error
+	Save(project *domain.Project) (*domain.Project, error)
 	For(project domain.ProjectCode) ForProject
 }
 
@@ -43,6 +50,7 @@ type ForProject interface {
 type EnvironmentStorage interface {
 	List() ([]*domain.Environment, error)
 	Get(code domain.EnvironmentCode) (*domain.Environment, error)
+	Delete(code domain.EnvironmentCode) error
 	Save(env domain.Environment) error
 	For(domain.EnvironmentCode) ForEnvironment
 }
@@ -56,5 +64,6 @@ type ForEnvironment interface {
 type ObjectStorage interface {
 	List() ([]*domain.Object, error)
 	Get(code domain.ObjectCode) (*domain.Object, error)
+	Delete(code domain.ObjectCode) error
 	Save(object domain.Object) error
 }

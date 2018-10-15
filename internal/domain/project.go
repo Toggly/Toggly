@@ -18,7 +18,7 @@ const (
 
 // Project represents a project data structure
 type Project struct {
-	OwnerID     string        `json:"-" bson:"owner"`
+	OwnerID     string        `json:"owner" bson:"owner"`
 	Code        ProjectCode   `json:"code" bson:"code"`
 	Description string        `json:"description,omitempty"`
 	RegDate     time.Time     `json:"reg_date,omitempty"`

@@ -18,17 +18,25 @@ func (p *ProjectAPI) List() ([]*domain.Project, error) {
 
 // Get Project By code
 func (p *ProjectAPI) Get(code domain.ProjectCode) (*domain.Project, error) {
-	return (*p.Storage).ForOwner(p.Owner).Projects().Get(code)
+	project, err := (*p.Storage).ForOwner(p.Owner).Projects().Get(code)
+	if err == storage.ErrNotFound {
+		return nil, ErrNotFound
+	}
+	return project, err
 }
 
 // Save Project
-func (p *ProjectAPI) Save(project *domain.Project) error {
-	return (*p.Storage).ForOwner(p.Owner).Projects().Save(*project)
+func (p *ProjectAPI) Save(project *domain.Project) (*domain.Project, error) {
+	return (*p.Storage).ForOwner(p.Owner).Projects().Save(project)
 }
 
 // Delete Project
-func (p *ProjectAPI) Delete(project *domain.Project) error {
-	return nil
+func (p *ProjectAPI) Delete(code domain.ProjectCode) error {
+	err := (*p.Storage).ForOwner(p.Owner).Projects().Delete(code)
+	if err == storage.ErrNotFound {
+		return ErrNotFound
+	}
+	return err
 }
 
 // For returns environment api for specified project

@@ -1,7 +1,14 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/Toggly/core/internal/pkg/storage"
+)
+
+var (
+	// ErrNotFound error
+	ErrNotFound = errors.New("not found")
 )
 
 // Engine type
