@@ -10,6 +10,7 @@ import (
 
 	"github.com/Toggly/core/internal/app/api"
 	"github.com/Toggly/core/internal/app/rest"
+	"github.com/Toggly/core/internal/domain"
 	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -84,6 +85,14 @@ func (api *APIRouter) v1(r chi.Router) {
 	r.Use(middleware.Logger)
 	r.Use(rest.VersionCtx("v1"))
 	r.Mount("/project", (&ProjectAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
-	// r.Mount("/project/{project_code}/env", (&EnvironmentAPIRouter{Cache: api.Cache, Storage: api.Storage}).Routes())
+	r.Mount("/project/{project_code}/env", (&EnvironmentAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
 	// r.Mount("/project/{project_code}/env/{env_code}/object", (&ObjectAPIRouter{Cache: api.Cache, Storage: api.Storage}).Routes())
+}
+
+func owner(r *http.Request) string {
+	return rest.OwnerFromContext(r)
+}
+
+func projectCode(r *http.Request) domain.ProjectCode {
+	return domain.ProjectCode(chi.URLParam(r, "project_code"))
 }

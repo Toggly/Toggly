@@ -15,6 +15,7 @@ import (
 
 	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/pkg/storage"
+	"github.com/Toggly/core/internal/pkg/storage/mongo"
 	flags "github.com/jessevdk/go-flags"
 )
 
@@ -82,7 +83,7 @@ func main() {
 		}
 	}
 
-	if dataStorage, err = storage.NewMongoStorage(opts.Toggly.Store.Mongo.URL); err != nil {
+	if dataStorage, err = mongo.NewMongoStorage(opts.Toggly.Store.Mongo.URL); err != nil {
 		log.Printf("Mongo URL: %s", opts.Toggly.Store.Mongo.URL)
 		log.Fatalf("Can't connect to storage: %v", err)
 	}

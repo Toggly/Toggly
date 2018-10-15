@@ -29,9 +29,9 @@ func (a *ProjectAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(group chi.Router) {
 		group.Get("/", a.cached(a.list))
-		group.Get("/{id}", a.cached(a.getProject))
-		group.Delete("/{id}", a.cached(a.deleteProject))
 		group.Post("/", a.saveProject)
+		group.Get("/{project_code}", a.cached(a.getProject))
+		group.Delete("/{project_code}", a.cached(a.deleteProject))
 	})
 	return router
 }
@@ -41,7 +41,10 @@ func (a *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func (a *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := a.Engine.ForOwner(rest.OwnerFromContext(r)).Project().List()
+	list, err := a.Engine.
+		ForOwner(owner(r)).
+		Project().
+		List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -51,15 +54,18 @@ func (a *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	proj, err := a.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Get(domain.ProjectCode(id))
-	if err == api.ErrNotFound {
-		rest.NotFoundResponse(w, r)
-		return
-	}
+	proj, err := a.Engine.
+		ForOwner(owner(r)).
+		Project().
+		Get(projectCode(r))
 	if err != nil {
-		log.Printf("[ERROR] %v", err)
-		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		switch err {
+		case api.ErrNotFound:
+			rest.NotFoundResponse(w, r)
+		default:
+			log.Printf("[ERROR] %v", err)
+			rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		}
 		return
 	}
 	if proj == nil {
@@ -70,15 +76,18 @@ func (a *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *ProjectAPI) deleteProject(w http.ResponseWriter, r *http.Request) {
-	id := chi.URLParam(r, "id")
-	err := a.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Delete(domain.ProjectCode(id))
-	if err == api.ErrNotFound {
-		rest.NotFoundResponse(w, r)
-		return
-	}
+	err := a.Engine.
+		ForOwner(owner(r)).
+		Project().
+		Delete(projectCode(r))
 	if err != nil {
-		log.Printf("[ERROR] %v", err)
-		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		switch err {
+		case api.ErrNotFound:
+			rest.NotFoundResponse(w, r)
+		default:
+			log.Printf("[ERROR] %v", err)
+			rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		}
 		return
 	}
 	rest.JSONResponse(w, r, nil)
@@ -96,7 +105,10 @@ func (a *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 		rest.ErrorResponse(w, r, errors.New("Bad request"), 400)
 		return
 	}
-	p, err := a.Engine.ForOwner(rest.OwnerFromContext(r)).Project().Save(proj)
+	p, err := a.Engine.
+		ForOwner(owner(r)).
+		Project().
+		Save(proj)
 	if err != nil {
 		switch err.(type) {
 		case *storage.UniqueIndexError:

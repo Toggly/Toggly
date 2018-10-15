@@ -1,16 +1,17 @@
-package storage_test
+package mongo_test
 
 import (
 	"testing"
 
 	"github.com/Toggly/core/internal/pkg/storage"
+	"github.com/Toggly/core/internal/pkg/storage/mongo"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMongoStorage(t *testing.T) {
 	assert := assert.New(t)
 	var err error
-	s, err := storage.NewMongoStorage("mongodb://127.0.0.1:27017/toggly")
+	s, err := mongo.NewMongoStorage("mongodb://127.0.0.1:27017/toggly")
 	assert.Nil(err)
 	assert.NotNil(s)
 

@@ -13,12 +13,18 @@ type ProjectAPI struct {
 
 //List returns list of projects
 func (p *ProjectAPI) List() ([]*domain.Project, error) {
-	return (*p.Storage).ForOwner(p.Owner).Projects().List()
+	return (*p.Storage).
+		ForOwner(p.Owner).
+		Projects().
+		List()
 }
 
 // Get Project By code
 func (p *ProjectAPI) Get(code domain.ProjectCode) (*domain.Project, error) {
-	project, err := (*p.Storage).ForOwner(p.Owner).Projects().Get(code)
+	project, err := (*p.Storage).
+		ForOwner(p.Owner).
+		Projects().
+		Get(code)
 	if err == storage.ErrNotFound {
 		return nil, ErrNotFound
 	}
@@ -27,12 +33,18 @@ func (p *ProjectAPI) Get(code domain.ProjectCode) (*domain.Project, error) {
 
 // Save Project
 func (p *ProjectAPI) Save(project *domain.Project) (*domain.Project, error) {
-	return (*p.Storage).ForOwner(p.Owner).Projects().Save(project)
+	return (*p.Storage).
+		ForOwner(p.Owner).
+		Projects().
+		Save(project)
 }
 
 // Delete Project
 func (p *ProjectAPI) Delete(code domain.ProjectCode) error {
-	err := (*p.Storage).ForOwner(p.Owner).Projects().Delete(code)
+	err := (*p.Storage).
+		ForOwner(p.Owner).
+		Projects().
+		Delete(code)
 	if err == storage.ErrNotFound {
 		return ErrNotFound
 	}

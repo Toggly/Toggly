@@ -18,6 +18,7 @@ const (
 
 // Project represents a project data structure
 type Project struct {
+	ID          string        `bson:"_id"`
 	OwnerID     string        `json:"owner" bson:"owner"`
 	Code        ProjectCode   `json:"code" bson:"code"`
 	Description string        `json:"description,omitempty"`

@@ -14,7 +14,12 @@ type EnvironmentAPI struct {
 
 // List returns list of project environments
 func (e *EnvironmentAPI) List() ([]*domain.Environment, error) {
-	return nil, nil
+	return (*e.Storage).
+		ForOwner(e.Owner).
+		Projects().
+		For(e.ProjectCode).
+		Environments().
+		List()
 }
 
 // Get returns environment by code

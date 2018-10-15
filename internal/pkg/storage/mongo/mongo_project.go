@@ -1,24 +1,21 @@
-package storage
+package mongo
 
 import (
 	"fmt"
 
 	"github.com/Toggly/core/internal/domain"
+	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 )
 
 type mgProjectStorage struct {
 	owner   string
-	storage *mgStorage
-}
-
-func getCollection(conn *mgo.Session, name string) *mgo.Collection {
-	return conn.DB("").C(name)
+	session *mgo.Session
 }
 
 func (s *mgProjectStorage) List() ([]*domain.Project, error) {
-	conn := s.storage.session.Copy()
+	conn := s.session.Copy()
 	defer conn.Close()
 	items := make([]*domain.Project, 0)
 	err := getCollection(conn, "project").Find(bson.M{"owner": s.owner}).All(&items)
@@ -26,23 +23,21 @@ func (s *mgProjectStorage) List() ([]*domain.Project, error) {
 }
 
 func (s *mgProjectStorage) Get(code domain.ProjectCode) (project *domain.Project, err error) {
-	conn := s.storage.session.Copy()
+	conn := s.session.Copy()
 	defer conn.Close()
-	collection := getCollection(conn, "project")
-	err = collection.Find(bson.M{"owner": s.owner, "code": code}).One(&project)
+	err = getCollection(conn, "project").Find(bson.M{"owner": s.owner, "code": code}).One(&project)
 	if err == mgo.ErrNotFound {
-		return nil, ErrNotFound
+		return nil, storage.ErrNotFound
 	}
 	return project, err
 }
 
 func (s *mgProjectStorage) Delete(code domain.ProjectCode) (err error) {
-	conn := s.storage.session.Copy()
+	conn := s.session.Copy()
 	defer conn.Close()
-	collection := getCollection(conn, "project")
-	err = collection.Remove(bson.M{"owner": s.owner, "code": code})
+	err = getCollection(conn, "project").Remove(bson.M{"owner": s.owner, "code": code})
 	if err == mgo.ErrNotFound {
-		return ErrNotFound
+		return storage.ErrNotFound
 	}
 	// TODO remove environments for this project
 
@@ -50,7 +45,7 @@ func (s *mgProjectStorage) Delete(code domain.ProjectCode) (err error) {
 }
 
 func (s *mgProjectStorage) Save(project *domain.Project) (*domain.Project, error) {
-	conn := s.storage.session.Copy()
+	conn := s.session.Copy()
 	defer conn.Close()
 
 	proj := &domain.Project{
@@ -71,7 +66,7 @@ func (s *mgProjectStorage) Save(project *domain.Project) (*domain.Project, error
 	err := collection.Insert(proj)
 	if err != nil {
 		if mgo.IsDup(err) {
-			return nil, &UniqueIndexError{
+			return nil, &storage.UniqueIndexError{
 				Type: "Project",
 				Key:  fmt.Sprintf("owner:%s, code: %s", proj.OwnerID, proj.Code),
 			}
@@ -81,8 +76,23 @@ func (s *mgProjectStorage) Save(project *domain.Project) (*domain.Project, error
 	return proj, nil
 }
 
-func (s *mgProjectStorage) For(project domain.ProjectCode) ForProject {
+func (s *mgProjectStorage) For(project domain.ProjectCode) storage.ForProject {
 	return &mgForProject{
 		project: project,
+		session: s.session,
+	}
+}
+
+type mgForProject struct {
+	project domain.ProjectCode
+	session *mgo.Session
+	owner   string
+}
+
+func (s *mgForProject) Environments() storage.EnvironmentStorage {
+	return &mgEnvironmentStorage{
+		project: s.project,
+		session: s.session,
+		owner:   s.owner,
 	}
 }

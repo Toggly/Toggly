@@ -1,16 +1,10 @@
-package storage
+package mongo
 
 import (
 	"errors"
 
 	"github.com/Toggly/core/internal/domain"
 )
-
-type mgForEnvironment struct{}
-
-func (s *mgForEnvironment) Objects() ObjectStorage {
-	return &mgObjectStorage{}
-}
 
 type mgObjectStorage struct{}
 
