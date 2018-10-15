@@ -51,7 +51,7 @@ type EnvironmentStorage interface {
 	List() ([]*domain.Environment, error)
 	Get(code domain.EnvironmentCode) (*domain.Environment, error)
 	Delete(code domain.EnvironmentCode) error
-	Save(env domain.Environment) error
+	Save(env *domain.Environment) (*domain.Environment, error)
 	For(domain.EnvironmentCode) ForEnvironment
 }
 
