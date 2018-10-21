@@ -6,17 +6,17 @@ import (
 	"github.com/Toggly/core/internal/domain"
 )
 
-type mgObjectStorage struct{}
+type mgoObjectStorage struct{}
 
-func (s *mgObjectStorage) List() ([]*domain.Object, error) {
+func (s *mgoObjectStorage) List() ([]*domain.Object, error) {
 	return nil, nil
 }
-func (s *mgObjectStorage) Get(code domain.ObjectCode) (*domain.Object, error) {
+func (s *mgoObjectStorage) Get(code domain.ObjectCode) (*domain.Object, error) {
 	return nil, nil
 }
-func (s *mgObjectStorage) Delete(code domain.ObjectCode) error {
+func (s *mgoObjectStorage) Delete(code domain.ObjectCode) error {
 	return errors.New("Method not implemented")
 }
-func (s *mgObjectStorage) Save(object domain.Object) error {
+func (s *mgoObjectStorage) Save(object domain.Object) error {
 	return nil
 }

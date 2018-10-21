@@ -90,7 +90,7 @@ type mgForProject struct {
 }
 
 func (s *mgForProject) Environments() storage.EnvironmentStorage {
-	return &mgEnvironmentStorage{
+	return &mgoEnvStorage{
 		project: s.project,
 		session: s.session,
 		owner:   s.owner,

@@ -3,13 +3,14 @@ package mongo
 import (
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/globalsign/mgo"
+	"github.com/pkg/errors"
 )
 
 // NewMongoStorage implements DataStorage interface for MongoDB
 func NewMongoStorage(url string) (storage.DataStorage, error) {
 	session, err := mgo.Dial(url)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "Can't connect to %s", url)
 	}
 	return &mgStorage{
 		session: session,

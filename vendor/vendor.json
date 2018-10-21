@@ -3,6 +3,24 @@
 	"ignore": "",
 	"package": [
 		{
+			"checksumSHA1": "OcccXyUyAcMI52BWzbfQ2Wox1cs=",
+			"path": "github.com/konsorten/go-windows-terminal-sequences",
+			"revision": "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242",
+			"revisionTime": "2018-10-04T22:41:46Z"
+		},
+		{
+			"checksumSHA1": "wbndQ3wg8xPxmM6olgZ/IR7fJIs=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "680f584d621da87ee04ea659130e149ba9d23cae",
+			"revisionTime": "2018-10-16T11:22:44Z"
+		},
+		{
+			"checksumSHA1": "7GOpjCMWSJP6DzCYRv9r3cpBDgo=",
+			"path": "github.com/sirupsen/logrus/hooks/syslog",
+			"revision": "680f584d621da87ee04ea659130e149ba9d23cae",
+			"revisionTime": "2018-10-16T11:22:44Z"
+		},
+		{
 			"checksumSHA1": "4QIV6wLzqcKK18LtKSi0VIi+4s0=",
 			"path": "github.com/stretchr/objx",
 			"revision": "ef50b0de28773081167c97fc27cf29a0bf8b8c71",
@@ -19,6 +37,24 @@
 			"path": "github.com/stretchr/testify/require",
 			"revision": "04af85275a5c7ac09d16bb3b9b2e751ed45154e5",
 			"revisionTime": "2018-10-09T18:43:15Z"
+		},
+		{
+			"checksumSHA1": "4nPV7YdyHiVRSWaxpy6jHt/MTq4=",
+			"path": "golang.org/x/crypto/ssh/terminal",
+			"revision": "0c41d7ab0a0ee717d4590a44bcb987dfd9e183eb",
+			"revisionTime": "2018-10-15T00:23:17Z"
+		},
+		{
+			"checksumSHA1": "FNIAF99qvszqvbnVtnwr2ohKc3k=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "fa43e7bc11baaae89f3f902b2b4d832b68234844",
+			"revisionTime": "2018-10-11T14:35:51Z"
+		},
+		{
+			"checksumSHA1": "s+lofQ+SCdhmy0cQp9FpdQncuuI=",
+			"path": "golang.org/x/sys/windows",
+			"revision": "fa43e7bc11baaae89f3f902b2b4d832b68234844",
+			"revisionTime": "2018-10-11T14:35:51Z"
 		}
 	],
 	"rootPath": "github.com/Toggly/core"

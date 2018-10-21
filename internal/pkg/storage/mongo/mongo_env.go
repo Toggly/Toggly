@@ -9,13 +9,13 @@ import (
 	"github.com/globalsign/mgo/bson"
 )
 
-type mgEnvironmentStorage struct {
+type mgoEnvStorage struct {
 	project domain.ProjectCode
 	session *mgo.Session
 	owner   string
 }
 
-func (s *mgEnvironmentStorage) List() ([]*domain.Environment, error) {
+func (s *mgoEnvStorage) List() ([]*domain.Environment, error) {
 	conn := s.session.Copy()
 	defer conn.Close()
 	items := make([]*domain.Environment, 0)
@@ -23,7 +23,7 @@ func (s *mgEnvironmentStorage) List() ([]*domain.Environment, error) {
 	return items, err
 }
 
-func (s *mgEnvironmentStorage) Get(code domain.EnvironmentCode) (env *domain.Environment, err error) {
+func (s *mgoEnvStorage) Get(code domain.EnvironmentCode) (env *domain.Environment, err error) {
 	conn := s.session.Copy()
 	defer conn.Close()
 	err = getCollection(conn, "env").Find(bson.M{"project_code": s.project, "code": code}).One(&env)
@@ -33,7 +33,7 @@ func (s *mgEnvironmentStorage) Get(code domain.EnvironmentCode) (env *domain.Env
 	return env, err
 }
 
-func (s *mgEnvironmentStorage) Delete(code domain.EnvironmentCode) (err error) {
+func (s *mgoEnvStorage) Delete(code domain.EnvironmentCode) (err error) {
 	conn := s.session.Copy()
 	defer conn.Close()
 	err = getCollection(conn, "env").Remove(bson.M{"project_code": s.project, "code": code})
@@ -44,7 +44,7 @@ func (s *mgEnvironmentStorage) Delete(code domain.EnvironmentCode) (err error) {
 	return err
 }
 
-func (s *mgEnvironmentStorage) Save(env *domain.Environment) (*domain.Environment, error) {
+func (s *mgoEnvStorage) Save(env *domain.Environment) (*domain.Environment, error) {
 	conn := s.session.Copy()
 	defer conn.Close()
 
@@ -68,17 +68,17 @@ func (s *mgEnvironmentStorage) Save(env *domain.Environment) (*domain.Environmen
 	return env, nil
 }
 
-func (s *mgEnvironmentStorage) For(code domain.EnvironmentCode) storage.ForEnvironment {
-	return &mgForEnvironment{}
+func (s *mgoEnvStorage) For(code domain.EnvironmentCode) storage.ForEnvironment {
+	return &mgoForEnvironment{}
 }
 
-type mgForEnvironment struct {
+type mgoForEnvironment struct {
 	project domain.ProjectCode
 	env     domain.EnvironmentCode
 	session *mgo.Session
 	owner   string
 }
 
-func (s *mgForEnvironment) Objects() storage.ObjectStorage {
-	return &mgObjectStorage{}
+func (s *mgoForEnvironment) Objects() storage.ObjectStorage {
+	return &mgoObjectStorage{}
 }

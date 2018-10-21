@@ -7,7 +7,6 @@ type EnvironmentCode string
 
 // Environment represents an environment data structure
 type Environment struct {
-	ID          string          `bson:"_id"`
 	OwnerID     string          `json:"owner" bson:"owner"`
 	ProjectCode ProjectCode     `json:"project_code"`
 	Code        EnvironmentCode `json:"code"`
