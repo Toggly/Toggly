@@ -1,13 +1,13 @@
 package restapi
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/server/rest"
 	"github.com/go-chi/chi"
-	log "github.com/sirupsen/logrus"
 )
 
 // EnvironmentAPI servers objects
@@ -31,14 +31,15 @@ func (a *EnvironmentAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func (a *EnvironmentAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := a.Engine.
-		ForOwner(owner(r)).
-		Project().
-		For(projectCode(r)).
-		List()
+	list, err := a.Engine.ForOwner(owner(r)).Project().For(projectCode(r)).List()
 	if err != nil {
-		log.Printf("[ERROR] %v", err)
-		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		switch err {
+		case api.ErrNotFound:
+			rest.NotFoundResponse(w, r)
+		default:
+			log.Printf("[ERROR] %v", err)
+			rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		}
 		return
 	}
 	rest.JSONResponse(w, r, list)

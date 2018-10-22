@@ -7,10 +7,11 @@ import (
 
 // ObjectAPI servers object api namespace
 type ObjectAPI struct {
-	Owner   string
-	Project domain.ProjectCode
-	Env     domain.EnvironmentCode
-	Storage *storage.DataStorage
+	Owner          string
+	Project        domain.ProjectCode
+	Env            domain.EnvironmentCode
+	Storage        *storage.DataStorage
+	EnvironmentAPI *EnvironmentAPI
 }
 
 //List returns list of objects

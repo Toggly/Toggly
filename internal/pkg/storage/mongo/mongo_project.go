@@ -68,7 +68,7 @@ func (s *mgProjectStorage) Save(project *domain.Project) (*domain.Project, error
 		if mgo.IsDup(err) {
 			return nil, &storage.UniqueIndexError{
 				Type: "Project",
-				Key:  fmt.Sprintf("owner:%s, code: %s", proj.OwnerID, proj.Code),
+				Key:  fmt.Sprintf("owner: %s, code: %s", proj.OwnerID, proj.Code),
 			}
 		}
 		return nil, err
@@ -76,23 +76,23 @@ func (s *mgProjectStorage) Save(project *domain.Project) (*domain.Project, error
 	return proj, nil
 }
 
-func (s *mgProjectStorage) For(project domain.ProjectCode) storage.ForProject {
+func (s *mgProjectStorage) For(projectCode domain.ProjectCode) storage.ForProject {
 	return &mgForProject{
-		project: project,
-		session: s.session,
+		projectCode: projectCode,
+		session:     s.session,
 	}
 }
 
 type mgForProject struct {
-	project domain.ProjectCode
-	session *mgo.Session
-	owner   string
+	projectCode domain.ProjectCode
+	session     *mgo.Session
+	owner       string
 }
 
 func (s *mgForProject) Environments() storage.EnvironmentStorage {
 	return &mgoEnvStorage{
-		project: s.project,
-		session: s.session,
-		owner:   s.owner,
+		projectCode: s.projectCode,
+		session:     s.session,
+		owner:       s.owner,
 	}
 }

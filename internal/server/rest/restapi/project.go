@@ -41,10 +41,7 @@ func (a *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func (a *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := a.Engine.
-		ForOwner(owner(r)).
-		Project().
-		List()
+	list, err := a.Engine.ForOwner(owner(r)).Project().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -54,10 +51,7 @@ func (a *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
-	proj, err := a.Engine.
-		ForOwner(owner(r)).
-		Project().
-		Get(projectCode(r))
+	proj, err := a.Engine.ForOwner(owner(r)).Project().Get(projectCode(r))
 	if err != nil {
 		switch err {
 		case api.ErrNotFound:
@@ -76,10 +70,7 @@ func (a *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *ProjectAPI) deleteProject(w http.ResponseWriter, r *http.Request) {
-	err := a.Engine.
-		ForOwner(owner(r)).
-		Project().
-		Delete(projectCode(r))
+	err := a.Engine.ForOwner(owner(r)).Project().Delete(projectCode(r))
 	if err != nil {
 		switch err {
 		case api.ErrNotFound:
@@ -105,10 +96,7 @@ func (a *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 		rest.ErrorResponse(w, r, errors.New("Bad request"), 400)
 		return
 	}
-	p, err := a.Engine.
-		ForOwner(owner(r)).
-		Project().
-		Save(proj)
+	p, err := a.Engine.ForOwner(owner(r)).Project().Save(proj)
 	if err != nil {
 		switch err.(type) {
 		case *storage.UniqueIndexError:

@@ -18,10 +18,7 @@ type Engine struct {
 
 // ForOwner returns owner api
 func (e *Engine) ForOwner(owner string) *OwnerAPI {
-	return &OwnerAPI{
-		Owner:   owner,
-		Storage: e.Storage,
-	}
+	return &OwnerAPI{Owner: owner, Storage: e.Storage}
 }
 
 // OwnerAPI type
@@ -32,8 +29,5 @@ type OwnerAPI struct {
 
 // Project returns project api
 func (o *OwnerAPI) Project() *ProjectAPI {
-	return &ProjectAPI{
-		Owner:   o.Owner,
-		Storage: o.Storage,
-	}
+	return &ProjectAPI{Owner: o.Owner, Storage: o.Storage}
 }
