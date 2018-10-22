@@ -10,14 +10,14 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// EnvironmentAPI servers objects
-type EnvironmentAPI struct {
+// EnvironmentRestAPI servers objects
+type EnvironmentRestAPI struct {
 	Cache  cache.DataCache
 	Engine *api.Engine
 }
 
 // Routes returns routes for environments
-func (a *EnvironmentAPI) Routes() chi.Router {
+func (a *EnvironmentRestAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(g chi.Router) {
 		g.Get("/", a.cached(a.list))
@@ -26,11 +26,11 @@ func (a *EnvironmentAPI) Routes() chi.Router {
 	return router
 }
 
-func (a *EnvironmentAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
+func (a *EnvironmentRestAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 	return rest.Cached(fn, a.Cache)
 }
 
-func (a *EnvironmentAPI) list(w http.ResponseWriter, r *http.Request) {
+func (a *EnvironmentRestAPI) list(w http.ResponseWriter, r *http.Request) {
 	list, err := a.Engine.ForOwner(owner(r)).Project().For(projectCode(r)).List()
 	if err != nil {
 		switch err {

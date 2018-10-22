@@ -18,14 +18,14 @@ import (
 	"github.com/go-chi/chi"
 )
 
-// ProjectAPI servers project api namespace
-type ProjectAPI struct {
+// ProjectRestAPI servers project api namespace
+type ProjectRestAPI struct {
 	Cache  cache.DataCache
 	Engine *api.Engine
 }
 
 // Routes returns routes for project namespace
-func (a *ProjectAPI) Routes() chi.Router {
+func (a *ProjectRestAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(group chi.Router) {
 		group.Get("/", a.cached(a.list))
@@ -36,11 +36,11 @@ func (a *ProjectAPI) Routes() chi.Router {
 	return router
 }
 
-func (a *ProjectAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
+func (a *ProjectRestAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 	return rest.Cached(fn, a.Cache)
 }
 
-func (a *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
+func (a *ProjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
 	list, err := a.Engine.ForOwner(owner(r)).Project().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
@@ -50,7 +50,7 @@ func (a *ProjectAPI) list(w http.ResponseWriter, r *http.Request) {
 	rest.JSONResponse(w, r, list)
 }
 
-func (a *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
+func (a *ProjectRestAPI) getProject(w http.ResponseWriter, r *http.Request) {
 	proj, err := a.Engine.ForOwner(owner(r)).Project().Get(projectCode(r))
 	if err != nil {
 		switch err {
@@ -69,7 +69,7 @@ func (a *ProjectAPI) getProject(w http.ResponseWriter, r *http.Request) {
 	rest.JSONResponse(w, r, proj)
 }
 
-func (a *ProjectAPI) deleteProject(w http.ResponseWriter, r *http.Request) {
+func (a *ProjectRestAPI) deleteProject(w http.ResponseWriter, r *http.Request) {
 	err := a.Engine.ForOwner(owner(r)).Project().Delete(projectCode(r))
 	if err != nil {
 		switch err {
@@ -84,7 +84,7 @@ func (a *ProjectAPI) deleteProject(w http.ResponseWriter, r *http.Request) {
 	rest.JSONResponse(w, r, nil)
 }
 
-func (a *ProjectAPI) saveProject(w http.ResponseWriter, r *http.Request) {
+func (a *ProjectRestAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		rest.ErrorResponse(w, r, err, 500)

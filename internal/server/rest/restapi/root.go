@@ -84,9 +84,8 @@ func (api *APIRouter) v1(r chi.Router) {
 	r.Use(rest.RequestIDCtx)
 	r.Use(middleware.Logger)
 	r.Use(rest.VersionCtx("v1"))
-	r.Mount("/project", (&ProjectAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
-	r.Mount("/project/{project_code}/env", (&EnvironmentAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
-	// r.Mount("/project/{project_code}/env/{env_code}/object", (&ObjectAPIRouter{Cache: api.Cache, Storage: api.Storage}).Routes())
+	r.Mount("/project", (&ProjectRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
+	r.Mount("/project/{project_code}/env", (&EnvironmentRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
 }
 
 func owner(r *http.Request) string {
