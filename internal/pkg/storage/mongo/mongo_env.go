@@ -44,7 +44,7 @@ func (s *mgoEnvStorage) Delete(code domain.EnvironmentCode) (err error) {
 	return err
 }
 
-func (s *mgoEnvStorage) Save(env *domain.Environment) (*domain.Environment, error) {
+func (s *mgoEnvStorage) Save(env *domain.Environment) error {
 	conn := s.session.Copy()
 	defer conn.Close()
 
@@ -58,14 +58,14 @@ func (s *mgoEnvStorage) Save(env *domain.Environment) (*domain.Environment, erro
 	err := collection.Insert(env)
 	if err != nil {
 		if mgo.IsDup(err) {
-			return nil, &storage.UniqueIndexError{
+			return &storage.UniqueIndexError{
 				Type: "Environment",
 				Key:  fmt.Sprintf("project_code: %s, code: %s", env.ProjectCode, env.Code),
 			}
 		}
-		return nil, err
+		return err
 	}
-	return env, nil
+	return nil
 }
 
 func (s *mgoEnvStorage) For(code domain.EnvironmentCode) storage.ForEnvironment {

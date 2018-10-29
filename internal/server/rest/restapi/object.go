@@ -41,7 +41,7 @@ func (api *ObjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if list == nil {
-		rest.NotFoundResponse(w, r)
+		rest.NotFoundResponse(w, r, "")
 		return
 	}
 	rest.JSONResponse(w, r, list)
@@ -58,7 +58,7 @@ func (api *ObjectRestAPI) getObject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if o == nil {
-		rest.NotFoundResponse(w, r)
+		rest.NotFoundResponse(w, r, "")
 		return
 	}
 	rest.JSONResponse(w, r, o)

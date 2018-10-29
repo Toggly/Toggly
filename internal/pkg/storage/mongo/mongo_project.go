@@ -44,17 +44,9 @@ func (s *mgProjectStorage) Delete(code domain.ProjectCode) (err error) {
 	return err
 }
 
-func (s *mgProjectStorage) Save(project *domain.Project) (*domain.Project, error) {
+func (s *mgProjectStorage) Save(project *domain.Project) error {
 	conn := s.session.Copy()
 	defer conn.Close()
-
-	proj := &domain.Project{
-		OwnerID:     s.owner,
-		Code:        project.Code,
-		Description: project.Description,
-		RegDate:     project.RegDate,
-		Status:      project.Status,
-	}
 
 	collection := getCollection(conn, "project")
 	idx := mgo.Index{
@@ -63,17 +55,36 @@ func (s *mgProjectStorage) Save(project *domain.Project) (*domain.Project, error
 	}
 	collection.EnsureIndex(idx)
 
-	err := collection.Insert(proj)
+	err := collection.Insert(project)
 	if err != nil {
 		if mgo.IsDup(err) {
-			return nil, &storage.UniqueIndexError{
+			return &storage.UniqueIndexError{
 				Type: "Project",
-				Key:  fmt.Sprintf("owner: %s, code: %s", proj.OwnerID, proj.Code),
+				Key:  fmt.Sprintf("owner: %s, code: %s", project.OwnerID, project.Code),
 			}
 		}
-		return nil, err
+		return err
 	}
-	return proj, nil
+	return nil
+}
+
+//TODO
+func (s *mgProjectStorage) Update(project *domain.Project) error {
+	conn := s.session.Copy()
+	defer conn.Close()
+
+	collection := getCollection(conn, "project")
+	idx := mgo.Index{
+		Key:    []string{"owner", "code"},
+		Unique: true,
+	}
+	collection.EnsureIndex(idx)
+
+	err := collection.Update(bson.M{"owner": project.OwnerID, "code": project.Code}, project)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *mgProjectStorage) For(projectCode domain.ProjectCode) storage.ForProject {

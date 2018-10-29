@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	// ErrNotFound error
-	ErrNotFound = errors.New("not found")
+	// ErrProjectNotFound error
+	ErrProjectNotFound = errors.New("project not found")
 )
 
 // Engine type
@@ -27,7 +27,7 @@ type OwnerAPI struct {
 	Storage *storage.DataStorage
 }
 
-// Project returns project api
-func (o *OwnerAPI) Project() *ProjectAPI {
-	return &ProjectAPI{Owner: o.Owner, Storage: o.Storage}
+// Projects returns project api
+func (o *OwnerAPI) Projects() *ProjectAPI {
+	return &ProjectAPI{*o}
 }

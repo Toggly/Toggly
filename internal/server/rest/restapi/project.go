@@ -18,6 +18,10 @@ import (
 	"github.com/go-chi/chi"
 )
 
+const (
+	errProjectNotFound string = "Project not found"
+)
+
 // ProjectRestAPI servers project api namespace
 type ProjectRestAPI struct {
 	Cache  cache.DataCache
@@ -41,7 +45,7 @@ func (a *ProjectRestAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func (a *ProjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := a.Engine.ForOwner(owner(r)).Project().List()
+	list, err := a.Engine.ForOwner(owner(r)).Projects().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -51,11 +55,11 @@ func (a *ProjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *ProjectRestAPI) getProject(w http.ResponseWriter, r *http.Request) {
-	proj, err := a.Engine.ForOwner(owner(r)).Project().Get(projectCode(r))
+	proj, err := a.Engine.ForOwner(owner(r)).Projects().Get(projectCode(r))
 	if err != nil {
 		switch err {
-		case api.ErrNotFound:
-			rest.NotFoundResponse(w, r)
+		case api.ErrProjectNotFound:
+			rest.NotFoundResponse(w, r, errProjectNotFound)
 		default:
 			log.Printf("[ERROR] %v", err)
 			rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -63,18 +67,18 @@ func (a *ProjectRestAPI) getProject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if proj == nil {
-		rest.NotFoundResponse(w, r)
+		rest.NotFoundResponse(w, r, errProjectNotFound)
 		return
 	}
 	rest.JSONResponse(w, r, proj)
 }
 
 func (a *ProjectRestAPI) deleteProject(w http.ResponseWriter, r *http.Request) {
-	err := a.Engine.ForOwner(owner(r)).Project().Delete(projectCode(r))
+	err := a.Engine.ForOwner(owner(r)).Projects().Delete(projectCode(r))
 	if err != nil {
 		switch err {
-		case api.ErrNotFound:
-			rest.NotFoundResponse(w, r)
+		case api.ErrProjectNotFound:
+			rest.NotFoundResponse(w, r, errProjectNotFound)
 		default:
 			log.Printf("[ERROR] %v", err)
 			rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -96,7 +100,7 @@ func (a *ProjectRestAPI) saveProject(w http.ResponseWriter, r *http.Request) {
 		rest.ErrorResponse(w, r, errors.New("Bad request"), 400)
 		return
 	}
-	p, err := a.Engine.ForOwner(owner(r)).Project().Save(proj)
+	p, err := a.Engine.ForOwner(owner(r)).Projects().Create(proj.Code, proj.Description, proj.Status)
 	if err != nil {
 		switch err.(type) {
 		case *storage.UniqueIndexError:

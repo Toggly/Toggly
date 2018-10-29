@@ -88,7 +88,7 @@ func OwnerCtx(next http.Handler) http.Handler {
 		owner := r.Header.Get(http.CanonicalHeaderKey(XTogglyOwnerID))
 		if owner == "" {
 			log.Print("[WARN] Header X-Toggly-Owner-Id missed.")
-			NotFoundResponse(w, r)
+			NotFoundResponse(w, r, "Owner not found")
 			return
 		}
 		ctx := r.Context()

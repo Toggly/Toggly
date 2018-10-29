@@ -37,7 +37,8 @@ type ProjectStorage interface {
 	List() ([]*domain.Project, error)
 	Get(code domain.ProjectCode) (*domain.Project, error)
 	Delete(code domain.ProjectCode) error
-	Save(project *domain.Project) (*domain.Project, error)
+	Save(project *domain.Project) error
+	Update(project *domain.Project) error
 	For(project domain.ProjectCode) ForProject
 }
 
@@ -51,7 +52,7 @@ type EnvironmentStorage interface {
 	List() ([]*domain.Environment, error)
 	Get(code domain.EnvironmentCode) (*domain.Environment, error)
 	Delete(code domain.EnvironmentCode) error
-	Save(env *domain.Environment) (*domain.Environment, error)
+	Save(env *domain.Environment) error
 	For(domain.EnvironmentCode) ForEnvironment
 }
 

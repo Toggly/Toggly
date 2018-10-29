@@ -18,9 +18,9 @@ func JSONResponse(w http.ResponseWriter, r *http.Request, data interface{}) {
 }
 
 // NotFoundResponse creates empty json body and responds with 404 code
-func NotFoundResponse(w http.ResponseWriter, r *http.Request) {
+func NotFoundResponse(w http.ResponseWriter, r *http.Request, message string) {
 	render.Status(r, http.StatusNotFound)
-	render.JSON(w, r, map[string]interface{}{"error": "Not found"})
+	render.JSON(w, r, map[string]interface{}{"error": message})
 }
 
 // UnauthorizedResponse creates empty json body and responds with 401 code
