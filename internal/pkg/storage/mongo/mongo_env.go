@@ -44,16 +44,20 @@ func (s *mgoEnvStorage) Delete(code domain.EnvironmentCode) (err error) {
 	return err
 }
 
-func (s *mgoEnvStorage) Save(env *domain.Environment) error {
-	conn := s.session.Copy()
-	defer conn.Close()
-
-	collection := getCollection(conn, "env")
+func ensureEnvIndex(collection *mgo.Collection) {
 	idx := mgo.Index{
 		Key:    []string{"project_code", "code"},
 		Unique: true,
 	}
 	collection.EnsureIndex(idx)
+}
+
+func (s *mgoEnvStorage) Save(env *domain.Environment) error {
+	conn := s.session.Copy()
+	defer conn.Close()
+
+	collection := getCollection(conn, "env")
+	ensureEnvIndex(collection)
 
 	err := collection.Insert(env)
 	if err != nil {
@@ -63,6 +67,20 @@ func (s *mgoEnvStorage) Save(env *domain.Environment) error {
 				Key:  fmt.Sprintf("project_code: %s, code: %s", env.ProjectCode, env.Code),
 			}
 		}
+		return err
+	}
+	return nil
+}
+
+func (s *mgoEnvStorage) Update(env *domain.Environment) error {
+	conn := s.session.Copy()
+	defer conn.Close()
+
+	collection := getCollection(conn, "env")
+	ensureEnvIndex(collection)
+
+	err := collection.Update(bson.M{"project_code": env.ProjectCode, "code": env.Code}, env)
+	if err != nil {
 		return err
 	}
 	return nil

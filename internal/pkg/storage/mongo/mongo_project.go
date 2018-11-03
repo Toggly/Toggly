@@ -44,16 +44,20 @@ func (s *mgProjectStorage) Delete(code domain.ProjectCode) (err error) {
 	return err
 }
 
-func (s *mgProjectStorage) Save(project *domain.Project) error {
-	conn := s.session.Copy()
-	defer conn.Close()
-
-	collection := getCollection(conn, "project")
+func ensureProjIndex(collection *mgo.Collection) {
 	idx := mgo.Index{
 		Key:    []string{"owner", "code"},
 		Unique: true,
 	}
 	collection.EnsureIndex(idx)
+}
+
+func (s *mgProjectStorage) Save(project *domain.Project) error {
+	conn := s.session.Copy()
+	defer conn.Close()
+
+	collection := getCollection(conn, "project")
+	ensureProjIndex(collection)
 
 	err := collection.Insert(project)
 	if err != nil {
@@ -68,17 +72,12 @@ func (s *mgProjectStorage) Save(project *domain.Project) error {
 	return nil
 }
 
-//TODO
 func (s *mgProjectStorage) Update(project *domain.Project) error {
 	conn := s.session.Copy()
 	defer conn.Close()
 
 	collection := getCollection(conn, "project")
-	idx := mgo.Index{
-		Key:    []string{"owner", "code"},
-		Unique: true,
-	}
-	collection.EnsureIndex(idx)
+	ensureProjIndex(collection)
 
 	err := collection.Update(bson.M{"owner": project.OwnerID, "code": project.Code}, project)
 	if err != nil {

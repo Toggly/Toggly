@@ -63,7 +63,14 @@ func (p *ProjectAPI) Update(code domain.ProjectCode, description string, status 
 
 // Delete Project
 func (p *ProjectAPI) Delete(code domain.ProjectCode) error {
-	err := (*p.Storage).ForOwner(p.Owner).Projects().Delete(code)
+	envList, err := p.For(code).Environments().List()
+	if err != nil {
+		return err
+	}
+	if len(envList) > 0 {
+		return ErrProjectNotEmpty
+	}
+	err = (*p.Storage).ForOwner(p.Owner).Projects().Delete(code)
 	if err == storage.ErrNotFound {
 		return ErrProjectNotFound
 	}

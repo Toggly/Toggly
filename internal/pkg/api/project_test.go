@@ -6,6 +6,7 @@ import (
 	"github.com/Toggly/core/internal/domain"
 
 	"github.com/Toggly/core/internal/pkg/api"
+	"github.com/Toggly/core/internal/pkg/storage"
 
 	"github.com/Toggly/core/internal/pkg/storage/mongo"
 	asserts "github.com/stretchr/testify/assert"
@@ -21,14 +22,9 @@ func TestProject(t *testing.T) {
 
 	const ow = "test_owner"
 
-	// proj1 := &domain.Project{
-	// 	Code:        "project1",
-	// 	Description: "Project 1 Description",
-	// 	Status:      domain.ProjectStatusActive,
-	// 	RegDate:     ,
-	// }
-
 	pApi := engine.ForOwner(ow).Projects()
+
+	pApi.Delete("p1")
 
 	pl, err := pApi.List()
 	assert.Nil(err)
@@ -49,6 +45,10 @@ func TestProject(t *testing.T) {
 
 	pl, err = pApi.List()
 	assert.Len(pl, 1)
+
+	_, err = pApi.Create("p1", "Description 1", domain.ProjectStatusActive)
+	assert.NotNil(err)
+	assert.IsType(&storage.UniqueIndexError{}, err)
 
 	pr1, err := pApi.Get("p1")
 	assert.Nil(err)
@@ -72,7 +72,12 @@ func TestProject(t *testing.T) {
 	assert.Nil(pr2u)
 	assert.Equal(api.ErrProjectNotFound, err)
 
+	pApi.For("p1").Environments().Create("env_code", "", false)
+
+	assert.Equal(api.ErrProjectNotEmpty, pApi.Delete("p1"))
+
+	assert.Nil(pApi.For("p1").Environments().Delete("env_code"))
 	assert.Nil(pApi.Delete("p1"))
-	assert.Equal(pApi.Delete("p1"), api.ErrProjectNotFound)
-	assert.Equal(pApi.Delete("not_existing_code"), api.ErrProjectNotFound)
+
+	assert.Equal(api.ErrProjectNotFound, pApi.Delete("p1"))
 }
