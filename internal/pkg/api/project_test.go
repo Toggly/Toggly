@@ -15,7 +15,9 @@ import (
 func TestProject(t *testing.T) {
 	assert := asserts.New(t)
 
-	dataStorage, err := mongo.NewMongoStorage("mongodb://localhost:27017/toggly_test")
+	BeforeTest()
+
+	dataStorage, err := mongo.NewMongoStorage(MongoTestUrl)
 	assert.Nil(err)
 
 	engine := &api.Engine{Storage: &dataStorage}
@@ -24,20 +26,25 @@ func TestProject(t *testing.T) {
 
 	pApi := engine.ForOwner(ow).Projects()
 
-	pApi.Delete("p1")
-
 	pl, err := pApi.List()
 	assert.Nil(err)
-	assert.Len(pl, 0)
+	assert.Empty(pl)
 
-	pr, err := pApi.Get("p1")
-	assert.Equal(err, api.ErrProjectNotFound)
+	pr, err := pApi.Get(ProjectCode)
+	assert.Equal(api.ErrProjectNotFound, err)
 	assert.Nil(pr)
 
-	pr, err = pApi.Create("p1", "Description 1", domain.ProjectStatusActive)
+	pr, err = pApi.Update(ProjectCode, "", domain.ProjectStatusActive)
+	assert.Equal(api.ErrProjectNotFound, err)
+	assert.Nil(pr)
+
+	err = pApi.Delete(ProjectCode)
+	assert.Equal(api.ErrProjectNotFound, err)
+
+	pr, err = pApi.Create(ProjectCode, "Description 1", domain.ProjectStatusActive)
 	assert.Nil(err)
 	assert.NotNil(pr)
-	assert.Equal(domain.ProjectCode("p1"), pr.Code)
+	assert.Equal(ProjectCode, pr.Code)
 	assert.Equal("Description 1", pr.Description)
 	assert.Equal(ow, pr.OwnerID)
 	assert.NotNil(pr.RegDate)
@@ -46,23 +53,23 @@ func TestProject(t *testing.T) {
 	pl, err = pApi.List()
 	assert.Len(pl, 1)
 
-	_, err = pApi.Create("p1", "Description 1", domain.ProjectStatusActive)
+	_, err = pApi.Create(ProjectCode, "Description 1", domain.ProjectStatusActive)
 	assert.NotNil(err)
 	assert.IsType(&storage.UniqueIndexError{}, err)
 
-	pr1, err := pApi.Get("p1")
+	pr1, err := pApi.Get(ProjectCode)
 	assert.Nil(err)
 	assert.NotNil(pr1)
-	assert.Equal(domain.ProjectCode("p1"), pr1.Code)
+	assert.Equal(ProjectCode, pr1.Code)
 	assert.Equal("Description 1", pr1.Description)
 	assert.Equal(ow, pr1.OwnerID)
 	assert.Equal(pr.RegDate, pr1.RegDate)
 	assert.Equal(pr.Status, pr1.Status)
 
-	pr1u, err := pApi.Update("p1", "Description 2", domain.ProjectStatusDisabled)
+	pr1u, err := pApi.Update(ProjectCode, "Description 2", domain.ProjectStatusDisabled)
 	assert.Nil(err)
 	assert.NotNil(pr1u)
-	assert.Equal(domain.ProjectCode("p1"), pr1u.Code)
+	assert.Equal(ProjectCode, pr1u.Code)
 	assert.Equal("Description 2", pr1u.Description)
 	assert.Equal(ow, pr1u.OwnerID)
 	assert.Equal(pr.RegDate, pr1u.RegDate)
@@ -72,12 +79,14 @@ func TestProject(t *testing.T) {
 	assert.Nil(pr2u)
 	assert.Equal(api.ErrProjectNotFound, err)
 
-	pApi.For("p1").Environments().Create("env_code", "", false)
+	pApi.For(ProjectCode).Environments().Create("env_code", "", false)
 
 	assert.Equal(api.ErrProjectNotEmpty, pApi.Delete("p1"))
 
-	assert.Nil(pApi.For("p1").Environments().Delete("env_code"))
-	assert.Nil(pApi.Delete("p1"))
+	assert.Nil(pApi.For(ProjectCode).Environments().Delete("env_code"))
+	assert.Nil(pApi.Delete(ProjectCode))
 
-	assert.Equal(api.ErrProjectNotFound, pApi.Delete("p1"))
+	assert.Equal(api.ErrProjectNotFound, pApi.Delete(ProjectCode))
+
+	AfterTest()
 }

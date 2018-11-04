@@ -21,13 +21,16 @@ func (e *EnvironmentAPI) projectExists(p domain.ProjectCode) error {
 	return err
 }
 
+func (e *EnvironmentAPI) storage() storage.EnvironmentStorage {
+	return (*e.Storage).ForOwner(e.Owner).Projects().For(e.ProjectCode).Environments()
+}
+
 // List returns list of project environments
 func (e *EnvironmentAPI) List() ([]*domain.Environment, error) {
-	err := e.projectExists(e.ProjectCode)
-	if err != nil {
+	if err := e.projectExists(e.ProjectCode); err != nil {
 		return nil, err
 	}
-	envList, err := (*e.Storage).ForOwner(e.Owner).Projects().For(e.ProjectCode).Environments().List()
+	envList, err := e.storage().List()
 	if err != nil {
 		return nil, err
 	}
@@ -36,11 +39,21 @@ func (e *EnvironmentAPI) List() ([]*domain.Environment, error) {
 
 // Get returns environment by code
 func (e *EnvironmentAPI) Get(code domain.EnvironmentCode) (*domain.Environment, error) {
-	return nil, nil
+	if err := e.projectExists(e.ProjectCode); err != nil {
+		return nil, err
+	}
+	env, err := e.storage().Get(code)
+	if err == storage.ErrNotFound {
+		return nil, ErrEnvironmentNotFound
+	}
+	return env, err
 }
 
 // Create saves environment
 func (e *EnvironmentAPI) Create(code domain.EnvironmentCode, description string, protected bool) (*domain.Environment, error) {
+	if err := e.projectExists(e.ProjectCode); err != nil {
+		return nil, err
+	}
 	newEnv := &domain.Environment{
 		Code:        code,
 		Description: description,
@@ -49,36 +62,42 @@ func (e *EnvironmentAPI) Create(code domain.EnvironmentCode, description string,
 		Protected:   protected,
 		RegDate:     bson.Now().In(time.UTC),
 	}
-	if err := (*e.Storage).ForOwner(e.Owner).Projects().For(e.ProjectCode).Environments().Save(newEnv); err != nil {
+	if err := e.storage().Save(newEnv); err != nil {
 		return nil, err
 	}
 	return newEnv, nil
 }
 
 // Update saves environment
-func (e *EnvironmentAPI) Update(env *domain.Environment) (*domain.Environment, error) {
-	uEnv, err := e.Get(env.Code)
+func (e *EnvironmentAPI) Update(code domain.EnvironmentCode, description string, protected bool) (*domain.Environment, error) {
+	if err := e.projectExists(e.ProjectCode); err != nil {
+		return nil, err
+	}
+	uEnv, err := e.Get(code)
 	if err != nil {
 		return nil, err
 	}
 	newEnv := &domain.Environment{
-		Code:        env.Code,
-		Description: env.Description,
+		Code:        code,
+		Description: description,
 		OwnerID:     e.Owner,
 		ProjectCode: e.ProjectCode,
-		Protected:   env.Protected,
+		Protected:   protected,
 		RegDate:     uEnv.RegDate,
 	}
-	if err := (*e.Storage).ForOwner(e.Owner).Projects().For(e.ProjectCode).Environments().Update(newEnv); err != nil {
+	if err := e.storage().Update(newEnv); err != nil {
 		return nil, err
 	}
-	return env, nil
+	return newEnv, nil
 }
 
 // Delete Environment
 func (e *EnvironmentAPI) Delete(code domain.EnvironmentCode) error {
+	if err := e.projectExists(e.ProjectCode); err != nil {
+		return err
+	}
 	// TODO: check if env is empty
-	err := (*e.Storage).ForOwner(e.Owner).Projects().For(e.ProjectCode).Environments().Delete(code)
+	err := e.storage().Delete(code)
 	if err == storage.ErrNotFound {
 		return ErrEnvironmentNotFound
 	}

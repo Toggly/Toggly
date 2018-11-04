@@ -13,14 +13,18 @@ type ProjectAPI struct {
 	OwnerAPI
 }
 
+func (p *ProjectAPI) storage() storage.ProjectStorage {
+	return (*p.Storage).ForOwner(p.Owner).Projects()
+}
+
 //List returns list of projects
 func (p *ProjectAPI) List() ([]*domain.Project, error) {
-	return (*p.Storage).ForOwner(p.Owner).Projects().List()
+	return p.storage().List()
 }
 
 // Get Project By code
 func (p *ProjectAPI) Get(code domain.ProjectCode) (*domain.Project, error) {
-	project, err := (*p.Storage).ForOwner(p.Owner).Projects().Get(code)
+	project, err := p.storage().Get(code)
 	if err == storage.ErrNotFound {
 		return nil, ErrProjectNotFound
 	}
@@ -36,7 +40,7 @@ func (p *ProjectAPI) Create(code domain.ProjectCode, description string, status 
 		RegDate:     bson.Now().In(time.UTC),
 		Status:      status,
 	}
-	if err := (*p.Storage).ForOwner(p.Owner).Projects().Save(newProj); err != nil {
+	if err := p.storage().Save(newProj); err != nil {
 		return nil, err
 	}
 	return newProj, nil
@@ -55,7 +59,7 @@ func (p *ProjectAPI) Update(code domain.ProjectCode, description string, status 
 		RegDate:     pr.RegDate,
 		Status:      status,
 	}
-	if err := (*p.Storage).ForOwner(p.Owner).Projects().Update(newProj); err != nil {
+	if err := p.storage().Update(newProj); err != nil {
 		return nil, err
 	}
 	return newProj, nil
@@ -70,7 +74,7 @@ func (p *ProjectAPI) Delete(code domain.ProjectCode) error {
 	if len(envList) > 0 {
 		return ErrProjectNotEmpty
 	}
-	err = (*p.Storage).ForOwner(p.Owner).Projects().Delete(code)
+	err = p.storage().Delete(code)
 	if err == storage.ErrNotFound {
 		return ErrProjectNotFound
 	}
