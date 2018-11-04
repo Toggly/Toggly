@@ -17,6 +17,9 @@ func (s *mgoObjectStorage) Get(code domain.ObjectCode) (*domain.Object, error) {
 func (s *mgoObjectStorage) Delete(code domain.ObjectCode) error {
 	return errors.New("Method not implemented")
 }
-func (s *mgoObjectStorage) Save(object domain.Object) error {
+func (s *mgoObjectStorage) Save(object *domain.Object) error {
+	return nil
+}
+func (s *mgoObjectStorage) Update(object *domain.Object) error {
 	return nil
 }

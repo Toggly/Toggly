@@ -1,11 +1,19 @@
 package api
 
 import (
+	"errors"
 	"time"
 
 	"github.com/Toggly/core/internal/domain"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/globalsign/mgo/bson"
+)
+
+var (
+	// ErrProjectNotFound error
+	ErrProjectNotFound = errors.New("project not found")
+	// ErrProjectNotEmpty error
+	ErrProjectNotEmpty = errors.New("project not empty")
 )
 
 // ProjectAPI servers project api namespace

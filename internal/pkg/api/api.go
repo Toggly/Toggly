@@ -1,20 +1,7 @@
 package api
 
 import (
-	"errors"
-
 	"github.com/Toggly/core/internal/pkg/storage"
-)
-
-var (
-	// ErrProjectNotFound error
-	ErrProjectNotFound = errors.New("project not found")
-	// ErrProjectNotEmpty error
-	ErrProjectNotEmpty = errors.New("project not empty")
-	// ErrEnvironmentNotFound error
-	ErrEnvironmentNotFound = errors.New("environment not found")
-	// ErrEnvironmentNotEmpty error
-	ErrEnvironmentNotEmpty = errors.New("environment not empty")
 )
 
 // Engine type

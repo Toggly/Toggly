@@ -63,7 +63,7 @@ func (a *EnvironmentRestAPI) saveEnv(w http.ResponseWriter, r *http.Request) {
 		rest.ErrorResponse(w, r, errors.New("Bad request"), 400)
 		return
 	}
-	e, err := a.Engine.ForOwner(owner(r)).Projects().For(projectCode(r)).Environments().Save(env)
+	e, err := a.Engine.ForOwner(owner(r)).Projects().For(projectCode(r)).Environments().Create(env.Code, env.Description, env.Protected)
 	if err != nil {
 		switch err.(type) {
 		case *storage.UniqueIndexError:

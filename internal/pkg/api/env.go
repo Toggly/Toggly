@@ -1,11 +1,19 @@
 package api
 
 import (
+	"errors"
 	"time"
 
 	"github.com/Toggly/core/internal/domain"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/globalsign/mgo/bson"
+)
+
+var (
+	// ErrEnvironmentNotFound error
+	ErrEnvironmentNotFound = errors.New("environment not found")
+	// ErrEnvironmentNotEmpty error
+	ErrEnvironmentNotEmpty = errors.New("environment not empty")
 )
 
 // EnvironmentAPI type
@@ -16,7 +24,7 @@ type EnvironmentAPI struct {
 	ProjectAPI  *ProjectAPI
 }
 
-func (e *EnvironmentAPI) projectExists(p domain.ProjectCode) error {
+func (e *EnvironmentAPI) projectExists() error {
 	_, err := e.ProjectAPI.Get(e.ProjectCode)
 	return err
 }
@@ -27,7 +35,7 @@ func (e *EnvironmentAPI) storage() storage.EnvironmentStorage {
 
 // List returns list of project environments
 func (e *EnvironmentAPI) List() ([]*domain.Environment, error) {
-	if err := e.projectExists(e.ProjectCode); err != nil {
+	if err := e.projectExists(); err != nil {
 		return nil, err
 	}
 	envList, err := e.storage().List()
@@ -39,7 +47,7 @@ func (e *EnvironmentAPI) List() ([]*domain.Environment, error) {
 
 // Get returns environment by code
 func (e *EnvironmentAPI) Get(code domain.EnvironmentCode) (*domain.Environment, error) {
-	if err := e.projectExists(e.ProjectCode); err != nil {
+	if err := e.projectExists(); err != nil {
 		return nil, err
 	}
 	env, err := e.storage().Get(code)
@@ -49,9 +57,9 @@ func (e *EnvironmentAPI) Get(code domain.EnvironmentCode) (*domain.Environment, 
 	return env, err
 }
 
-// Create saves environment
+// Create environment
 func (e *EnvironmentAPI) Create(code domain.EnvironmentCode, description string, protected bool) (*domain.Environment, error) {
-	if err := e.projectExists(e.ProjectCode); err != nil {
+	if err := e.projectExists(); err != nil {
 		return nil, err
 	}
 	newEnv := &domain.Environment{
@@ -68,9 +76,9 @@ func (e *EnvironmentAPI) Create(code domain.EnvironmentCode, description string,
 	return newEnv, nil
 }
 
-// Update saves environment
+// Update environment
 func (e *EnvironmentAPI) Update(code domain.EnvironmentCode, description string, protected bool) (*domain.Environment, error) {
-	if err := e.projectExists(e.ProjectCode); err != nil {
+	if err := e.projectExists(); err != nil {
 		return nil, err
 	}
 	uEnv, err := e.Get(code)
@@ -91,9 +99,9 @@ func (e *EnvironmentAPI) Update(code domain.EnvironmentCode, description string,
 	return newEnv, nil
 }
 
-// Delete Environment
+// Delete environment
 func (e *EnvironmentAPI) Delete(code domain.EnvironmentCode) error {
-	if err := e.projectExists(e.ProjectCode); err != nil {
+	if err := e.projectExists(); err != nil {
 		return err
 	}
 	// TODO: check if env is empty
@@ -108,8 +116,8 @@ func (e *EnvironmentAPI) Delete(code domain.EnvironmentCode) error {
 func (e *EnvironmentAPI) For(code domain.EnvironmentCode) *ObjectAPI {
 	return &ObjectAPI{
 		Owner:          e.Owner,
-		Project:        e.ProjectCode,
-		Env:            code,
+		ProjectCode:    e.ProjectCode,
+		EnvCode:        code,
 		Storage:        e.Storage,
 		EnvironmentAPI: e,
 	}
