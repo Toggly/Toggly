@@ -104,8 +104,14 @@ func (e *EnvironmentAPI) Delete(code domain.EnvironmentCode) error {
 	if err := e.projectExists(); err != nil {
 		return err
 	}
-	// TODO: check if env is empty
-	err := e.storage().Delete(code)
+	objList, err := e.For(code).Objects().List()
+	if err != nil {
+		return err
+	}
+	if len(objList) > 0 {
+		return ErrEnvironmentNotEmpty
+	}
+	err = e.storage().Delete(code)
 	if err == storage.ErrNotFound {
 		return ErrEnvironmentNotFound
 	}
@@ -113,12 +119,32 @@ func (e *EnvironmentAPI) Delete(code domain.EnvironmentCode) error {
 }
 
 // For returns object api for specified environment
-func (e *EnvironmentAPI) For(code domain.EnvironmentCode) *ObjectAPI {
-	return &ObjectAPI{
+func (e *EnvironmentAPI) For(code domain.EnvironmentCode) *ForObjectAPI {
+	return &ForObjectAPI{
 		Owner:          e.Owner,
 		ProjectCode:    e.ProjectCode,
 		EnvCode:        code,
 		Storage:        e.Storage,
 		EnvironmentAPI: e,
+	}
+}
+
+// ForObjectAPI type
+type ForObjectAPI struct {
+	Owner          string
+	ProjectCode    domain.ProjectCode
+	EnvCode        domain.EnvironmentCode
+	Storage        *storage.DataStorage
+	EnvironmentAPI *EnvironmentAPI
+}
+
+// Objects returns ObjectAPI
+func (fo *ForObjectAPI) Objects() *ObjectAPI {
+	return &ObjectAPI{
+		Owner:          fo.Owner,
+		ProjectCode:    fo.ProjectCode,
+		EnvCode:        fo.EnvCode,
+		Storage:        fo.Storage,
+		EnvironmentAPI: fo.EnvironmentAPI,
 	}
 }

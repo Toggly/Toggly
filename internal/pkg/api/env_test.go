@@ -118,9 +118,13 @@ func TestEnvWithProject(t *testing.T) {
 	assert.Nil(envU2)
 	assert.Equal(api.ErrEnvironmentNotFound, err)
 
-	// TODO: check deletion non empty env
+	envApi.For(envCode).Objects().Create(domain.ObjectCode("obj1"), "", domain.NilObjectCode, nil)
 
-	assert.Nil(envApi.Delete(envCode))
+	assert.Equal(api.ErrEnvironmentNotEmpty, envApi.Delete(envCode))
+
+	// envApi.For(envCode).Objects().Delete(domain.ObjectCode("obj1"))
+
+	// assert.Nil(envApi.Delete(envCode))
 
 	AfterTest()
 }
