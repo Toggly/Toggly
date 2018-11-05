@@ -39,8 +39,6 @@ func (s *mgProjectStorage) Delete(code domain.ProjectCode) (err error) {
 	if err == mgo.ErrNotFound {
 		return storage.ErrNotFound
 	}
-	// TODO remove environments for this project
-
 	return err
 }
 

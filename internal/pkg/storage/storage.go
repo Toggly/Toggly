@@ -66,6 +66,7 @@ type ForEnvironment interface {
 type ObjectStorage interface {
 	List() ([]*domain.Object, error)
 	Get(code domain.ObjectCode) (*domain.Object, error)
+	ListInheritors(code domain.ObjectCode) ([]*domain.Object, error)
 	Delete(code domain.ObjectCode) error
 	Save(object *domain.Object) error
 	Update(object *domain.Object) error

@@ -40,7 +40,6 @@ func (s *mgoEnvStorage) Delete(code domain.EnvironmentCode) (err error) {
 	if err == mgo.ErrNotFound {
 		return storage.ErrNotFound
 	}
-	// TODO remove objects for environment
 	return err
 }
 
@@ -87,7 +86,12 @@ func (s *mgoEnvStorage) Update(env *domain.Environment) error {
 }
 
 func (s *mgoEnvStorage) For(code domain.EnvironmentCode) storage.ForEnvironment {
-	return &mgoForEnvironment{}
+	return &mgoForEnvironment{
+		projectCode: s.projectCode,
+		env:         code,
+		session:     s.session,
+		owner:       s.owner,
+	}
 }
 
 type mgoForEnvironment struct {
@@ -98,5 +102,10 @@ type mgoForEnvironment struct {
 }
 
 func (s *mgoForEnvironment) Objects() storage.ObjectStorage {
-	return &mgoObjectStorage{}
+	return &mgoObjectStorage{
+		projectCode: s.projectCode,
+		envCode:     s.env,
+		session:     s.session,
+		owner:       s.owner,
+	}
 }
