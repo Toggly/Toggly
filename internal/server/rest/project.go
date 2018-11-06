@@ -1,4 +1,4 @@
-package restapi
+package rest
 
 import (
 	"encoding/json"
@@ -13,7 +13,6 @@ import (
 
 	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/pkg/cache"
-	"github.com/Toggly/core/internal/server/rest"
 
 	"github.com/go-chi/chi"
 )
@@ -21,6 +20,13 @@ import (
 const (
 	errProjectNotFound string = "Project not found"
 )
+
+// ProjectCreateRequest type
+type ProjectCreateRequest struct {
+	Code        domain.ProjectCode
+	Description string
+	Status      domain.ProjectStatus
+}
 
 // ProjectRestAPI servers project api namespace
 type ProjectRestAPI struct {
@@ -33,7 +39,8 @@ func (a *ProjectRestAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(group chi.Router) {
 		group.Get("/", a.cached(a.list))
-		group.Post("/", a.saveProject)
+		group.Post("/", a.createProject)
+		group.Put("/", a.updateProject)
 		group.Get("/{project_code}", a.cached(a.getProject))
 		group.Delete("/{project_code}", a.cached(a.deleteProject))
 	})
@@ -41,17 +48,20 @@ func (a *ProjectRestAPI) Routes() chi.Router {
 }
 
 func (a *ProjectRestAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return rest.Cached(fn, a.Cache)
+	return Cached(fn, a.Cache)
 }
 
 func (a *ProjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
 	list, err := a.Engine.ForOwner(owner(r)).Projects().List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
-		rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+		ErrorResponse(w, r, err, http.StatusInternalServerError)
 		return
 	}
-	rest.JSONResponse(w, r, list)
+	response := map[string]interface{}{
+		"projects": list,
+	}
+	JSONResponse(w, r, response)
 }
 
 func (a *ProjectRestAPI) getProject(w http.ResponseWriter, r *http.Request) {
@@ -59,18 +69,14 @@ func (a *ProjectRestAPI) getProject(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case api.ErrProjectNotFound:
-			rest.NotFoundResponse(w, r, errProjectNotFound)
+			NotFoundResponse(w, r, errProjectNotFound)
 		default:
 			log.Printf("[ERROR] %v", err)
-			rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+			ErrorResponse(w, r, err, http.StatusInternalServerError)
 		}
 		return
 	}
-	if proj == nil {
-		rest.NotFoundResponse(w, r, errProjectNotFound)
-		return
-	}
-	rest.JSONResponse(w, r, proj)
+	JSONResponse(w, r, proj)
 }
 
 func (a *ProjectRestAPI) deleteProject(w http.ResponseWriter, r *http.Request) {
@@ -78,37 +84,54 @@ func (a *ProjectRestAPI) deleteProject(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case api.ErrProjectNotFound:
-			rest.NotFoundResponse(w, r, errProjectNotFound)
+			NotFoundResponse(w, r, errProjectNotFound)
 		default:
 			log.Printf("[ERROR] %v", err)
-			rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+			ErrorResponse(w, r, err, http.StatusInternalServerError)
 		}
 		return
 	}
-	rest.JSONResponse(w, r, nil)
+	JSONResponse(w, r, nil)
 }
 
-func (a *ProjectRestAPI) saveProject(w http.ResponseWriter, r *http.Request) {
+func (a *ProjectRestAPI) createProject(w http.ResponseWriter, r *http.Request) {
+	a.createUpdate(w, r, true)
+}
+
+func (a *ProjectRestAPI) updateProject(w http.ResponseWriter, r *http.Request) {
+	a.createUpdate(w, r, false)
+}
+
+func (a *ProjectRestAPI) createUpdate(w http.ResponseWriter, r *http.Request, create bool) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		rest.ErrorResponse(w, r, err, 500)
+		ErrorResponse(w, r, err, http.StatusInternalServerError)
 		return
 	}
-	proj := &domain.Project{}
+	proj := &ProjectCreateRequest{}
 	err = json.Unmarshal(body, proj)
 	if err != nil {
-		rest.ErrorResponse(w, r, errors.New("Bad request"), 400)
+		ErrorResponse(w, r, errors.New("Bad request"), http.StatusBadRequest)
 		return
 	}
-	p, err := a.Engine.ForOwner(owner(r)).Projects().Create(proj.Code, proj.Description, proj.Status)
+	var p *domain.Project
+	if create {
+		p, err = a.Engine.ForOwner(owner(r)).Projects().Create(proj.Code, proj.Description, proj.Status)
+	} else {
+		p, err = a.Engine.ForOwner(owner(r)).Projects().Update(proj.Code, proj.Description, proj.Status)
+		if err != nil && err == api.ErrProjectNotFound {
+			NotFoundResponse(w, r, errProjectNotFound)
+			return
+		}
+	}
 	if err != nil {
 		switch err.(type) {
 		case *storage.UniqueIndexError:
-			rest.ErrorResponse(w, r, err, 400)
+			ErrorResponse(w, r, err, http.StatusBadRequest)
 		default:
-			rest.ErrorResponse(w, r, err, 500)
+			ErrorResponse(w, r, err, http.StatusInternalServerError)
 		}
 		return
 	}
-	rest.JSONResponse(w, r, p)
+	JSONResponse(w, r, p)
 }

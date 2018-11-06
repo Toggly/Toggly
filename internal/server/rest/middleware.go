@@ -32,10 +32,6 @@ const (
 // OwnerFromContext returns context value for project owner
 func OwnerFromContext(r *http.Request) string {
 	owner := r.Context().Value(CtxValueOwner)
-	if owner == nil {
-		log.Print("[ERROR] Context Value Owner is not specified")
-		return ""
-	}
 	return owner.(string)
 }
 
@@ -60,25 +56,33 @@ func RequestIDCtx(next http.Handler) http.Handler {
 		ctx := r.Context()
 		ctx = context.WithValue(ctx, CtxValueRequestID, rid)
 		ctx = context.WithValue(ctx, middleware.RequestIDKey, fmt.Sprintf("Request: %s", rid))
+		w.Header().Set(http.CanonicalHeaderKey(XTogglyRequestID), rid)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 	return http.HandlerFunc(fn)
 }
 
 // AuthCtx adds auth data to context
-func AuthCtx(next http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		auth := r.Header.Get(http.CanonicalHeaderKey(XTogglyAuth))
-		if auth == "" {
-			log.Printf("[WARN] Header X-Toggly-Auth missed.")
-			UnauthorizedResponse(w, r)
-			return
+func AuthCtx(token string) func(http.Handler) http.Handler {
+	f := func(next http.Handler) http.Handler {
+		fn := func(w http.ResponseWriter, r *http.Request) {
+			if token == "" {
+				next.ServeHTTP(w, r)
+				return
+			}
+			auth := r.Header.Get(http.CanonicalHeaderKey(XTogglyAuth))
+			if auth != token {
+				log.Printf("[WARN] Header X-Toggly-Auth is wrong.")
+				UnauthorizedResponse(w, r)
+				return
+			}
+			ctx := r.Context()
+			ctx = context.WithValue(ctx, CtxValueAuth, auth)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		}
-		ctx := r.Context()
-		ctx = context.WithValue(ctx, CtxValueAuth, auth)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		return http.HandlerFunc(fn)
 	}
-	return http.HandlerFunc(fn)
+	return f
 }
 
 // OwnerCtx adds auth data to context

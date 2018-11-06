@@ -30,5 +30,5 @@ func BeforeTest() {
 }
 
 func AfterTest() {
-	// DropDB()
+	DropDB()
 }

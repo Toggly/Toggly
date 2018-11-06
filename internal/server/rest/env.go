@@ -1,4 +1,4 @@
-package restapi
+package rest
 
 import (
 	"encoding/json"
@@ -11,7 +11,6 @@ import (
 	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/pkg/storage"
-	"github.com/Toggly/core/internal/server/rest"
 	"github.com/go-chi/chi"
 )
 
@@ -33,7 +32,7 @@ func (a *EnvironmentRestAPI) Routes() chi.Router {
 }
 
 func (a *EnvironmentRestAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return rest.Cached(fn, a.Cache)
+	return Cached(fn, a.Cache)
 }
 
 func (a *EnvironmentRestAPI) list(w http.ResponseWriter, r *http.Request) {
@@ -41,37 +40,37 @@ func (a *EnvironmentRestAPI) list(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err {
 		case api.ErrProjectNotFound:
-			rest.NotFoundResponse(w, r, "Project not found")
+			NotFoundResponse(w, r, "Project not found")
 		default:
 			log.Printf("[ERROR] %v", err)
-			rest.ErrorResponse(w, r, err, http.StatusInternalServerError)
+			ErrorResponse(w, r, err, http.StatusInternalServerError)
 		}
 		return
 	}
-	rest.JSONResponse(w, r, list)
+	JSONResponse(w, r, list)
 }
 
 func (a *EnvironmentRestAPI) saveEnv(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		rest.ErrorResponse(w, r, err, 500)
+		ErrorResponse(w, r, err, 500)
 		return
 	}
 	env := &domain.Environment{}
 	err = json.Unmarshal(body, env)
 	if err != nil {
-		rest.ErrorResponse(w, r, errors.New("Bad request"), 400)
+		ErrorResponse(w, r, errors.New("Bad request"), 400)
 		return
 	}
 	e, err := a.Engine.ForOwner(owner(r)).Projects().For(projectCode(r)).Environments().Create(env.Code, env.Description, env.Protected)
 	if err != nil {
 		switch err.(type) {
 		case *storage.UniqueIndexError:
-			rest.ErrorResponse(w, r, err, 400)
+			ErrorResponse(w, r, err, 400)
 		default:
-			rest.ErrorResponse(w, r, err, 500)
+			ErrorResponse(w, r, err, 500)
 		}
 		return
 	}
-	rest.JSONResponse(w, r, e)
+	JSONResponse(w, r, e)
 }
