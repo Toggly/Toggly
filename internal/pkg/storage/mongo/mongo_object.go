@@ -38,8 +38,24 @@ func (s *mgoObjectStorage) Get(code domain.ObjectCode) (obj *domain.Object, err 
 func (s *mgoObjectStorage) ListInheritors(code domain.ObjectCode) ([]*domain.Object, error) {
 	conn := s.session.Copy()
 	defer conn.Close()
+
 	items := make([]*domain.Object, 0)
-	err := getCollection(conn, "object").Find(bson.M{"inherits": code}).All(&items)
+
+	obj, err := s.Get(code)
+	if err != nil {
+		switch err {
+		case storage.ErrNotFound:
+			return items, nil
+		default:
+			return nil, err
+		}
+	}
+	query := bson.M{
+		"inherits.project_code": obj.ProjectCode,
+		"inherits.env_code":     obj.EnvCode,
+		"inherits.object_code":  obj.Code,
+	}
+	err = getCollection(conn, "object").Find(query).All(&items)
 	return items, err
 }
 
@@ -59,7 +75,7 @@ func ensureObjIndex(collection *mgo.Collection) {
 		Unique: true,
 	})
 	collection.EnsureIndex(mgo.Index{
-		Key: []string{"inherits"},
+		Key: []string{"inherits.project_code", "inherits.env_code", "inherits.object_code"},
 	})
 }
 

@@ -1,14 +1,14 @@
 package domain
 
 // ParameterType type
-type ParameterType int
+type ParameterType string
 
 // Parameter types enum
 const (
-	ParameterBool ParameterType = iota
-	ParameterString
-	ParameterInt
-	ParameterEnum
+	ParameterBool   ParameterType = "bool"
+	ParameterString ParameterType = "string"
+	ParameterInt    ParameterType = "int"
+	ParameterEnum   ParameterType = "enum"
 )
 
 // ParameterCode type

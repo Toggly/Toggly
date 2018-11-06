@@ -8,7 +8,6 @@ import (
 	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/pkg/storage"
 
-	"github.com/Toggly/core/internal/pkg/storage/mongo"
 	asserts "github.com/stretchr/testify/assert"
 )
 
@@ -17,14 +16,7 @@ func TestProject(t *testing.T) {
 
 	BeforeTest()
 
-	dataStorage, err := mongo.NewMongoStorage(MongoTestUrl)
-	assert.Nil(err)
-
-	engine := &api.Engine{Storage: &dataStorage}
-
-	const ow = "test_owner"
-
-	pApi := engine.ForOwner(ow).Projects()
+	pApi := GetApi()
 
 	pl, err := pApi.List()
 	assert.Nil(err)

@@ -8,28 +8,18 @@ import (
 	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/pkg/storage"
 
-	"github.com/Toggly/core/internal/pkg/storage/mongo"
 	asserts "github.com/stretchr/testify/assert"
 )
 
-const ow = "test_owner"
-
 const envCode = domain.EnvironmentCode("env_1")
-
-func apis() (*api.ProjectAPI, *api.EnvironmentAPI) {
-	dataStorage, _ := mongo.NewMongoStorage(MongoTestUrl)
-	engine := &api.Engine{Storage: &dataStorage}
-	pApi := engine.ForOwner(ow).Projects()
-	envApi := pApi.For(ProjectCode).Environments()
-	return pApi, envApi
-}
 
 func TestEnvWithNoProject(t *testing.T) {
 	assert := asserts.New(t)
 
 	BeforeTest()
 
-	_, envApi := apis()
+	pApi := GetApi()
+	envApi := pApi.For(ProjectCode).Environments()
 
 	envList, err := envApi.List()
 	assert.Equal(api.ErrProjectNotFound, err)
@@ -58,9 +48,10 @@ func TestEnvWithProject(t *testing.T) {
 
 	BeforeTest()
 
-	pApi, envApi := apis()
+	pApi := GetApi()
+	envApi := pApi.For(ProjectCode).Environments()
 
-	_, _ = pApi.Create(ProjectCode, "Description 1", domain.ProjectStatusActive)
+	pApi.Create(ProjectCode, "Description 1", domain.ProjectStatusActive)
 
 	envList, err := envApi.List()
 	assert.Nil(err)
@@ -118,13 +109,13 @@ func TestEnvWithProject(t *testing.T) {
 	assert.Nil(envU2)
 	assert.Equal(api.ErrEnvironmentNotFound, err)
 
-	envApi.For(envCode).Objects().Create(domain.ObjectCode("obj1"), "", domain.NilObjectCode, nil)
+	envApi.For(envCode).Objects().Create(domain.ObjectCode("obj1"), "", nil, nil)
 
 	assert.Equal(api.ErrEnvironmentNotEmpty, envApi.Delete(envCode))
 
-	// envApi.For(envCode).Objects().Delete(domain.ObjectCode("obj1"))
+	envApi.For(envCode).Objects().Delete(domain.ObjectCode("obj1"))
 
-	// assert.Nil(envApi.Delete(envCode))
+	assert.Nil(envApi.Delete(envCode))
 
 	AfterTest()
 }
