@@ -1,0 +1,54 @@
+### Ping
+GET http://localhost:8080/ping
+
+### Save project
+POST http://localhost:8080/api/v1/project
+X-Toggly-Request-Id: 123425346
+X-Toggly-Auth: sdfkjhsdfjg
+X-Toggly-Owner-Id: ow1
+
+{
+    "code": "project1",
+    "description": "Project 1",
+    "reg_date": "2018-07-08T21:42:31.236594677-07:00",
+    "status": "active"
+}
+
+### Get Projects list
+GET http://localhost:8080/api/v1/project
+X-Toggly-Request-Id: 123425346
+X-Toggly-Auth: sdfkjhsdfjg
+X-Toggly-Owner-Id: ow1
+
+
+### Get project by id
+GET http://localhost:8080/api/v1/project/project1
+X-Toggly-Request-Id: 123425346
+X-Toggly-Auth: sdfkjhsdfjg
+X-Toggly-Owner-Id: ow1
+
+
+### Delete project
+DELETE http://localhost:8080/api/v1/project/project1
+X-Toggly-Request-Id: 123425346
+X-Toggly-Auth: sdfkjhsdfjg
+X-Toggly-Owner-Id: ow1
+
+
+### Get project environments
+GET http://localhost:8080/api/v1/project/project1/env
+X-Toggly-Request-Id: 123425346
+X-Toggly-Auth: sdfkjhsdfjg
+X-Toggly-Owner-Id: ow1
+
+### Save project environment
+POST http://localhost:8080/api/v1/project/project1/env
+X-Toggly-Request-Id: 123425346
+X-Toggly-Auth: sdfkjhsdfjg
+X-Toggly-Owner-Id: ow1
+
+{
+    "code": "env1",
+    "description": "Environment 2",
+    "reg_date": "2018-07-08T21:42:31.236594677-07:00"
+}
