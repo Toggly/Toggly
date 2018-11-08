@@ -96,3 +96,7 @@ func owner(r *http.Request) string {
 func projectCode(r *http.Request) domain.ProjectCode {
 	return domain.ProjectCode(chi.URLParam(r, "project_code"))
 }
+
+func environmentCode(r *http.Request) domain.EnvironmentCode {
+	return domain.EnvironmentCode(chi.URLParam(r, "env_code"))
+}

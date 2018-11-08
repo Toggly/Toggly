@@ -18,7 +18,10 @@ import (
 )
 
 const (
-	errProjectNotFound string = "Project not found"
+	// ErrProjectNotFound error
+	ErrProjectNotFound string = "Project not found"
+	// ErrProjectNotEmpty error
+	ErrProjectNotEmpty string = "Project not empty"
 )
 
 // ProjectCreateRequest type
@@ -47,12 +50,16 @@ func (a *ProjectRestAPI) Routes() chi.Router {
 	return router
 }
 
+func (a *ProjectRestAPI) engine(r *http.Request) *api.ProjectAPI {
+	return a.Engine.ForOwner(owner(r)).Projects()
+}
+
 func (a *ProjectRestAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
 	return Cached(fn, a.Cache)
 }
 
 func (a *ProjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
-	list, err := a.Engine.ForOwner(owner(r)).Projects().List()
+	list, err := a.engine(r).List()
 	if err != nil {
 		log.Printf("[ERROR] %v", err)
 		ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -65,11 +72,11 @@ func (a *ProjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *ProjectRestAPI) getProject(w http.ResponseWriter, r *http.Request) {
-	proj, err := a.Engine.ForOwner(owner(r)).Projects().Get(projectCode(r))
+	proj, err := a.engine(r).Get(projectCode(r))
 	if err != nil {
 		switch err {
 		case api.ErrProjectNotFound:
-			NotFoundResponse(w, r, errProjectNotFound)
+			NotFoundResponse(w, r, ErrProjectNotFound)
 		default:
 			log.Printf("[ERROR] %v", err)
 			ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -80,11 +87,13 @@ func (a *ProjectRestAPI) getProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *ProjectRestAPI) deleteProject(w http.ResponseWriter, r *http.Request) {
-	err := a.Engine.ForOwner(owner(r)).Projects().Delete(projectCode(r))
+	err := a.engine(r).Delete(projectCode(r))
 	if err != nil {
 		switch err {
 		case api.ErrProjectNotFound:
-			NotFoundResponse(w, r, errProjectNotFound)
+			NotFoundResponse(w, r, ErrProjectNotFound)
+		case api.ErrProjectNotEmpty:
+			ErrorResponse(w, r, errors.New(ErrProjectNotEmpty), http.StatusLocked)
 		default:
 			log.Printf("[ERROR] %v", err)
 			ErrorResponse(w, r, err, http.StatusInternalServerError)
@@ -116,15 +125,19 @@ func (a *ProjectRestAPI) createUpdate(w http.ResponseWriter, r *http.Request, cr
 	}
 	var p *domain.Project
 	if create {
-		p, err = a.Engine.ForOwner(owner(r)).Projects().Create(proj.Code, proj.Description, proj.Status)
+		p, err = a.engine(r).Create(proj.Code, proj.Description, proj.Status)
 	} else {
-		p, err = a.Engine.ForOwner(owner(r)).Projects().Update(proj.Code, proj.Description, proj.Status)
-		if err != nil && err == api.ErrProjectNotFound {
-			NotFoundResponse(w, r, errProjectNotFound)
-			return
-		}
+		p, err = a.engine(r).Update(proj.Code, proj.Description, proj.Status)
 	}
 	if err != nil {
+		switch err {
+		case api.ErrBadRequest:
+			ErrorResponse(w, r, err, http.StatusBadRequest)
+			return
+		case api.ErrProjectNotFound:
+			NotFoundResponse(w, r, ErrProjectNotFound)
+			return
+		}
 		switch err.(type) {
 		case *storage.UniqueIndexError:
 			ErrorResponse(w, r, err, http.StatusBadRequest)
