@@ -33,6 +33,10 @@ func TestProject(t *testing.T) {
 	err = pApi.Delete(ProjectCode)
 	assert.Equal(api.ErrProjectNotFound, err)
 
+	pr, err = pApi.Create("", "Description 1", domain.ProjectStatusActive)
+	assert.Equal(api.ErrBadRequest, err)
+	assert.Nil(pr)
+
 	pr, err = pApi.Create(ProjectCode, "Description 1", domain.ProjectStatusActive)
 	assert.Nil(err)
 	assert.NotNil(pr)
