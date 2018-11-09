@@ -137,6 +137,6 @@ func TestRestEnvironment(t *testing.T) {
 		runTestCase(t, rs, tc)
 	}
 
-	// AfterTest()
+	AfterTest()
 
 }
