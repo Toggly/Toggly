@@ -33,12 +33,12 @@ type Opts struct {
 				URL string `long:"url" env:"URL" description:"mongo connection url"`
 			} `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
 		} `group:"store" namespace:"store" env-namespace:"STORE"`
-		Cache struct {
-			Disabled bool `long:"disable" description:"Disable cache" env:"DISABLE"`
-			Redis    struct {
-				URL string `long:"url" env:"URL" description:"redis connection url"`
-			} `group:"redis" namespace:"redis" env-namespace:"REDIS"`
-		} `group:"cache" namespace:"cache" env-namespace:"CACHE"`
+		// Cache struct {
+		// 	Disabled bool `long:"disable" description:"Disable cache" env:"DISABLE"`
+		// 	Redis    struct {
+		// 		URL string `long:"url" env:"URL" description:"redis connection url"`
+		// 	} `group:"redis" namespace:"redis" env-namespace:"REDIS"`
+		// } `group:"cache" namespace:"cache" env-namespace:"CACHE"`
 	} `group:"toggly" env-namespace:"TOGGLY"`
 }
 
@@ -76,13 +76,13 @@ func main() {
 		cancel()
 	}()
 
-	if opts.Toggly.Cache.Disabled {
-		log.Print("[WARN] CACHE DISABLED")
-	} else {
-		if apiCache, err = cache.NewHashMapCache(); err != nil {
-			log.Fatalf("Can't connect to cache service: %v", err)
-		}
-	}
+	// if opts.Toggly.Cache.Disabled {
+	// 	log.Print("[WARN] CACHE DISABLED")
+	// } else {
+	// 	if apiCache, err = cache.NewHashMapCache(); err != nil {
+	// 		log.Fatalf("Can't connect to cache service: %v", err)
+	// 	}
+	// }
 
 	if dataStorage, err = mongo.NewMongoStorage(opts.Toggly.Store.Mongo.URL); err != nil {
 		log.Fatalf("Can't connect to storage: %v", err)
