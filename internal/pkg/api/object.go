@@ -167,7 +167,18 @@ func checkObjParams(code domain.ObjectCode, description string, inherits *domain
 	if code == "" {
 		return ErrBadRequest
 	}
+	if parameters != nil && len(parameters) > 0 {
+		for _, p := range parameters {
+			if p.Code == "" || p.Value == nil || !isParameterType(p.Type) {
+				return ErrBadRequest
+			}
+		}
+	}
 	return nil
+}
+
+func isParameterType(t domain.ParameterType) bool {
+	return t == domain.ParameterBool || t == domain.ParameterEnum || t == domain.ParameterInt || t == domain.ParameterString
 }
 
 // Create object

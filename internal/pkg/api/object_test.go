@@ -136,7 +136,37 @@ func TestObjects(t *testing.T) {
 	_, err = objApi.Update("", "Obj description", nil, nil)
 	assert.Equal(api.ErrBadRequest, err)
 
-	obj, err := objApi.Create("obj1", "Obj description", nil, nil)
+	params := []*domain.Parameter{
+		&domain.Parameter{
+			Code:        "param1",
+			Description: "Param 1",
+		},
+	}
+	obj, err := objApi.Create("obj1", "Obj description", nil, params)
+	assert.Equal(api.ErrBadRequest, err)
+
+	params = []*domain.Parameter{
+		&domain.Parameter{
+			Code:        "param1",
+			Description: "Param 1",
+			Type:        domain.ParameterBool,
+		},
+	}
+	obj, err = objApi.Create("obj1", "Obj description", nil, params)
+	assert.Equal(api.ErrBadRequest, err)
+
+	params = []*domain.Parameter{
+		&domain.Parameter{
+			Code:        "param1",
+			Description: "Param 1",
+			Type:        "wrong_type",
+			Value:       "some_value",
+		},
+	}
+	obj, err = objApi.Create("obj1", "Obj description", nil, params)
+	assert.Equal(api.ErrBadRequest, err)
+
+	obj, err = objApi.Create("obj1", "Obj description", nil, nil)
 	assert.Nil(err)
 	assert.NotNil(obj)
 	assert.Equal(ow, obj.Owner)
@@ -165,7 +195,7 @@ func TestObjects(t *testing.T) {
 	assert.Nil(obj.Inherits)
 	assert.Empty(obj.Parameters)
 
-	params := []*domain.Parameter{
+	params = []*domain.Parameter{
 		&domain.Parameter{
 			Code:        "param1",
 			Description: "Param 1",
