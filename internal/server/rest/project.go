@@ -45,7 +45,7 @@ func (a *ProjectRestAPI) Routes() chi.Router {
 		group.Post("/", a.createProject)
 		group.Put("/", a.updateProject)
 		group.Get("/{project_code}", a.cached(a.getProject))
-		group.Delete("/{project_code}", a.cached(a.deleteProject))
+		group.Delete("/{project_code}", a.deleteProject)
 	})
 	return router
 }

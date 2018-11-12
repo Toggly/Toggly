@@ -87,6 +87,7 @@ func (api *APIRouter) v1(r chi.Router) {
 	r.Use(VersionCtx("v1"))
 	r.Mount("/project", (&ProjectRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
 	r.Mount("/project/{project_code}/env", (&EnvironmentRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
+	r.Mount("/project/{project_code}/env/{env_code}/object", (&ObjectRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
 }
 
 func owner(r *http.Request) string {
@@ -99,4 +100,8 @@ func projectCode(r *http.Request) domain.ProjectCode {
 
 func environmentCode(r *http.Request) domain.EnvironmentCode {
 	return domain.EnvironmentCode(chi.URLParam(r, "env_code"))
+}
+
+func objectCode(r *http.Request) domain.ObjectCode {
+	return domain.ObjectCode(chi.URLParam(r, "object_code"))
 }

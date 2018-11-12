@@ -42,7 +42,7 @@ func (a *EnvironmentRestAPI) Routes() chi.Router {
 		g.Post("/", a.createEnvironment)
 		g.Put("/", a.updateEnvironment)
 		g.Get("/{env_code}", a.cached(a.getEnvironment))
-		g.Delete("/{env_code}", a.cached(a.deleteEnvironment))
+		g.Delete("/{env_code}", a.deleteEnvironment)
 	})
 	return router
 }
@@ -147,7 +147,6 @@ func (a *EnvironmentRestAPI) createUpdate(w http.ResponseWriter, r *http.Request
 			NotFoundResponse(w, r, ErrEnvironmentNotFound)
 			return
 		}
-
 		switch err.(type) {
 		case *storage.UniqueIndexError:
 			ErrorResponse(w, r, err, http.StatusBadRequest)

@@ -1,6 +1,8 @@
 package rest_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -168,21 +170,38 @@ func TestRestProject(t *testing.T) {
 			},
 		},
 		{
-			skip:   true,
 			name:   "delete not empty project",
 			method: http.MethodDelete,
 			path:   "/api/v1/project/project1",
-			status: http.StatusNotFound,
+			status: http.StatusLocked,
 			before: func(rs *httptest.Server) {
-
+				body, err := json.Marshal(&rest.EnvironmentCreateRequest{
+					Code:        "env1",
+					Description: "Env description",
+					Protected:   false,
+				})
+				assert.Nil(err)
+				req, err := http.NewRequest(http.MethodPost, rs.URL+"/api/v1/project/project1/env", bytes.NewBuffer(body))
+				assert.Nil(err)
+				req.Header = http.Header{
+					rest.XTogglyAuth:    []string{TestAuthToken},
+					rest.XTogglyOwnerID: []string{ow},
+				}
+				rs.Client().Do(req)
 			},
 			validator: func(body []byte) {
-				// body, err := bodyJSON(r)
-				// assert.Nil(err)
-				// assert.Equal(rest.ErrProjectNotFound, body["error"])
+				b, err := bodyJSON(body)
+				assert.Nil(err)
+				assert.Equal(rest.ErrProjectNotEmpty, b["error"])
 			},
 			after: func(rs *httptest.Server) {
-
+				req, err := http.NewRequest(http.MethodDelete, rs.URL+"/api/v1/project/project1/env/env1", nil)
+				assert.Nil(err)
+				req.Header = http.Header{
+					rest.XTogglyAuth:    []string{TestAuthToken},
+					rest.XTogglyOwnerID: []string{ow},
+				}
+				rs.Client().Do(req)
 			},
 		},
 		{
