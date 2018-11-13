@@ -1,7 +1,14 @@
 package api
 
 import (
+	"errors"
+
 	"github.com/Toggly/core/internal/pkg/storage"
+)
+
+var (
+	// ErrBadRequest error
+	ErrBadRequest = errors.New("bad request")
 )
 
 // Engine type

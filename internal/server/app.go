@@ -3,12 +3,12 @@ package server
 import (
 	"context"
 
-	"github.com/Toggly/core/internal/server/rest/restapi"
+	"github.com/Toggly/core/internal/server/rest"
 )
 
 //Application contains all internal components
 type Application struct {
-	Router *restapi.APIRouter
+	Router *rest.APIRouter
 }
 
 //Run application

@@ -68,6 +68,14 @@ func TestEnvWithProject(t *testing.T) {
 	err = envApi.Delete(envCode)
 	assert.Equal(api.ErrEnvironmentNotFound, err)
 
+	env, err = envApi.Create("", "Description 1", false)
+	assert.Equal(api.ErrBadRequest, err)
+	assert.Nil(env)
+
+	env, err = envApi.Update("", "Description 1", false)
+	assert.Equal(api.ErrBadRequest, err)
+	assert.Nil(env)
+
 	env, err = envApi.Create(envCode, "Description 1", false)
 	assert.Nil(err)
 	assert.NotNil(env)

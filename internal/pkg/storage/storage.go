@@ -13,14 +13,14 @@ type UniqueIndexError struct {
 	Key  string
 }
 
+func (e *UniqueIndexError) Error() string {
+	return fmt.Sprintf("Unique index error: %s [%s]", e.Type, e.Key)
+}
+
 var (
 	// ErrNotFound error
 	ErrNotFound = errors.New("not found")
 )
-
-func (e *UniqueIndexError) Error() string {
-	return fmt.Sprintf("Unique index error: %s [%s]", e.Type, e.Key)
-}
 
 // DataStorage defines storage interface
 type DataStorage interface {

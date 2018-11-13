@@ -39,8 +39,18 @@ func (p *ProjectAPI) Get(code domain.ProjectCode) (*domain.Project, error) {
 	return project, err
 }
 
+func checkProjectParams(code domain.ProjectCode, description string, status domain.ProjectStatus) error {
+	if code == "" {
+		return ErrBadRequest
+	}
+	return nil
+}
+
 // Create Project
 func (p *ProjectAPI) Create(code domain.ProjectCode, description string, status domain.ProjectStatus) (*domain.Project, error) {
+	if err := checkProjectParams(code, description, status); err != nil {
+		return nil, err
+	}
 	newProj := &domain.Project{
 		OwnerID:     p.Owner,
 		Code:        code,
@@ -56,6 +66,9 @@ func (p *ProjectAPI) Create(code domain.ProjectCode, description string, status 
 
 // Update Project
 func (p *ProjectAPI) Update(code domain.ProjectCode, description string, status domain.ProjectStatus) (*domain.Project, error) {
+	if err := checkProjectParams(code, description, status); err != nil {
+		return nil, err
+	}
 	pr, err := p.Get(code)
 	if err != nil {
 		return nil, err

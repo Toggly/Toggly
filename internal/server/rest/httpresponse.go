@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/render"
@@ -19,8 +20,7 @@ func JSONResponse(w http.ResponseWriter, r *http.Request, data interface{}) {
 
 // NotFoundResponse creates empty json body and responds with 404 code
 func NotFoundResponse(w http.ResponseWriter, r *http.Request, message string) {
-	render.Status(r, http.StatusNotFound)
-	render.JSON(w, r, map[string]interface{}{"error": message})
+	ErrorResponse(w, r, errors.New(message), http.StatusNotFound)
 }
 
 // UnauthorizedResponse creates empty json body and responds with 401 code

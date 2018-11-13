@@ -130,7 +130,43 @@ func TestObjects(t *testing.T) {
 	pApi.Create(ProjectCode, "", domain.ProjectStatusActive)
 	envApi.Create(envCode, "", false)
 
-	obj, err := objApi.Create("obj1", "Obj description", nil, nil)
+	_, err := objApi.Create("", "Obj description", nil, nil)
+	assert.Equal(api.ErrBadRequest, err)
+
+	_, err = objApi.Update("", "Obj description", nil, nil)
+	assert.Equal(api.ErrBadRequest, err)
+
+	params := []*domain.Parameter{
+		&domain.Parameter{
+			Code:        "param1",
+			Description: "Param 1",
+		},
+	}
+	obj, err := objApi.Create("obj1", "Obj description", nil, params)
+	assert.Equal(api.ErrBadRequest, err)
+
+	params = []*domain.Parameter{
+		&domain.Parameter{
+			Code:        "param1",
+			Description: "Param 1",
+			Type:        domain.ParameterBool,
+		},
+	}
+	obj, err = objApi.Create("obj1", "Obj description", nil, params)
+	assert.Equal(api.ErrBadRequest, err)
+
+	params = []*domain.Parameter{
+		&domain.Parameter{
+			Code:        "param1",
+			Description: "Param 1",
+			Type:        "wrong_type",
+			Value:       "some_value",
+		},
+	}
+	obj, err = objApi.Create("obj1", "Obj description", nil, params)
+	assert.Equal(api.ErrBadRequest, err)
+
+	obj, err = objApi.Create("obj1", "Obj description", nil, nil)
 	assert.Nil(err)
 	assert.NotNil(obj)
 	assert.Equal(ow, obj.Owner)
@@ -159,7 +195,7 @@ func TestObjects(t *testing.T) {
 	assert.Nil(obj.Inherits)
 	assert.Empty(obj.Parameters)
 
-	params := []*domain.Parameter{
+	params = []*domain.Parameter{
 		&domain.Parameter{
 			Code:        "param1",
 			Description: "Param 1",
@@ -323,4 +359,81 @@ func TestObjectsInheritance(t *testing.T) {
 
 	AfterTest()
 
+}
+
+func TestObjectsParameterInheritance(t *testing.T) {
+	assert := asserts.New(t)
+	BeforeTest()
+
+	pApi := GetApi()
+	envApi := pApi.For(ProjectCode).Environments()
+	objApi := envApi.For(envCode).Objects()
+
+	pApi.Create(ProjectCode, "", domain.ProjectStatusActive)
+	envApi.Create(envCode, "", false)
+
+	obj1Params := []*domain.Parameter{
+		&domain.Parameter{
+			Code:  "param1",
+			Type:  domain.ParameterBool,
+			Value: true,
+		},
+	}
+
+	obj2Params := []*domain.Parameter{
+		&domain.Parameter{
+			Code:  "param1",
+			Type:  domain.ParameterBool,
+			Value: false,
+		},
+	}
+
+	obj3Params := []*domain.Parameter{
+		&domain.Parameter{
+			Code:  "param2",
+			Type:  domain.ParameterString,
+			Value: "value",
+		},
+	}
+
+	_, err := objApi.Create("obj1", "", nil, obj1Params)
+	assert.Nil(err)
+	_, err = objApi.Create("obj2", "", &domain.ObjectInheritance{ProjectCode: ProjectCode, EnvCode: envCode, ObjectCode: "obj1"}, obj2Params)
+	assert.Nil(err)
+	_, err = objApi.Create("obj3", "", &domain.ObjectInheritance{ProjectCode: ProjectCode, EnvCode: envCode, ObjectCode: "obj2"}, obj3Params)
+	assert.Nil(err)
+
+	_, err = objApi.Update("obj1", "", nil, []*domain.Parameter{
+		&domain.Parameter{
+			Code:  "param1",
+			Type:  domain.ParameterString,
+			Value: "value",
+		},
+	})
+	assert.IsType(&api.ErrObjectParameter{}, err)
+	assert.Equal("Object parameter `param1` error: Object parameter type changing restricted", err.Error())
+
+	_, err = objApi.Update("obj1", "", nil, []*domain.Parameter{})
+	assert.Nil(err)
+	_, err = objApi.Update("obj1", "", nil, []*domain.Parameter{
+		&domain.Parameter{
+			Code:  "param1",
+			Type:  domain.ParameterString,
+			Value: "value",
+		},
+	})
+	assert.IsType(&api.ErrObjectParameter{}, err)
+	assert.Equal("Object parameter `param1` error: Object parameter exists in inheritor: p1:env_1:obj2", err.Error())
+
+	_, err = objApi.Update("obj1", "", nil, []*domain.Parameter{
+		&domain.Parameter{
+			Code:  "param2",
+			Type:  domain.ParameterBool,
+			Value: false,
+		},
+	})
+	assert.IsType(&api.ErrObjectParameter{}, err)
+	assert.Equal("Object parameter `param2` error: Object parameter exists in inheritor: p1:env_1:obj3", err.Error())
+
+	AfterTest()
 }

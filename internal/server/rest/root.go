@@ -1,4 +1,4 @@
-package restapi
+package rest
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 	"github.com/Toggly/core/internal/domain"
 	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/pkg/cache"
-	"github.com/Toggly/core/internal/server/rest"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -26,11 +25,12 @@ type APIRouter struct {
 	httpServer *http.Server
 	lock       sync.Mutex
 	IsDebug    bool
+	AuthToken  string
 }
 
 // Run rest api
 func (api *APIRouter) Run() {
-	routes := api.routes()
+	routes := api.Router()
 	api.lock.Lock()
 	api.httpServer = &http.Server{
 		Addr:    fmt.Sprintf(":%d", api.Port),
@@ -58,14 +58,15 @@ func (api *APIRouter) Stop() {
 	api.lock.Unlock()
 }
 
-func (api *APIRouter) routes() chi.Router {
+// Router returns router
+func (api *APIRouter) Router() chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Throttle(1000))
 	router.Use(middleware.Timeout(60 * time.Second))
 	router.Use(middleware.Heartbeat("/ping"))
-	router.Use(rest.ServiceInfo("Toggly", api.Version))
+	router.Use(ServiceInfo("Toggly", api.Version))
 	router.Route(api.BasePath, api.versions)
 	if api.IsDebug {
 		log.Print("[DEBUG] Profiler enabled on /debug path")
@@ -79,19 +80,28 @@ func (api *APIRouter) versions(r chi.Router) {
 }
 
 func (api *APIRouter) v1(r chi.Router) {
-	r.Use(rest.AuthCtx)
-	r.Use(rest.OwnerCtx)
-	r.Use(rest.RequestIDCtx)
 	r.Use(middleware.Logger)
-	r.Use(rest.VersionCtx("v1"))
+	r.Use(RequestIDCtx)
+	r.Use(AuthCtx(api.AuthToken))
+	r.Use(OwnerCtx)
+	r.Use(VersionCtx("v1"))
 	r.Mount("/project", (&ProjectRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
 	r.Mount("/project/{project_code}/env", (&EnvironmentRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
+	r.Mount("/project/{project_code}/env/{env_code}/object", (&ObjectRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
 }
 
 func owner(r *http.Request) string {
-	return rest.OwnerFromContext(r)
+	return OwnerFromContext(r)
 }
 
 func projectCode(r *http.Request) domain.ProjectCode {
 	return domain.ProjectCode(chi.URLParam(r, "project_code"))
+}
+
+func environmentCode(r *http.Request) domain.EnvironmentCode {
+	return domain.EnvironmentCode(chi.URLParam(r, "env_code"))
+}
+
+func objectCode(r *http.Request) domain.ObjectCode {
+	return domain.ObjectCode(chi.URLParam(r, "object_code"))
 }

@@ -19,5 +19,5 @@ type Parameter struct {
 	Code        ParameterCode `json:"code"`
 	Description string        `json:"description"`
 	Type        ParameterType `json:"type"`
-	Value       interface{}
+	Value       interface{}   `json:"value"`
 }

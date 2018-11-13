@@ -57,9 +57,19 @@ func (e *EnvironmentAPI) Get(code domain.EnvironmentCode) (*domain.Environment, 
 	return env, err
 }
 
+func checkEnvParams(code domain.EnvironmentCode, description string, protected bool) error {
+	if code == "" {
+		return ErrBadRequest
+	}
+	return nil
+}
+
 // Create environment
 func (e *EnvironmentAPI) Create(code domain.EnvironmentCode, description string, protected bool) (*domain.Environment, error) {
 	if err := e.projectExists(); err != nil {
+		return nil, err
+	}
+	if err := checkEnvParams(code, description, protected); err != nil {
 		return nil, err
 	}
 	newEnv := &domain.Environment{
@@ -79,6 +89,9 @@ func (e *EnvironmentAPI) Create(code domain.EnvironmentCode, description string,
 // Update environment
 func (e *EnvironmentAPI) Update(code domain.EnvironmentCode, description string, protected bool) (*domain.Environment, error) {
 	if err := e.projectExists(); err != nil {
+		return nil, err
+	}
+	if err := checkEnvParams(code, description, protected); err != nil {
 		return nil, err
 	}
 	uEnv, err := e.Get(code)
