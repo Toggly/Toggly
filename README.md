@@ -19,17 +19,17 @@ See public [OpenAPI specification](https://app.swaggerhub.com/apis-docs/Toggly/C
 ### Docker
 
 ```bash
-docker run -it --rm toggly/toggly-server --help
+docker run -it -v mongo:/data --network toggly --name mongo -p 27017:27017 -d mongo
+docker run -it --network toggly --name toggly-server -p 9090:8080 -d toggly/toggly-server --store.mongo.url=mongodb://mongo:27017/toggly
 ```
 
 ```bash
 Usage:
-  toggly_server [OPTIONS]
+  toggly-server [OPTIONS]
 
 toggly:
   -p, --port=            port (default: 8080) [$TOGGLY_API_PORT]
       --base-path=       Base API Path (default: /api) [$TOGGLY_API_BASE_PATH]
-      --auth-token=      Consumer auth token [$TOGGLY_API_AUTH_TOKEN]
       --debug            Run in DEBUG mode
 
 mongo:
@@ -48,7 +48,10 @@ cd cmd/toggly-server && go install
 ## Build Docker image
 
 ```bash
-cd cmd/toggly-server && GOOS=linux go build -o ../../toggly-server && cd ../.. && docker build -t toggly/toggly-server .
+version=$(git describe --always --tags) && \
+revision=${version}-$(date +%Y%m%d-%H:%M:%S) && \
+GOOS=linux go build -o toggly-server -ldflags "-X main.revision=${revision} -s -w" ./cmd/toggly-server
+docker build -t toggly/toggly-server .
 ```
 
 ## Development
