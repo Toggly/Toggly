@@ -1,8 +1,5 @@
 openapi: 3.0.0
 servers:
-# Added by API Auto Mocking Plugin
-  - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/vasmik/Toggly/1.0.0
   - url: /v1
     description: V1
 
@@ -23,11 +20,9 @@ paths:
   '/project':
 
     get:
-      summary: projects list
+      summary: Projects list
       tags:
-        - project
-      description: |
-        Returns the list of projects for current owner
+        - Project
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -41,16 +36,16 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Project'
+                  $ref: '#/components/schemas/ProjectResponse'
+        '404':
+          description: not found
         '400':
           description: bad request
 
     post:
-      summary: save project
+      summary: Create project
       tags:
-        - project
-      description: |
-        Saves the project
+        - Project
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -61,11 +56,39 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Project'
-
+              $ref: '#/components/schemas/ProjectRequest'
       responses:
         '200':
-          description: blahblah
+          description: project info
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/ProjectResponse'
+        '400':
+          description: bad request
+
+    put:
+      summary: Update project
+      tags:
+        - Project
+      security: 
+        - ApiKeyAuth: []
+      parameters: 
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectRequest'
+      responses:
+        '200':
+          description: project info
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/ProjectResponse'
         '400':
           description: bad request
 
@@ -73,11 +96,9 @@ paths:
   '/project/{project_code}':
 
     get:
-      summary: get project information
+      summary: Get project information
       tags:
-        - project
-      description: |
-        Returns the project information
+        - Project
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -90,16 +111,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Project'
+                $ref: '#/components/schemas/ProjectResponse'
         '400':
           description: bad request
         '404':
           description: project not found
           
     delete:
-      summary: delete project
+      summary: Delete project
       tags:
-        - project
+        - Project
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -120,9 +141,9 @@ paths:
   '/project/{project_code}/env':
   
     get:
-      summary: list of environments for project
+      summary: List of environments for project
       tags:
-        - environment
+        - Environment
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -137,14 +158,14 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Environment'
-        '400':
+                  $ref: '#/components/schemas/EnvironmentResponse'
+        '404':
           description: not found
 
     post:
-      summary: save environment
+      summary: Create environment
       tags:
-        - environment
+        - Environment
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -156,19 +177,53 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Environment'
+              $ref: '#/components/schemas/EnvironmentRequest'
       responses:
         '200':
-          description: blahblah
+          description: environment info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentResponse'
         '400':
           description: bad request
+        '404':
+          description: project not found
 
+    put:
+      summary: Update environment
+      tags:
+        - Environment
+      security: 
+        - ApiKeyAuth: []
+      parameters: 
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnvironmentRequest'
+      responses:
+        '200':
+          description: environment info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentResponse'
+        '400':
+          description: bad request
+        '404':
+          description: project not found
+          
   '/project/{project_code}/env/{env_code}':
 
     get:
-      summary: environment information
+      summary: Environment information
       tags:
-        - environment
+        - Environment
       security:
         - ApiKeyAuth: []
       parameters:
@@ -182,14 +237,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Environment'
+                $ref: '#/components/schemas/EnvironmentResponse'
         '400':
-          description: not found
+          description: project not found
 
     delete:
-      summary: delete environment
+      summary: Delete environment
       tags:
-        - environment
+        - Environment
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -203,7 +258,7 @@ paths:
         '400':
           description: bad request
         '404':
-          description: environment not found
+          description: project|environment not found
 
 
   # Object
@@ -211,9 +266,9 @@ paths:
   '/project/{project_code}/env/{env_code}/object':
   
     get:
-      summary: list of objects for environment
+      summary: List of objects for environment
       tags:
-        - object
+        - Object
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -229,14 +284,16 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Object'
+                  $ref: '#/components/schemas/ObjectResponse'
         '400':
-          description: not found
+          description: bad request
+        '404':
+          description: project|environment not found
 
     post:
-      summary: save object
+      summary: Create object
       tags:
-        - object
+        - Object
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -249,19 +306,55 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Object'
+              $ref: '#/components/schemas/ObjectRequest'
       responses:
         '200':
-          description: blahblah
+          description: Object information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponse'
         '400':
           description: bad request
+        '404':
+          description: project|environment not found
 
+    put:
+      summary: Update object
+      tags:
+        - Object
+      security: 
+        - ApiKeyAuth: []
+      parameters: 
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+        - $ref: '#/components/parameters/envCode'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObjectRequest'
+      responses:
+        '200':
+          description: Object information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObjectResponse'
+        '400':
+          description: bad request
+        '404':
+          description: project|environment not found
+  
+  
   '/project/{project_code}/env/{env_code}/object/{obj_code}':
   
     get:
       summary: list of objects for environment
       tags:
-        - object
+        - Object
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -276,14 +369,14 @@ paths:
           content:
             application/json:
               schema: 
-                $ref: '#/components/schemas/Object'
-        '400':
-          description: not found
+                $ref: '#/components/schemas/ObjectResponse'
+        '404':
+          description: project|environment|object not found
 
     delete:
       summary: delete object
       tags:
-        - object
+        - Object
       security: 
         - ApiKeyAuth: []
       parameters: 
@@ -295,10 +388,8 @@ paths:
       responses:
         '200':
           description: object succesfully deleted
-        '400':
-          description: bad request
         '404':
-          description: object not found
+          description: project|environment|object not found
 
 components:
 
@@ -306,7 +397,7 @@ components:
     ApiKeyAuth:
       type: apiKey
       in: header
-      name: X-Toggly-Api-Key
+      name: X-Toggly-Auth
 
   parameters:
 
@@ -319,6 +410,7 @@ components:
     requestId:
       in: header
       name: X-Toggly-Request-Id
+      required: false
       schema:
         type: string
 
@@ -344,39 +436,158 @@ components:
         type: string
 
   schemas:
-  
-    Project:
+
+    ProjectRequest:
       type: object
+      required:
+        - code
       properties:
         code:
           type: string
-          example: my_project_1
+          example: "project1"
         description:
           type: string
-          example: Project description
+          example: "Project description"
         status:
-          type: integer
-          example: 0
-        reg_date:
-          type: integer
-          example: '2018-07-08T21:42:31.236594677-07:00'
+          type: string
+          enum: ["active", "disabled"]
+          example: "active"
 
-    Environment:
+  
+    ProjectResponse:
       type: object
+      properties:
+        owner: 
+          type: string
+          example: "owner1"
+        code:
+          type: string
+          example: "project1"
+        description:
+          type: string
+          example: "Project description"
+        status:
+          type: string
+          example: "active"
+        reg_date:
+          type: string
+          example: "2018-10-12T23:47:18.967Z"
+
+    EnvironmentRequest:
+      type: object
+      required:
+        - code
       properties:
         code:
           type: string
           example: dev
         description:
           type: string
-          example: Development environment
-        reg_date:
-          type: integer
-          example: '2018-07-08T21:42:31.236594677-07:00'
+          example: "Development environment"
+        protected:
+          type: boolean
+          example: false
 
-    Object:
+    EnvironmentResponse:
+      type: object
+      properties:
+        owner:
+          type: string
+          example: "owner1"
+        project_code:
+          type: string
+          example: "project1"
+        code:
+          type: string
+          example: "dev"
+        description:
+          type: string
+          example: "Development environment"
+        protected:
+          type: boolean
+          example: false
+        reg_date:
+          type: string
+          example: "2018-10-12T23:47:18.967Z"
+
+    ObjectRequest:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          example: "obj1"
+        description:
+          type: string
+          example: "Object 1 description"
+        inherits: 
+          $ref: "#/components/schemas/Inheritanse"
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Parameter'
+      
+    ObjectResponse:
       type: object
       properties:
         code:
           type: string
-          example: user
+          example: "user"
+        owner:
+          type: string
+          example: "owner1"
+        project_code: 
+          type: string
+          example: "project1"
+        env_code: 
+          type: string
+          example: "env1"
+        description:
+          type: string
+          example: "Object 1 description"
+        inherits:
+          $ref: "#/components/schemas/Inheritanse"
+        parameters:
+          type: array
+          items:
+            $ref: '#/components/schemas/Parameter'
+
+
+    Inheritanse:
+      type: object
+      required:
+        - project_code
+        - env_code
+        - object_code
+      properties:
+        project_code:
+          type: string
+          example: "project1"
+        env_code:
+          type: string
+          example: "env1"
+        object_code:
+          type: string
+          example: "obj0"
+
+    Parameter:
+      type: object
+      required:
+        - code
+        - type
+        - value
+      properties:
+        code:
+          type: string
+          example: "parameter1"
+        description:
+          type: string
+          example: "Parameter 1"
+        type:
+          type: string
+          enum: ["bool", "string", "int", "enum"]
+          example: "bool"
+        value:
+          type: object
+          example: false
