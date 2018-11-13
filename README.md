@@ -50,7 +50,7 @@ cd cmd/toggly-server && go install
 ```bash
 version=$(git describe --always --tags) && \
 revision=${version}-$(date +%Y%m%d-%H:%M:%S) && \
-GOOS=linux go build -o toggly-server -ldflags "-X main.revision=${revision} -s -w" ./cmd/toggly-server && \
+GOOS=linux go build -o toggly-server -ldflags "-X main.revision=${revision}" ./cmd/toggly-server && \
 docker build -t toggly/toggly-server .
 ```
 
