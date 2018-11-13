@@ -39,12 +39,11 @@ func GetRouter() *rest.APIRouter {
 	dataStorage, _ := mongo.NewMongoStorage(MongoTestUrl)
 	engine := &api.Engine{Storage: &dataStorage}
 	return &rest.APIRouter{
-		Version:   "test",
-		Cache:     nil,
-		Engine:    engine,
-		BasePath:  "/api",
-		IsDebug:   false,
-		AuthToken: TestAuthToken,
+		Version:  "test",
+		Cache:    nil,
+		Engine:   engine,
+		BasePath: "/api",
+		IsDebug:  false,
 	}
 }
 
@@ -146,27 +145,7 @@ func TestRestRequestHeaders(t *testing.T) {
 
 	tt := []TestCase{
 		{
-			name:   "no auth",
-			method: http.MethodGet,
-			path:   "/api/v1",
-			status: http.StatusUnauthorized,
-			cType:  "text/plain",
-			patchRequest: func(req *http.Request) {
-				req.Header[rest.XTogglyAuth] = nil
-			},
-		},
-		{
-			name:   "wrong token",
-			method: http.MethodGet,
-			path:   "/api/v1",
-			status: http.StatusUnauthorized,
-			cType:  "text/plain",
-			patchRequest: func(req *http.Request) {
-				req.Header[rest.XTogglyAuth] = []string{"wrong_token"}
-			},
-		},
-		{
-			name:   "authorized but owner not found",
+			name:   "owner not found",
 			method: http.MethodGet,
 			path:   "/api/v1",
 			status: http.StatusNotFound,
@@ -180,7 +159,7 @@ func TestRestRequestHeaders(t *testing.T) {
 			},
 		},
 		{
-			name:   "authorized",
+			name:   "owner ok",
 			method: http.MethodGet,
 			path:   "/api/v1",
 			status: http.StatusNotFound,
