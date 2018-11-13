@@ -62,29 +62,6 @@ func RequestIDCtx(next http.Handler) http.Handler {
 	return http.HandlerFunc(fn)
 }
 
-// AuthCtx adds auth data to context
-func AuthCtx(token string) func(http.Handler) http.Handler {
-	f := func(next http.Handler) http.Handler {
-		fn := func(w http.ResponseWriter, r *http.Request) {
-			if token == "" {
-				next.ServeHTTP(w, r)
-				return
-			}
-			auth := r.Header.Get(http.CanonicalHeaderKey(XTogglyAuth))
-			if auth != token {
-				log.Printf("[WARN] Header X-Toggly-Auth is wrong.")
-				UnauthorizedResponse(w, r)
-				return
-			}
-			ctx := r.Context()
-			ctx = context.WithValue(ctx, CtxValueAuth, auth)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		}
-		return http.HandlerFunc(fn)
-	}
-	return f
-}
-
 // OwnerCtx adds auth data to context
 func OwnerCtx(next http.Handler) http.Handler {
 

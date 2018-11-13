@@ -25,7 +25,6 @@ type APIRouter struct {
 	httpServer *http.Server
 	lock       sync.Mutex
 	IsDebug    bool
-	AuthToken  string
 }
 
 // Run rest api
@@ -82,7 +81,6 @@ func (api *APIRouter) versions(r chi.Router) {
 func (api *APIRouter) v1(r chi.Router) {
 	r.Use(middleware.Logger)
 	r.Use(RequestIDCtx)
-	r.Use(AuthCtx(api.AuthToken))
 	r.Use(OwnerCtx)
 	r.Use(VersionCtx("v1"))
 	r.Mount("/project", (&ProjectRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
