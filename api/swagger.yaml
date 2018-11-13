@@ -1,5 +1,8 @@
 openapi: 3.0.0
 servers:
+# Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/Toggly/Core/1.0.0
   - url: /v1
     description: V1
 
@@ -23,9 +26,9 @@ paths:
       summary: Projects list
       tags:
         - Project
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
       responses:
@@ -46,9 +49,9 @@ paths:
       summary: Create project
       tags:
         - Project
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
       requestBody:
@@ -62,7 +65,7 @@ paths:
           description: project info
           content:
             application/json:
-              schema: 
+              schema:
                 $ref: '#/components/schemas/ProjectResponse'
         '400':
           description: bad request
@@ -71,9 +74,9 @@ paths:
       summary: Update project
       tags:
         - Project
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
       requestBody:
@@ -87,7 +90,7 @@ paths:
           description: project info
           content:
             application/json:
-              schema: 
+              schema:
                 $ref: '#/components/schemas/ProjectResponse'
         '400':
           description: bad request
@@ -99,9 +102,9 @@ paths:
       summary: Get project information
       tags:
         - Project
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -116,14 +119,14 @@ paths:
           description: bad request
         '404':
           description: project not found
-          
+
     delete:
       summary: Delete project
       tags:
         - Project
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -139,14 +142,14 @@ paths:
   # Environment
 
   '/project/{project_code}/env':
-  
+
     get:
       summary: List of environments for project
       tags:
         - Environment
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -166,9 +169,9 @@ paths:
       summary: Create environment
       tags:
         - Environment
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -194,9 +197,9 @@ paths:
       summary: Update environment
       tags:
         - Environment
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -217,7 +220,7 @@ paths:
           description: bad request
         '404':
           description: project not found
-          
+
   '/project/{project_code}/env/{env_code}':
 
     get:
@@ -245,9 +248,9 @@ paths:
       summary: Delete environment
       tags:
         - Environment
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -264,14 +267,14 @@ paths:
   # Object
 
   '/project/{project_code}/env/{env_code}/object':
-  
+
     get:
       summary: List of objects for environment
       tags:
         - Object
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -294,9 +297,9 @@ paths:
       summary: Create object
       tags:
         - Object
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -323,9 +326,9 @@ paths:
       summary: Update object
       tags:
         - Object
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -347,17 +350,17 @@ paths:
           description: bad request
         '404':
           description: project|environment not found
-  
-  
+
+
   '/project/{project_code}/env/{env_code}/object/{obj_code}':
-  
+
     get:
       summary: list of objects for environment
       tags:
         - Object
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -368,7 +371,7 @@ paths:
           description: object information
           content:
             application/json:
-              schema: 
+              schema:
                 $ref: '#/components/schemas/ObjectResponse'
         '404':
           description: project|environment|object not found
@@ -377,9 +380,9 @@ paths:
       summary: delete object
       tags:
         - Object
-      security: 
+      security:
         - ApiKeyAuth: []
-      parameters: 
+      parameters:
         - $ref: '#/components/parameters/ownerId'
         - $ref: '#/components/parameters/requestId'
         - $ref: '#/components/parameters/projectCode'
@@ -453,11 +456,11 @@ components:
           enum: ["active", "disabled"]
           example: "active"
 
-  
+
     ProjectResponse:
       type: object
       properties:
-        owner: 
+        owner:
           type: string
           example: "owner1"
         code:
@@ -521,13 +524,13 @@ components:
         description:
           type: string
           example: "Object 1 description"
-        inherits: 
+        inherits:
           $ref: "#/components/schemas/Inheritanse"
         parameters:
           type: array
           items:
             $ref: '#/components/schemas/Parameter'
-      
+
     ObjectResponse:
       type: object
       properties:
@@ -537,10 +540,10 @@ components:
         owner:
           type: string
           example: "owner1"
-        project_code: 
+        project_code:
           type: string
           example: "project1"
-        env_code: 
+        env_code:
           type: string
           example: "env1"
         description:

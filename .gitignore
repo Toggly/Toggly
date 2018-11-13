@@ -6,3 +6,4 @@ sonar-report.json
 .DS_Store
 Gopkg.lock
 *.mongo
+toggly-server
