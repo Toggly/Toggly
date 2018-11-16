@@ -1,11 +1,11 @@
-package api_test
+package engine_test
 
 import (
 	"testing"
 
+	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
 
-	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/pkg/storage"
 
 	asserts "github.com/stretchr/testify/assert"
@@ -26,18 +26,22 @@ func TestProject(t *testing.T) {
 	assert.Equal(api.ErrProjectNotFound, err)
 	assert.Nil(pr)
 
-	pr, err = pApi.Update(ProjectCode, "", domain.ProjectStatusActive)
+	pr, err = pApi.Update(&api.ProjectInfo{Code: ProjectCode})
 	assert.Equal(api.ErrProjectNotFound, err)
 	assert.Nil(pr)
 
 	err = pApi.Delete(ProjectCode)
 	assert.Equal(api.ErrProjectNotFound, err)
 
-	pr, err = pApi.Create("", "Description 1", domain.ProjectStatusActive)
-	assert.Equal(api.ErrBadRequest, err)
+	pr, err = pApi.Create(&api.ProjectInfo{Description: "Description 1"})
+	assert.IsType(&api.ErrBadRequest{}, err)
 	assert.Nil(pr)
 
-	pr, err = pApi.Create(ProjectCode, "Description 1", domain.ProjectStatusActive)
+	pr, err = pApi.Create(&api.ProjectInfo{
+		Code:        ProjectCode,
+		Description: "Description 1",
+		Status:      domain.ProjectStatusActive,
+	})
 	assert.Nil(err)
 	assert.NotNil(pr)
 	assert.Equal(ProjectCode, pr.Code)
@@ -49,7 +53,7 @@ func TestProject(t *testing.T) {
 	pl, err = pApi.List()
 	assert.Len(pl, 1)
 
-	_, err = pApi.Create(ProjectCode, "Description 1", domain.ProjectStatusActive)
+	_, err = pApi.Create(&api.ProjectInfo{Code: ProjectCode})
 	assert.NotNil(err)
 	assert.IsType(&storage.UniqueIndexError{}, err)
 
@@ -62,7 +66,11 @@ func TestProject(t *testing.T) {
 	assert.Equal(pr.RegDate, pr1.RegDate)
 	assert.Equal(pr.Status, pr1.Status)
 
-	pr1u, err := pApi.Update(ProjectCode, "Description 2", domain.ProjectStatusDisabled)
+	pr1u, err := pApi.Update(&api.ProjectInfo{
+		Code:        ProjectCode,
+		Description: "Description 2",
+		Status:      domain.ProjectStatusDisabled,
+	})
 	assert.Nil(err)
 	assert.NotNil(pr1u)
 	assert.Equal(ProjectCode, pr1u.Code)
@@ -71,11 +79,15 @@ func TestProject(t *testing.T) {
 	assert.Equal(pr.RegDate, pr1u.RegDate)
 	assert.Equal(domain.ProjectStatusDisabled, pr1u.Status)
 
-	pr2u, err := pApi.Update("p2", "Description 2", domain.ProjectStatusDisabled)
+	pr2u, err := pApi.Update(&api.ProjectInfo{
+		Code:        "p2",
+		Description: "Description 2",
+		Status:      domain.ProjectStatusDisabled,
+	})
 	assert.Nil(pr2u)
 	assert.Equal(api.ErrProjectNotFound, err)
 
-	pApi.For(ProjectCode).Environments().Create("env_code", "", false)
+	pApi.For(ProjectCode).Environments().Create(&api.EnvironmentInfo{Code: "env_code"})
 
 	assert.Equal(api.ErrProjectNotEmpty, pApi.Delete("p1"))
 

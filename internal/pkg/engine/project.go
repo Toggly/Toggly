@@ -1,19 +1,12 @@
-package api
+package engine
 
 import (
-	"errors"
 	"time"
 
+	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/globalsign/mgo/bson"
-)
-
-var (
-	// ErrProjectNotFound error
-	ErrProjectNotFound = errors.New("project not found")
-	// ErrProjectNotEmpty error
-	ErrProjectNotEmpty = errors.New("project not empty")
 )
 
 // ProjectAPI servers project api namespace
@@ -34,20 +27,23 @@ func (p *ProjectAPI) List() ([]*domain.Project, error) {
 func (p *ProjectAPI) Get(code domain.ProjectCode) (*domain.Project, error) {
 	project, err := p.storage().Get(code)
 	if err == storage.ErrNotFound {
-		return nil, ErrProjectNotFound
+		return nil, api.ErrProjectNotFound
 	}
 	return project, err
 }
 
 func checkProjectParams(code domain.ProjectCode, description string, status domain.ProjectStatus) error {
 	if code == "" {
-		return ErrBadRequest
+		return api.NewBadRequestError("Project code not specified")
 	}
 	return nil
 }
 
 // Create Project
-func (p *ProjectAPI) Create(code domain.ProjectCode, description string, status domain.ProjectStatus) (*domain.Project, error) {
+func (p *ProjectAPI) Create(info *api.ProjectInfo) (*domain.Project, error) {
+	code := info.Code
+	description := info.Description
+	status := info.Status
 	if err := checkProjectParams(code, description, status); err != nil {
 		return nil, err
 	}
@@ -65,7 +61,10 @@ func (p *ProjectAPI) Create(code domain.ProjectCode, description string, status 
 }
 
 // Update Project
-func (p *ProjectAPI) Update(code domain.ProjectCode, description string, status domain.ProjectStatus) (*domain.Project, error) {
+func (p *ProjectAPI) Update(info *api.ProjectInfo) (*domain.Project, error) {
+	code := info.Code
+	description := info.Description
+	status := info.Status
 	if err := checkProjectParams(code, description, status); err != nil {
 		return nil, err
 	}
@@ -93,17 +92,17 @@ func (p *ProjectAPI) Delete(code domain.ProjectCode) error {
 		return err
 	}
 	if len(envList) > 0 {
-		return ErrProjectNotEmpty
+		return api.ErrProjectNotEmpty
 	}
 	err = p.storage().Delete(code)
 	if err == storage.ErrNotFound {
-		return ErrProjectNotFound
+		return api.ErrProjectNotFound
 	}
 	return err
 }
 
 // For returns environment api for specified project
-func (p *ProjectAPI) For(code domain.ProjectCode) *ForProjectAPI {
+func (p *ProjectAPI) For(code domain.ProjectCode) api.ForProjectAPI {
 	return &ForProjectAPI{
 		Owner:       p.Owner,
 		ProjectCode: code,
@@ -121,7 +120,7 @@ type ForProjectAPI struct {
 }
 
 // Environments returns Environments API
-func (fp *ForProjectAPI) Environments() *EnvironmentAPI {
+func (fp *ForProjectAPI) Environments() api.EnvironmentAPI {
 	return &EnvironmentAPI{
 		Owner:       fp.Owner,
 		ProjectCode: fp.ProjectCode,

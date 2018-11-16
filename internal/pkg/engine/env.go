@@ -1,19 +1,12 @@
-package api
+package engine
 
 import (
-	"errors"
 	"time"
 
+	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/globalsign/mgo/bson"
-)
-
-var (
-	// ErrEnvironmentNotFound error
-	ErrEnvironmentNotFound = errors.New("environment not found")
-	// ErrEnvironmentNotEmpty error
-	ErrEnvironmentNotEmpty = errors.New("environment not empty")
 )
 
 // EnvironmentAPI type
@@ -52,20 +45,23 @@ func (e *EnvironmentAPI) Get(code domain.EnvironmentCode) (*domain.Environment, 
 	}
 	env, err := e.storage().Get(code)
 	if err == storage.ErrNotFound {
-		return nil, ErrEnvironmentNotFound
+		return nil, api.ErrEnvironmentNotFound
 	}
 	return env, err
 }
 
 func checkEnvParams(code domain.EnvironmentCode, description string, protected bool) error {
 	if code == "" {
-		return ErrBadRequest
+		return api.NewBadRequestError("Environment code not specified")
 	}
 	return nil
 }
 
 // Create environment
-func (e *EnvironmentAPI) Create(code domain.EnvironmentCode, description string, protected bool) (*domain.Environment, error) {
+func (e *EnvironmentAPI) Create(info *api.EnvironmentInfo) (*domain.Environment, error) {
+	code := info.Code
+	description := info.Description
+	protected := info.Protected
 	if err := e.projectExists(); err != nil {
 		return nil, err
 	}
@@ -87,7 +83,10 @@ func (e *EnvironmentAPI) Create(code domain.EnvironmentCode, description string,
 }
 
 // Update environment
-func (e *EnvironmentAPI) Update(code domain.EnvironmentCode, description string, protected bool) (*domain.Environment, error) {
+func (e *EnvironmentAPI) Update(info *api.EnvironmentInfo) (*domain.Environment, error) {
+	code := info.Code
+	description := info.Description
+	protected := info.Protected
 	if err := e.projectExists(); err != nil {
 		return nil, err
 	}
@@ -122,17 +121,17 @@ func (e *EnvironmentAPI) Delete(code domain.EnvironmentCode) error {
 		return err
 	}
 	if len(objList) > 0 {
-		return ErrEnvironmentNotEmpty
+		return api.ErrEnvironmentNotEmpty
 	}
 	err = e.storage().Delete(code)
 	if err == storage.ErrNotFound {
-		return ErrEnvironmentNotFound
+		return api.ErrEnvironmentNotFound
 	}
 	return err
 }
 
 // For returns object api for specified environment
-func (e *EnvironmentAPI) For(code domain.EnvironmentCode) *ForObjectAPI {
+func (e *EnvironmentAPI) For(code domain.EnvironmentCode) api.ForObjectAPI {
 	return &ForObjectAPI{
 		Owner:          e.Owner,
 		ProjectCode:    e.ProjectCode,
@@ -152,7 +151,7 @@ type ForObjectAPI struct {
 }
 
 // Objects returns ObjectAPI
-func (fo *ForObjectAPI) Objects() *ObjectAPI {
+func (fo *ForObjectAPI) Objects() api.ObjectAPI {
 	return &ObjectAPI{
 		Owner:          fo.Owner,
 		ProjectCode:    fo.ProjectCode,

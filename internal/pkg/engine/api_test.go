@@ -1,8 +1,9 @@
-package api_test
+package engine_test
 
 import (
+	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
-	"github.com/Toggly/core/internal/pkg/api"
+	"github.com/Toggly/core/internal/pkg/engine"
 	"github.com/Toggly/core/internal/pkg/storage/mongo"
 	"github.com/globalsign/mgo"
 )
@@ -13,9 +14,9 @@ const MongoTestUrl = "mongodb://localhost:27017/toggly_test"
 
 const ow = "test_owner"
 
-func GetApi() *api.ProjectAPI {
+func GetApi() api.ProjectAPI {
 	dataStorage, _ := mongo.NewMongoStorage(MongoTestUrl)
-	engine := &api.Engine{Storage: &dataStorage}
+	engine := engine.NewTogglyAPI(&dataStorage)
 	pApi := engine.ForOwner(ow).Projects()
 	return pApi
 }

@@ -1,11 +1,11 @@
-package api_test
+package engine_test
 
 import (
 	"testing"
 
+	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
 
-	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/pkg/storage"
 
 	asserts "github.com/stretchr/testify/assert"
@@ -29,11 +29,11 @@ func TestEnvWithNoProject(t *testing.T) {
 	assert.Equal(api.ErrProjectNotFound, err)
 	assert.Nil(env)
 
-	env, err = envApi.Create(envCode, "", false)
+	env, err = envApi.Create(&api.EnvironmentInfo{Code: envCode})
 	assert.Equal(api.ErrProjectNotFound, err)
 	assert.Nil(env)
 
-	env, err = envApi.Update(envCode, "", false)
+	env, err = envApi.Update(&api.EnvironmentInfo{Code: envCode})
 	assert.Equal(api.ErrProjectNotFound, err)
 	assert.Nil(env)
 
@@ -51,7 +51,11 @@ func TestEnvWithProject(t *testing.T) {
 	pApi := GetApi()
 	envApi := pApi.For(ProjectCode).Environments()
 
-	pApi.Create(ProjectCode, "Description 1", domain.ProjectStatusActive)
+	pApi.Create(&api.ProjectInfo{
+		Code:        ProjectCode,
+		Description: "Description 1",
+		Status:      domain.ProjectStatusActive,
+	})
 
 	envList, err := envApi.List()
 	assert.Nil(err)
@@ -61,22 +65,39 @@ func TestEnvWithProject(t *testing.T) {
 	assert.Equal(api.ErrEnvironmentNotFound, err)
 	assert.Nil(env)
 
-	env, err = envApi.Update(envCode, "", false)
+	env, err = envApi.Update(&api.EnvironmentInfo{
+		Code:        envCode,
+		Description: "",
+		Protected:   false,
+	})
+
 	assert.Equal(api.ErrEnvironmentNotFound, err)
 	assert.Nil(env)
 
 	err = envApi.Delete(envCode)
 	assert.Equal(api.ErrEnvironmentNotFound, err)
 
-	env, err = envApi.Create("", "Description 1", false)
-	assert.Equal(api.ErrBadRequest, err)
+	env, err = envApi.Create(&api.EnvironmentInfo{
+		Code:        "",
+		Description: "Description 1",
+		Protected:   false,
+	})
+	assert.IsType(&api.ErrBadRequest{}, err)
 	assert.Nil(env)
 
-	env, err = envApi.Update("", "Description 1", false)
-	assert.Equal(api.ErrBadRequest, err)
+	env, err = envApi.Update(&api.EnvironmentInfo{
+		Code:        "",
+		Description: "Description 1",
+		Protected:   false,
+	})
+	assert.IsType(&api.ErrBadRequest{}, err)
 	assert.Nil(env)
 
-	env, err = envApi.Create(envCode, "Description 1", false)
+	env, err = envApi.Create(&api.EnvironmentInfo{
+		Code:        envCode,
+		Description: "Description 1",
+		Protected:   false,
+	})
 	assert.Nil(err)
 	assert.NotNil(env)
 	assert.Equal(ow, env.OwnerID)
@@ -86,7 +107,11 @@ func TestEnvWithProject(t *testing.T) {
 	assert.False(env.Protected)
 	assert.NotNil(env.RegDate)
 
-	_, err = envApi.Create(envCode, "Description 1", false)
+	_, err = envApi.Create(&api.EnvironmentInfo{
+		Code:        envCode,
+		Description: "Description 1",
+		Protected:   false,
+	})
 	assert.IsType(&storage.UniqueIndexError{}, err)
 
 	envList, err = envApi.List()
@@ -103,7 +128,11 @@ func TestEnvWithProject(t *testing.T) {
 	assert.False(env.Protected)
 	assert.NotNil(env.RegDate)
 
-	envU, err := envApi.Update(envCode, "Description 2", true)
+	envU, err := envApi.Update(&api.EnvironmentInfo{
+		Code:        envCode,
+		Description: "Description 2",
+		Protected:   true,
+	})
 	assert.Nil(err)
 	assert.NotNil(envU)
 	assert.Equal(envCode, envU.Code)
@@ -113,11 +142,18 @@ func TestEnvWithProject(t *testing.T) {
 	assert.True(envU.Protected)
 	assert.Equal(env.RegDate, envU.RegDate)
 
-	envU2, err := envApi.Update("env_2", "Description 2", true)
+	envU2, err := envApi.Update(&api.EnvironmentInfo{
+		Code:        "env_2",
+		Description: "Description 2",
+		Protected:   true,
+	})
 	assert.Nil(envU2)
 	assert.Equal(api.ErrEnvironmentNotFound, err)
 
-	envApi.For(envCode).Objects().Create(domain.ObjectCode("obj1"), "", nil, nil)
+	envApi.For(envCode).Objects().Create(&api.ObjectInfo{
+		Code:        "obj1",
+		Description: "",
+	})
 
 	assert.Equal(api.ErrEnvironmentNotEmpty, envApi.Delete(envCode))
 

@@ -1,33 +1,12 @@
-package api
+package engine
 
 import (
-	"errors"
 	"fmt"
 
+	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
 	"github.com/Toggly/core/internal/pkg/storage"
 )
-
-var (
-	// ErrObjectNotFound error
-	ErrObjectNotFound = errors.New("object not found")
-	// ErrObjectHasInheritors error
-	ErrObjectHasInheritors = errors.New("object has inheritors")
-	// ErrObjectParentNotExists error
-	ErrObjectParentNotExists = errors.New("object parrent does not exists")
-	// ErrObjectInheritorTypeMismatch error
-	ErrObjectInheritorTypeMismatch = errors.New("object inheritor type mismatch")
-)
-
-// ErrObjectParameter type
-type ErrObjectParameter struct {
-	Name        string
-	Description string
-}
-
-func (e *ErrObjectParameter) Error() string {
-	return fmt.Sprintf("Object parameter `%s` error: %s", e.Name, e.Description)
-}
 
 // ObjectAPI servers object api namespace
 type ObjectAPI struct {
@@ -50,15 +29,15 @@ func (o *ObjectAPI) storage() storage.ObjectStorage {
 func (o *ObjectAPI) getParentObject(parent *domain.ObjectInheritance) (*domain.Object, error) {
 	_, err := (*o.Storage).ForOwner(o.Owner).Projects().Get(parent.ProjectCode)
 	if err == storage.ErrNotFound {
-		return nil, ErrProjectNotFound
+		return nil, api.ErrProjectNotFound
 	}
 	_, err = (*o.Storage).ForOwner(o.Owner).Projects().For(parent.ProjectCode).Environments().Get(parent.EnvCode)
 	if err == storage.ErrNotFound {
-		return nil, ErrEnvironmentNotFound
+		return nil, api.ErrEnvironmentNotFound
 	}
 	obj, err := (*o.Storage).ForOwner(o.Owner).Projects().For(parent.ProjectCode).Environments().For(parent.EnvCode).Objects().Get(parent.ObjectCode)
 	if err == storage.ErrNotFound {
-		return nil, ErrObjectNotFound
+		return nil, api.ErrObjectNotFound
 	}
 	return obj, err
 }
@@ -83,7 +62,7 @@ func (o *ObjectAPI) getInherits(obj *domain.Object) (*domain.Object, error) {
 		for _, ip := range iObj.Parameters {
 			if ip.Code == p.Code {
 				if ip.Type != p.Type {
-					return nil, ErrObjectInheritorTypeMismatch
+					return nil, api.ErrObjectInheritorTypeMismatch
 				}
 				resultParams = append(resultParams, &domain.Parameter{
 					Code:        ip.Code,
@@ -154,7 +133,7 @@ func (o *ObjectAPI) Get(code domain.ObjectCode) (obj *domain.Object, err error) 
 	}
 	obj, err = o.storage().Get(code)
 	if err == storage.ErrNotFound {
-		return nil, ErrObjectNotFound
+		return nil, api.ErrObjectNotFound
 	}
 	obj, err = o.getInherits(obj)
 	if err != nil {
@@ -165,12 +144,18 @@ func (o *ObjectAPI) Get(code domain.ObjectCode) (obj *domain.Object, err error) 
 
 func checkObjParams(code domain.ObjectCode, description string, inherits *domain.ObjectInheritance, parameters []*domain.Parameter) error {
 	if code == "" {
-		return ErrBadRequest
+		return api.NewBadRequestError("Object code not specified")
 	}
 	if parameters != nil && len(parameters) > 0 {
 		for _, p := range parameters {
-			if p.Code == "" || p.Value == nil || !isParameterType(p.Type) {
-				return ErrBadRequest
+			if p.Code == "" {
+				return api.NewBadRequestError("Parameter code not specified")
+			}
+			if p.Value == nil {
+				return api.NewBadRequestError("Parameter value not specified")
+			}
+			if !isParameterType(p.Type) {
+				return api.NewBadRequestError("Parameter type not specified")
 			}
 		}
 	}
@@ -182,12 +167,16 @@ func isParameterType(t domain.ParameterType) bool {
 }
 
 // Create object
-func (o *ObjectAPI) Create(code domain.ObjectCode, description string, inherits *domain.ObjectInheritance, parameters []*domain.Parameter) (*domain.Object, error) {
+func (o *ObjectAPI) Create(info *api.ObjectInfo) (*domain.Object, error) {
+	code := info.Code
+	description := info.Description
+	inherits := info.Inherits
+	parameters := info.Parameters
 	if err := o.envExists(); err != nil {
 		return nil, err
 	}
 	if err := checkObjParams(code, description, inherits, parameters); err != nil {
-		return nil, ErrBadRequest
+		return nil, err
 	}
 	var parent *domain.Object
 	var err error
@@ -213,12 +202,16 @@ func (o *ObjectAPI) Create(code domain.ObjectCode, description string, inherits 
 }
 
 // Update object
-func (o *ObjectAPI) Update(code domain.ObjectCode, description string, inherits *domain.ObjectInheritance, parameters []*domain.Parameter) (*domain.Object, error) {
+func (o *ObjectAPI) Update(info *api.ObjectInfo) (*domain.Object, error) {
+	code := info.Code
+	description := info.Description
+	inherits := info.Inherits
+	parameters := info.Parameters
 	if err := o.envExists(); err != nil {
 		return nil, err
 	}
 	if err := checkObjParams(code, description, inherits, parameters); err != nil {
-		return nil, ErrBadRequest
+		return nil, err
 	}
 	obj, err := o.Get(code)
 	if err != nil {
@@ -278,7 +271,7 @@ func (o *ObjectAPI) checkIfParametersChanged(obj *domain.Object, parameters []*d
 		if par != nil {
 			// 1. Deny changing the parameter type
 			if par.Type != p.Type {
-				return &ErrObjectParameter{Name: string(par.Code), Description: "Object parameter type changing restricted"}
+				return api.NewObjectParameterError(string(par.Code), "Object parameter type changing restricted")
 			}
 		} else {
 			// 2. Deny creating the parameter if inheritors already have it
@@ -286,7 +279,7 @@ func (o *ObjectAPI) checkIfParametersChanged(obj *domain.Object, parameters []*d
 				for _, ip := range inh.Parameters {
 					if ip.Code == p.Code {
 						msg := fmt.Sprintf("Object parameter exists in inheritor: %s:%s:%s", inh.ProjectCode, inh.EnvCode, inh.Code)
-						return &ErrObjectParameter{Name: string(p.Code), Description: msg}
+						return api.NewObjectParameterError(string(p.Code), msg)
 					}
 				}
 			}
@@ -302,12 +295,12 @@ func (o *ObjectAPI) checkInheritance(inherits *domain.ObjectInheritance) (*domai
 	obj, err := o.getParentObject(inherits)
 	if err != nil {
 		switch err {
-		case ErrProjectNotFound:
-			return nil, ErrObjectParentNotExists
-		case ErrEnvironmentNotFound:
-			return nil, ErrObjectParentNotExists
-		case ErrObjectNotFound:
-			return nil, ErrObjectParentNotExists
+		case api.ErrProjectNotFound:
+			return nil, api.ErrObjectParentNotExists
+		case api.ErrEnvironmentNotFound:
+			return nil, api.ErrObjectParentNotExists
+		case api.ErrObjectNotFound:
+			return nil, api.ErrObjectParentNotExists
 		default:
 			return nil, err
 		}
@@ -322,7 +315,7 @@ func (o *ObjectAPI) checkParametersInheritanceForParent(parent *domain.Object, p
 	for _, p := range parameters {
 		for _, pp := range parent.Parameters {
 			if p.Code == pp.Code && p.Type != pp.Type {
-				return ErrObjectInheritorTypeMismatch
+				return api.ErrObjectInheritorTypeMismatch
 			}
 		}
 	}
@@ -339,11 +332,11 @@ func (o *ObjectAPI) Delete(code domain.ObjectCode) (err error) {
 		return err
 	}
 	if len(inheritors) > 0 {
-		return ErrObjectHasInheritors
+		return api.ErrObjectHasInheritors
 	}
 	err = o.storage().Delete(code)
 	if err == storage.ErrNotFound {
-		return ErrObjectNotFound
+		return api.ErrObjectNotFound
 	}
 	return err
 }
