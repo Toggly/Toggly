@@ -169,7 +169,7 @@ func TestRestObject(t *testing.T) {
 			validator: func(body []byte) {
 				b, err := bodyJSON(body)
 				assert.Nil(err)
-				assert.Equal("object parrent does not exists", b["error"])
+				assert.Equal("Object parrent does not exists", b["error"])
 			},
 		},
 		{
@@ -234,7 +234,7 @@ func TestRestObject(t *testing.T) {
 			validator: func(body []byte) {
 				b, err := bodyJSON(body)
 				assert.Nil(err)
-				assert.Equal("object inheritor type mismatch", b["error"])
+				assert.Equal("Object inheritor parameter type mismatch", b["error"])
 			},
 		},
 		{

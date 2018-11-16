@@ -214,39 +214,34 @@ func TestRestEnvironment(t *testing.T) {
 			},
 		},
 		{
-			skip:   true,
 			name:   "delete not empty environment",
 			method: http.MethodDelete,
 			path:   "/api/v1/project/project1/env/env1",
 			status: http.StatusLocked,
 			before: func(rs *httptest.Server) {
-				// body, err := json.Marshal(&rest.EnvironmentCreateRequest{
-				// 	Code:        "env1",
-				// 	Description: "Env description",
-				// 	Protected:   false,
-				// })
-				// assert.Nil(err)
-				// req, err := http.NewRequest(http.MethodPost, rs.URL+"/api/v1/project/project1/env", bytes.NewBuffer(body))
-				// assert.Nil(err)
-				// req.Header = http.Header{
-				// 	rest.XTogglyAuth:    []string{TestAuthToken},
-				// 	rest.XTogglyOwnerID: []string{ow},
-				// }
-				// rs.Client().Do(req)
+				body, err := json.Marshal(&rest.ObjectCreateRequest{Code: "obj1"})
+				assert.Nil(err)
+				req, err := http.NewRequest(http.MethodPost, rs.URL+"/api/v1/project/project1/env/env1/object", bytes.NewBuffer(body))
+				assert.Nil(err)
+				req.Header = http.Header{
+					rest.XTogglyAuth:    []string{TestAuthToken},
+					rest.XTogglyOwnerID: []string{ow},
+				}
+				rs.Client().Do(req)
 			},
 			validator: func(body []byte) {
 				b, err := bodyJSON(body)
 				assert.Nil(err)
-				assert.Equal(rest.ErrProjectNotEmpty, b["error"])
+				assert.Equal(rest.ErrEnvironmentNotEmpty, b["error"])
 			},
 			after: func(rs *httptest.Server) {
-				// req, err := http.NewRequest(http.MethodDelete, rs.URL+"/api/v1/project/project1/env/env1", nil)
-				// assert.Nil(err)
-				// req.Header = http.Header{
-				// 	rest.XTogglyAuth:    []string{TestAuthToken},
-				// 	rest.XTogglyOwnerID: []string{ow},
-				// }
-				// rs.Client().Do(req)
+				req, err := http.NewRequest(http.MethodDelete, rs.URL+"/api/v1/project/project1/env/env1/object/obj1", nil)
+				assert.Nil(err)
+				req.Header = http.Header{
+					rest.XTogglyAuth:    []string{TestAuthToken},
+					rest.XTogglyOwnerID: []string{ow},
+				}
+				rs.Client().Do(req)
 			},
 		}, {
 			name:   "Delete env",

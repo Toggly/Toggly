@@ -7,11 +7,11 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/pkg/storage"
 
 	"github.com/Toggly/core/internal/domain"
 
-	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/pkg/cache"
 
 	"github.com/go-chi/chi"
@@ -33,29 +33,25 @@ type ProjectCreateRequest struct {
 
 // ProjectRestAPI servers project api namespace
 type ProjectRestAPI struct {
-	Cache  cache.DataCache
-	Engine *api.Engine
+	Cache cache.DataCache
+	API   api.TogglyAPI
 }
 
 // Routes returns routes for project namespace
 func (a *ProjectRestAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(group chi.Router) {
-		group.Get("/", a.cached(a.list))
+		group.Get("/", a.list)
 		group.Post("/", a.createProject)
 		group.Put("/", a.updateProject)
-		group.Get("/{project_code}", a.cached(a.getProject))
+		group.Get("/{project_code}", a.getProject)
 		group.Delete("/{project_code}", a.deleteProject)
 	})
 	return router
 }
 
-func (a *ProjectRestAPI) engine(r *http.Request) *api.ProjectAPI {
-	return a.Engine.ForOwner(owner(r)).Projects()
-}
-
-func (a *ProjectRestAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return Cached(fn, a.Cache)
+func (a *ProjectRestAPI) engine(r *http.Request) api.ProjectAPI {
+	return a.API.ForOwner(owner(r)).Projects()
 }
 
 func (a *ProjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
@@ -125,20 +121,28 @@ func (a *ProjectRestAPI) createUpdate(w http.ResponseWriter, r *http.Request, cr
 	}
 	var p *domain.Project
 	if create {
-		p, err = a.engine(r).Create(proj.Code, proj.Description, proj.Status)
+		p, err = a.engine(r).Create(&api.ProjectInfo{
+			Code:        proj.Code,
+			Description: proj.Description,
+			Status:      proj.Status,
+		})
 	} else {
-		p, err = a.engine(r).Update(proj.Code, proj.Description, proj.Status)
+		p, err = a.engine(r).Update(&api.ProjectInfo{
+			Code:        proj.Code,
+			Description: proj.Description,
+			Status:      proj.Status,
+		})
 	}
 	if err != nil {
 		switch err {
-		case api.ErrBadRequest:
-			ErrorResponse(w, r, err, http.StatusBadRequest)
-			return
 		case api.ErrProjectNotFound:
 			NotFoundResponse(w, r, ErrProjectNotFound)
 			return
 		}
 		switch err.(type) {
+		case *api.ErrBadRequest:
+			ErrorResponse(w, r, err, http.StatusBadRequest)
+			return
 		case *storage.UniqueIndexError:
 			ErrorResponse(w, r, err, http.StatusBadRequest)
 		default:

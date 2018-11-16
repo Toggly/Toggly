@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
-	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/go-chi/chi"
@@ -30,29 +30,25 @@ type EnvironmentCreateRequest struct {
 
 // EnvironmentRestAPI servers objects
 type EnvironmentRestAPI struct {
-	Cache  cache.DataCache
-	Engine *api.Engine
+	Cache cache.DataCache
+	API   api.TogglyAPI
 }
 
 // Routes returns routes for environments
 func (a *EnvironmentRestAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(g chi.Router) {
-		g.Get("/", a.cached(a.list))
+		g.Get("/", a.list)
 		g.Post("/", a.createEnvironment)
 		g.Put("/", a.updateEnvironment)
-		g.Get("/{env_code}", a.cached(a.getEnvironment))
+		g.Get("/{env_code}", a.getEnvironment)
 		g.Delete("/{env_code}", a.deleteEnvironment)
 	})
 	return router
 }
 
-func (a *EnvironmentRestAPI) engine(r *http.Request) *api.EnvironmentAPI {
-	return a.Engine.ForOwner(owner(r)).Projects().For(projectCode(r)).Environments()
-}
-
-func (a *EnvironmentRestAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return Cached(fn, a.Cache)
+func (a *EnvironmentRestAPI) engine(r *http.Request) api.EnvironmentAPI {
+	return a.API.ForOwner(owner(r)).Projects().For(projectCode(r)).Environments()
 }
 
 func (a *EnvironmentRestAPI) list(w http.ResponseWriter, r *http.Request) {
@@ -131,15 +127,20 @@ func (a *EnvironmentRestAPI) createUpdate(w http.ResponseWriter, r *http.Request
 	}
 	var newEnv *domain.Environment
 	if create {
-		newEnv, err = a.engine(r).Create(env.Code, env.Description, env.Protected)
+		newEnv, err = a.engine(r).Create(&api.EnvironmentInfo{
+			Code:        env.Code,
+			Description: env.Description,
+			Protected:   env.Protected,
+		})
 	} else {
-		newEnv, err = a.engine(r).Update(env.Code, env.Description, env.Protected)
+		newEnv, err = a.engine(r).Update(&api.EnvironmentInfo{
+			Code:        env.Code,
+			Description: env.Description,
+			Protected:   env.Protected,
+		})
 	}
 	if err != nil {
 		switch err {
-		case api.ErrBadRequest:
-			ErrorResponse(w, r, err, http.StatusBadRequest)
-			return
 		case api.ErrProjectNotFound:
 			NotFoundResponse(w, r, ErrProjectNotFound)
 			return
@@ -148,6 +149,9 @@ func (a *EnvironmentRestAPI) createUpdate(w http.ResponseWriter, r *http.Request
 			return
 		}
 		switch err.(type) {
+		case *api.ErrBadRequest:
+			ErrorResponse(w, r, err, http.StatusBadRequest)
+			return
 		case *storage.UniqueIndexError:
 			ErrorResponse(w, r, err, http.StatusBadRequest)
 		default:

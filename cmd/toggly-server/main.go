@@ -9,11 +9,11 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/Toggly/core/internal/pkg/api"
 	"github.com/Toggly/core/internal/server"
 	"github.com/Toggly/core/internal/server/rest"
 
 	"github.com/Toggly/core/internal/pkg/cache"
+	"github.com/Toggly/core/internal/pkg/engine"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/Toggly/core/internal/pkg/storage/mongo"
 	flags "github.com/jessevdk/go-flags"
@@ -91,7 +91,7 @@ func main() {
 		Router: &rest.APIRouter{
 			Version:  revision,
 			Cache:    apiCache,
-			Engine:   &api.Engine{Storage: &dataStorage},
+			API:      engine.NewTogglyAPI(&dataStorage), //TODO: replace to cached implementation
 			BasePath: opts.Toggly.BasePath,
 			Port:     opts.Toggly.Port,
 			IsDebug:  opts.Toggly.Debug,
