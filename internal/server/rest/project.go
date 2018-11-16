@@ -12,8 +12,6 @@ import (
 
 	"github.com/Toggly/core/internal/domain"
 
-	"github.com/Toggly/core/internal/pkg/cache"
-
 	"github.com/go-chi/chi"
 )
 
@@ -33,8 +31,7 @@ type ProjectCreateRequest struct {
 
 // ProjectRestAPI servers project api namespace
 type ProjectRestAPI struct {
-	Cache cache.DataCache
-	API   api.TogglyAPI
+	API api.TogglyAPI
 }
 
 // Routes returns routes for project namespace

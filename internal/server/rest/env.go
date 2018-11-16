@@ -9,7 +9,6 @@ import (
 
 	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
-	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/go-chi/chi"
 )
@@ -30,8 +29,7 @@ type EnvironmentCreateRequest struct {
 
 // EnvironmentRestAPI servers objects
 type EnvironmentRestAPI struct {
-	Cache cache.DataCache
-	API   api.TogglyAPI
+	API api.TogglyAPI
 }
 
 // Routes returns routes for environments

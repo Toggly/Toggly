@@ -10,7 +10,6 @@ import (
 
 	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
-	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -18,7 +17,6 @@ import (
 // APIRouter implements rest APIRouter
 type APIRouter struct {
 	Version    string
-	Cache      cache.DataCache
 	API        api.TogglyAPI
 	Port       int
 	BasePath   string
@@ -83,9 +81,9 @@ func (r *APIRouter) v1(router chi.Router) {
 	router.Use(RequestIDCtx)
 	router.Use(OwnerCtx)
 	router.Use(VersionCtx("v1"))
-	router.Mount("/project", (&ProjectRestAPI{Cache: r.Cache, API: r.API}).Routes())
-	router.Mount("/project/{project_code}/env", (&EnvironmentRestAPI{Cache: r.Cache, API: r.API}).Routes())
-	router.Mount("/project/{project_code}/env/{env_code}/object", (&ObjectRestAPI{Cache: r.Cache, API: r.API}).Routes())
+	router.Mount("/project", (&ProjectRestAPI{API: r.API}).Routes())
+	router.Mount("/project/{project_code}/env", (&EnvironmentRestAPI{API: r.API}).Routes())
+	router.Mount("/project/{project_code}/env/{env_code}/object", (&ObjectRestAPI{API: r.API}).Routes())
 }
 
 func owner(r *http.Request) string {

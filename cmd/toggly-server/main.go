@@ -12,7 +12,6 @@ import (
 	"github.com/Toggly/core/internal/server"
 	"github.com/Toggly/core/internal/server/rest"
 
-	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/pkg/engine"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/Toggly/core/internal/pkg/storage/mongo"
@@ -56,7 +55,6 @@ func main() {
 	fmt.Println(centeredText(fmt.Sprintf("ver: %s", revision), 63))
 	fmt.Print("--------------------------------------------------------------\n\n")
 
-	var apiCache cache.DataCache
 	var dataStorage storage.DataStorage
 	var err error
 
@@ -90,7 +88,6 @@ func main() {
 	server := &server.Application{
 		Router: &rest.APIRouter{
 			Version:  revision,
-			Cache:    apiCache,
 			API:      engine.NewTogglyAPI(&dataStorage), //TODO: replace to cached implementation
 			BasePath: opts.Toggly.BasePath,
 			Port:     opts.Toggly.Port,
