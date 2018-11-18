@@ -20,6 +20,7 @@ See public [OpenAPI specification](https://app.swaggerhub.com/apis-docs/Toggly/C
 
 ```bash
 docker run -it -v mongo:/data --network toggly --name mongo -p 27017:27017 -d mongo
+
 docker run -it --network toggly --name toggly-server -p 9090:8080 -d toggly/toggly-server --store.mongo.url=mongodb://mongo:27017/toggly
 ```
 
@@ -55,9 +56,6 @@ cd cmd/toggly-server && go install
 ## Build Docker image
 
 ```bash
-version=$(git describe --always --tags) && \
-revision=${version}-$(date +%Y%m%d-%H:%M:%S) && \
-GOOS=linux go build -o toggly-server -ldflags "-X main.revision=${revision}" ./cmd/toggly-server && \
 docker build -t toggly/toggly-server .
 ```
 
