@@ -129,4 +129,5 @@ type ObjectAPI interface {
 	Create(info *ObjectInfo) (*domain.Object, error)
 	Update(info *ObjectInfo) (*domain.Object, error)
 	Delete(code domain.ObjectCode) error
+	InheritorsFlatList(code domain.ObjectCode) ([]*domain.Object, error)
 }

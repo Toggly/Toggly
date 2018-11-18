@@ -39,7 +39,6 @@ func GetRouter() *rest.APIRouter {
 	dataStorage, _ := mongo.NewMongoStorage(MongoTestUrl)
 	return &rest.APIRouter{
 		Version:  "test",
-		Cache:    nil,
 		API:      engine.NewTogglyAPI(&dataStorage),
 		BasePath: "/api",
 		IsDebug:  false,

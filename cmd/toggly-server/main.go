@@ -12,6 +12,8 @@ import (
 	"github.com/Toggly/core/internal/server"
 	"github.com/Toggly/core/internal/server/rest"
 
+	"github.com/Toggly/core/internal/pkg/cache"
+	"github.com/Toggly/core/internal/pkg/cache/cachedapi"
 	"github.com/Toggly/core/internal/pkg/engine"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/Toggly/core/internal/pkg/storage/mongo"
@@ -31,12 +33,13 @@ type Opts struct {
 				URL string `long:"url" env:"URL" description:"mongo connection url"`
 			} `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
 		} `group:"store" namespace:"store" env-namespace:"STORE"`
-		// Cache struct {
-		// 	Disabled bool `long:"disable" description:"Disable cache" env:"DISABLE"`
-		// 	Redis    struct {
-		// 		URL string `long:"url" env:"URL" description:"redis connection url"`
-		// 	} `group:"redis" namespace:"redis" env-namespace:"REDIS"`
-		// } `group:"cache" namespace:"cache" env-namespace:"CACHE"`
+		Cache struct {
+			Disabled bool `long:"disable" description:"Disable cache" env:"DISABLE"`
+			InMemory bool `long:"in-memory" description:"In-memory storage. Do not use for production. Only for development purposes." env:"IN_MEMORY"`
+			Redis    struct {
+				URL string `long:"url" env:"URL" description:"redis connection url"`
+			} `group:"redis" namespace:"redis" env-namespace:"REDIS"`
+		} `group:"cache" namespace:"cache" env-namespace:"CACHE"`
 	} `group:"toggly" env-namespace:"TOGGLY"`
 }
 
@@ -56,6 +59,7 @@ func main() {
 	fmt.Print("--------------------------------------------------------------\n\n")
 
 	var dataStorage storage.DataStorage
+	var dataCache cache.DataCache
 	var err error
 
 	var opts Opts
@@ -73,22 +77,27 @@ func main() {
 		cancel()
 	}()
 
-	// if opts.Toggly.Cache.Disabled {
-	// 	log.Print("[WARN] CACHE DISABLED")
-	// } else {
-	// 	if apiCache, err = cache.NewHashMapCache(); err != nil {
-	// 		log.Fatalf("Can't connect to cache service: %v", err)
-	// 	}
-	// }
+	if opts.Toggly.Cache.Disabled {
+		log.Print("[WARN] Cache disabled")
+	} else {
+		if opts.Toggly.Cache.InMemory {
+			if dataCache, err = cache.NewHashMapCache(); err != nil {
+				log.Fatalf("[FATAL] Can't connect to cache service: %v", err)
+			}
+			log.Print("[WARN] In-memory cache used")
+		} else {
+			log.Fatal("[FATAL] Only in-memory cache is available now. Use `--cache.in-memory` or `--cache.disable` flag.")
+		}
+	}
 
 	if dataStorage, err = mongo.NewMongoStorage(opts.Toggly.Store.Mongo.URL); err != nil {
-		log.Fatalf("Can't connect to storage: %v", err)
+		log.Fatalf("[FATAL] Can't connect to storage: %v", err)
 	}
 
 	server := &server.Application{
 		Router: &rest.APIRouter{
 			Version:  revision,
-			API:      engine.NewTogglyAPI(&dataStorage), //TODO: replace to cached implementation
+			API:      cachedapi.NewCachedAPI(engine.NewTogglyAPI(&dataStorage), dataCache),
 			BasePath: opts.Toggly.BasePath,
 			Port:     opts.Toggly.Port,
 			IsDebug:  opts.Toggly.Debug,
@@ -96,7 +105,7 @@ func main() {
 	}
 
 	if err != nil {
-		log.Fatalf("[ERROR] failed to setup application, %+v", err)
+		log.Fatalf("[FATAL] failed to setup application, %+v", err)
 	}
 
 	log.Print("[INFO] API server started")

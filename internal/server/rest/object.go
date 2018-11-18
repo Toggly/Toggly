@@ -41,6 +41,7 @@ func (a *ObjectRestAPI) Routes() chi.Router {
 		g.Post("/", a.createObject)
 		g.Put("/", a.updateObject)
 		g.Get("/{object_code}", a.getObject)
+		g.Get("/{object_code}/inheritors", a.getObjectInheritors)
 		g.Delete("/{object_code}", a.deleteObject)
 	})
 	return router
@@ -87,6 +88,19 @@ func (a *ObjectRestAPI) getObject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	JSONResponse(w, r, obj)
+}
+
+func (a *ObjectRestAPI) getObjectInheritors(w http.ResponseWriter, r *http.Request) {
+	list, err := a.engine(r).InheritorsFlatList(objectCode(r))
+	if err != nil {
+		log.Printf("[ERROR] %v", err)
+		ErrorResponse(w, r, err, http.StatusInternalServerError)
+		return
+	}
+	response := map[string]interface{}{
+		"inheritors": list,
+	}
+	JSONResponse(w, r, response)
 }
 
 func (a *ObjectRestAPI) deleteObject(w http.ResponseWriter, r *http.Request) {

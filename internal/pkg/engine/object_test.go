@@ -414,6 +414,23 @@ func TestObjectsInheritance(t *testing.T) {
 		}
 	}
 
+	ls, err := objApi.InheritorsFlatList("obj1")
+	assert.Nil(err)
+	assert.Len(ls, 2)
+
+	for _, l := range ls {
+		switch l.Code {
+		case "obj2":
+			assert.Equal(domain.ObjectCode("obj1"), l.Inherits.ObjectCode)
+			assert.Equal(envCode, l.Inherits.EnvCode)
+			assert.Equal(ProjectCode, l.Inherits.ProjectCode)
+		case "obj3":
+			assert.Equal(domain.ObjectCode("obj2"), l.Inherits.ObjectCode)
+			assert.Equal(envCode, l.Inherits.EnvCode)
+			assert.Equal(ProjectCode, l.Inherits.ProjectCode)
+		}
+	}
+
 	AfterTest()
 
 }

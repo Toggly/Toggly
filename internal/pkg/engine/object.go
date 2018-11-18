@@ -242,13 +242,14 @@ func (o *ObjectAPI) Update(info *api.ObjectInfo) (*domain.Object, error) {
 	return o.Get(code)
 }
 
-func (o *ObjectAPI) getInheritorsFlatList(obj *domain.Object) ([]*domain.Object, error) {
-	list, err := o.storage().ListInheritors(obj.Code)
+// InheritorsFlatList returns flat list of inheritors
+func (o *ObjectAPI) InheritorsFlatList(code domain.ObjectCode) ([]*domain.Object, error) {
+	list, err := o.storage().ListInheritors(code)
 	if err != nil {
 		return nil, err
 	}
 	for _, i := range list {
-		sub, err := o.storage().ListInheritors(i.Code)
+		sub, err := o.InheritorsFlatList(i.Code)
 		if err != nil {
 			return nil, err
 		}
@@ -258,7 +259,7 @@ func (o *ObjectAPI) getInheritorsFlatList(obj *domain.Object) ([]*domain.Object,
 }
 
 func (o *ObjectAPI) checkIfParametersChanged(obj *domain.Object, parameters []*domain.Parameter) error {
-	inheritors, err := o.getInheritorsFlatList(obj)
+	inheritors, err := o.InheritorsFlatList(obj.Code)
 	if err != nil {
 		return err
 	}
