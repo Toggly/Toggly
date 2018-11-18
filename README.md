@@ -35,6 +35,13 @@ toggly:
 mongo:
       --store.mongo.url= mongo connection url [$TOGGLY_STORE_MONGO_URL]
 
+cache:
+      --cache.disable    Disable cache [$TOGGLY_CACHE_DISABLE]
+      --cache.in-memory  In-memory cache. Do not use for production. Only for development purposes. [$TOGGLY_CACHE_IN_MEMORY]
+
+redis:
+      --cache.redis.url= redis connection url [$TOGGLY_CACHE_REDIS_URL]
+
 Help Options:
   -h, --help             Show this help message
 ```

@@ -35,7 +35,7 @@ type Opts struct {
 		} `group:"store" namespace:"store" env-namespace:"STORE"`
 		Cache struct {
 			Disabled bool `long:"disable" description:"Disable cache" env:"DISABLE"`
-			InMemory bool `long:"in-memory" description:"In-memory storage. Do not use for production. Only for development purposes." env:"IN_MEMORY"`
+			InMemory bool `long:"in-memory" description:"In-memory cache. Do not use for production. Only for development purposes." env:"IN_MEMORY"`
 			Redis    struct {
 				URL string `long:"url" env:"URL" description:"redis connection url"`
 			} `group:"redis" namespace:"redis" env-namespace:"REDIS"`
