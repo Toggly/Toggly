@@ -1,0 +1,27 @@
+version: '3'
+services:
+  toggly-server:
+    build: .
+    image: toggly/toggly-server
+    container_name: toggly-server
+    environment:
+      TOGGLY_STORE_MONGO_URL: mongodb://db:27017/toggly
+      TOGGLY_CACHE_PLUGIN: in-memory
+    ports:
+      - "8080:8080"
+    networks:
+      - toggly
+
+  db:
+    image: mongo
+    container_name: toggly-db
+    volumes:
+      - db-data:/data
+    networks:
+      - toggly
+
+networks:
+  toggly:
+
+volumes:
+  db-data:
