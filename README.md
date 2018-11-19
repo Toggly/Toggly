@@ -53,7 +53,7 @@ docker-compose up -d
 docker run -it -v mongo:/data --network toggly --name mongo -p 27017:27017 -d mongo
 
 # Start Toggly server
-docker run -it --network toggly --name toggly-server -p 8080:8080 -d toggly/toggly-server --store.mongo.url=mongodb://mongo:27017/toggly
+docker run -it --network toggly --name toggly-server -p 8080:8080 -d toggly/toggly-server --store.mongo.url=mongodb://mongo:27017/toggly --cache-plugin=in-memory
 ```
 
 ### Parameters
