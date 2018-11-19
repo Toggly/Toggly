@@ -9,7 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/Toggly/core/internal/pkg/api"
+	"github.com/Toggly/core/internal/pkg/engine"
 	"github.com/Toggly/core/internal/pkg/storage/mongo"
 	"github.com/Toggly/core/internal/server/rest"
 	"github.com/globalsign/mgo"
@@ -37,11 +37,9 @@ type TestCase struct {
 
 func GetRouter() *rest.APIRouter {
 	dataStorage, _ := mongo.NewMongoStorage(MongoTestUrl)
-	engine := &api.Engine{Storage: &dataStorage}
 	return &rest.APIRouter{
 		Version:  "test",
-		Cache:    nil,
-		Engine:   engine,
+		API:      engine.NewTogglyAPI(&dataStorage),
 		BasePath: "/api",
 		IsDebug:  false,
 	}

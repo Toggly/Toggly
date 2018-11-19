@@ -7,9 +7,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
-	"github.com/Toggly/core/internal/pkg/api"
-	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/go-chi/chi"
 )
@@ -31,29 +30,25 @@ type ObjectCreateRequest struct {
 
 // ObjectRestAPI servers objects
 type ObjectRestAPI struct {
-	Cache  cache.DataCache
-	Engine *api.Engine
+	API api.TogglyAPI
 }
 
 // Routes returns routes for environments
 func (a *ObjectRestAPI) Routes() chi.Router {
 	router := chi.NewRouter()
 	router.Group(func(g chi.Router) {
-		g.Get("/", a.cached(a.list))
+		g.Get("/", a.list)
 		g.Post("/", a.createObject)
 		g.Put("/", a.updateObject)
-		g.Get("/{object_code}", a.cached(a.getObject))
+		g.Get("/{object_code}", a.getObject)
+		g.Get("/{object_code}/inheritors", a.getObjectInheritors)
 		g.Delete("/{object_code}", a.deleteObject)
 	})
 	return router
 }
 
-func (a *ObjectRestAPI) engine(r *http.Request) *api.ObjectAPI {
-	return a.Engine.ForOwner(owner(r)).Projects().For(projectCode(r)).Environments().For(environmentCode(r)).Objects()
-}
-
-func (a *ObjectRestAPI) cached(fn http.HandlerFunc) http.HandlerFunc {
-	return Cached(fn, a.Cache)
+func (a *ObjectRestAPI) engine(r *http.Request) api.ObjectAPI {
+	return a.API.ForOwner(owner(r)).Projects().For(projectCode(r)).Environments().For(environmentCode(r)).Objects()
 }
 
 func (a *ObjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
@@ -93,6 +88,19 @@ func (a *ObjectRestAPI) getObject(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	JSONResponse(w, r, obj)
+}
+
+func (a *ObjectRestAPI) getObjectInheritors(w http.ResponseWriter, r *http.Request) {
+	list, err := a.engine(r).InheritorsFlatList(objectCode(r))
+	if err != nil {
+		log.Printf("[ERROR] %v", err)
+		ErrorResponse(w, r, err, http.StatusInternalServerError)
+		return
+	}
+	response := map[string]interface{}{
+		"inheritors": list,
+	}
+	JSONResponse(w, r, response)
 }
 
 func (a *ObjectRestAPI) deleteObject(w http.ResponseWriter, r *http.Request) {
@@ -138,15 +146,22 @@ func (a *ObjectRestAPI) createUpdate(w http.ResponseWriter, r *http.Request, cre
 	}
 	var newObj *domain.Object
 	if create {
-		newObj, err = a.engine(r).Create(obj.Code, obj.Description, obj.Inherits, obj.Parameters)
+		newObj, err = a.engine(r).Create(&api.ObjectInfo{
+			Code:        obj.Code,
+			Description: obj.Description,
+			Inherits:    obj.Inherits,
+			Parameters:  obj.Parameters,
+		})
 	} else {
-		newObj, err = a.engine(r).Update(obj.Code, obj.Description, obj.Inherits, obj.Parameters)
+		newObj, err = a.engine(r).Update(&api.ObjectInfo{
+			Code:        obj.Code,
+			Description: obj.Description,
+			Inherits:    obj.Inherits,
+			Parameters:  obj.Parameters,
+		})
 	}
 	if err != nil {
 		switch err {
-		case api.ErrBadRequest:
-			ErrorResponse(w, r, err, http.StatusBadRequest)
-			return
 		case api.ErrProjectNotFound:
 			NotFoundResponse(w, r, ErrProjectNotFound)
 			return
@@ -164,6 +179,9 @@ func (a *ObjectRestAPI) createUpdate(w http.ResponseWriter, r *http.Request, cre
 			return
 		}
 		switch err.(type) {
+		case *api.ErrBadRequest:
+			ErrorResponse(w, r, err, http.StatusBadRequest)
+			return
 		case *storage.UniqueIndexError:
 			ErrorResponse(w, r, err, http.StatusBadRequest)
 		case *api.ErrObjectParameter:

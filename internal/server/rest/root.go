@@ -8,9 +8,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
-	"github.com/Toggly/core/internal/pkg/api"
-	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 )
@@ -18,8 +17,7 @@ import (
 // APIRouter implements rest APIRouter
 type APIRouter struct {
 	Version    string
-	Cache      cache.DataCache
-	Engine     *api.Engine
+	API        api.TogglyAPI
 	Port       int
 	BasePath   string
 	httpServer *http.Server
@@ -28,64 +26,64 @@ type APIRouter struct {
 }
 
 // Run rest api
-func (api *APIRouter) Run() {
-	routes := api.Router()
-	api.lock.Lock()
-	api.httpServer = &http.Server{
-		Addr:    fmt.Sprintf(":%d", api.Port),
+func (r *APIRouter) Run() {
+	routes := r.Router()
+	r.lock.Lock()
+	r.httpServer = &http.Server{
+		Addr:    fmt.Sprintf(":%d", r.Port),
 		Handler: chi.ServerBaseContext(context.Background(), routes),
 	}
-	api.lock.Unlock()
-	log.Printf("[INFO] HTTP server listening on -> %s", api.httpServer.Addr)
-	log.Printf("[INFO] APIRouter V.1 base path -> %s/v1", api.BasePath)
-	err := api.httpServer.ListenAndServe()
+	r.lock.Unlock()
+	log.Printf("[INFO] HTTP server listening on -> %s", r.httpServer.Addr)
+	log.Printf("[INFO] APIRouter V.1 base path -> %s/v1", r.BasePath)
+	err := r.httpServer.ListenAndServe()
 	log.Printf("[INFO] HTTP server terminated, %s", err)
 }
 
 // Stop rest api
-func (api *APIRouter) Stop() {
+func (r *APIRouter) Stop() {
 	log.Printf("[INFO] stop REST server")
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
-	api.lock.Lock()
-	if api.httpServer != nil {
-		if err := api.httpServer.Shutdown(ctx); err != nil {
+	r.lock.Lock()
+	if r.httpServer != nil {
+		if err := r.httpServer.Shutdown(ctx); err != nil {
 			log.Printf("[ERROR] REST stop error, %s", err)
 		}
 	}
 	log.Print("[INFO] REST server stopped")
-	api.lock.Unlock()
+	r.lock.Unlock()
 }
 
 // Router returns router
-func (api *APIRouter) Router() chi.Router {
+func (r *APIRouter) Router() chi.Router {
 	router := chi.NewRouter()
 	router.Use(middleware.RealIP)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Throttle(1000))
 	router.Use(middleware.Timeout(60 * time.Second))
 	router.Use(middleware.Heartbeat("/ping"))
-	router.Use(ServiceInfo("Toggly", api.Version))
-	router.Route(api.BasePath, api.versions)
-	if api.IsDebug {
+	router.Use(ServiceInfo("Toggly", r.Version))
+	router.Route(r.BasePath, r.versions)
+	if r.IsDebug {
 		log.Print("[DEBUG] Profiler enabled on /debug path")
 		router.Mount("/debug", middleware.Profiler())
 	}
 	return router
 }
 
-func (api *APIRouter) versions(r chi.Router) {
-	r.Route("/v1", api.v1)
+func (r *APIRouter) versions(router chi.Router) {
+	router.Route("/v1", r.v1)
 }
 
-func (api *APIRouter) v1(r chi.Router) {
-	r.Use(middleware.Logger)
-	r.Use(RequestIDCtx)
-	r.Use(OwnerCtx)
-	r.Use(VersionCtx("v1"))
-	r.Mount("/project", (&ProjectRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
-	r.Mount("/project/{project_code}/env", (&EnvironmentRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
-	r.Mount("/project/{project_code}/env/{env_code}/object", (&ObjectRestAPI{Cache: api.Cache, Engine: api.Engine}).Routes())
+func (r *APIRouter) v1(router chi.Router) {
+	router.Use(middleware.Logger)
+	router.Use(RequestIDCtx)
+	router.Use(OwnerCtx)
+	router.Use(VersionCtx("v1"))
+	router.Mount("/project", (&ProjectRestAPI{API: r.API}).Routes())
+	router.Mount("/project/{project_code}/env", (&EnvironmentRestAPI{API: r.API}).Routes())
+	router.Mount("/project/{project_code}/env/{env_code}/object", (&ObjectRestAPI{API: r.API}).Routes())
 }
 
 func owner(r *http.Request) string {
