@@ -40,6 +40,8 @@ See [Docker Store](https://store.docker.com/community/images/toggly/toggly-serve
 
 #### Docker Compose
 
+See [`docker-compose.yml`](docker-compose.yml) file for details
+
 ```bash
 docker-compose up -d
 ```
@@ -96,7 +98,7 @@ Toggly supports plugins for caching layer. Plugins implementation base on native
 
 By default `in-memory` plugin is available.
 
-To use in-memory cache plugin `so` file has to be compiled:
+To use in-memory cache plugin `.so` file has to be compiled:
 
 ```bash
 go build -buildmode=plugin -o in-memory-cache.so ./internal/plugin/in-memory-cache/cache.go
