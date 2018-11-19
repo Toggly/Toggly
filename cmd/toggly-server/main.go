@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"plugin"
 	"strings"
 	"syscall"
 
@@ -25,39 +26,20 @@ var revision = "development" //revision assigned on build
 // Opts describes application command line arguments
 type Opts struct {
 	Toggly struct {
-		Port     int    `short:"p" long:"port" env:"API_PORT" default:"8080" description:"port"`
+		Version  bool   `short:"v" long:"version"`
+		Port     int    `short:"p" long:"port" env:"API_PORT" default:"8080" description:"Port"`
 		BasePath string `long:"base-path" env:"API_BASE_PATH" default:"/api" description:"Base API Path"`
-		Debug    bool   `long:"debug" description:"Run in DEBUG mode"`
+		NoLogo   bool   `long:"no-logo" description:"Do not show application logo"`
 		Store    struct {
 			Mongo struct {
-				URL string `long:"url" env:"URL" description:"mongo connection url"`
+				URL string `long:"url" env:"URL" description:"Mongo connection url"`
 			} `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
 		} `group:"store" namespace:"store" env-namespace:"STORE"`
-		Cache struct {
-			Disabled bool `long:"disable" description:"Disable cache" env:"DISABLE"`
-			InMemory bool `long:"in-memory" description:"In-memory cache. Do not use for production. Only for development purposes." env:"IN_MEMORY"`
-			Redis    struct {
-				URL string `long:"url" env:"URL" description:"redis connection url"`
-			} `group:"redis" namespace:"redis" env-namespace:"REDIS"`
-		} `group:"cache" namespace:"cache" env-namespace:"CACHE"`
+		Cache string `long:"cache-plugin" env:"CACHE_PLUGIN" description:"Cache plugin file.\n Skip '-cache.so' suffix.\n For example: '--cache-plugin=in-memory' will lookup 'in-memory-cache.so' file.\n"`
 	} `group:"toggly" env-namespace:"TOGGLY"`
 }
 
 func main() {
-
-	fmt.Println(`
-::::::::::: ::::::::   ::::::::   ::::::::  :::     :::   ::: 
-    :+:    :+:    :+: :+:    :+: :+:    :+: :+:     :+:   :+: 
-    +:+    +:+    +:+ +:+        +:+        +:+      +:+ +:+  
-    +#+    +#+    +:+ :#:        :#:        +#+       +#++:   
-    +#+    +#+    +#+ +#+   +#+# +#+   +#+# +#+        +#+    
-    #+#    #+#    #+# #+#    #+# #+#    #+# #+#        #+#    
-    ###     ########   ########   ########  ########## ###    
-	`)
-	fmt.Println(centeredText("-= Core API Server =-", 63))
-	fmt.Println(centeredText(fmt.Sprintf("ver: %s", revision), 63))
-	fmt.Print("--------------------------------------------------------------\n\n")
-
 	var dataStorage storage.DataStorage
 	var dataCache cache.DataCache
 	var err error
@@ -65,6 +47,26 @@ func main() {
 	var opts Opts
 	if _, err = flags.NewParser(&opts, flags.Default).ParseArgs(os.Args[1:]); err != nil {
 		os.Exit(0)
+	}
+
+	if opts.Toggly.Version {
+		fmt.Printf("Toggly Server ver: %s\n", revision)
+		os.Exit(0)
+	}
+
+	if !opts.Toggly.NoLogo {
+		fmt.Println(`
+::::::::::: ::::::::   ::::::::   ::::::::  :::     :::   ::: 
+    :+:    :+:    :+: :+:    :+: :+:    :+: :+:     :+:   :+: 
+    +:+    +:+    +:+ +:+        +:+        +:+      +:+ +:+  
+    +#+    +#+    +:+ :#:        :#:        +#+       +#++:   
+    +#+    +#+    +#+ +#+   +#+# +#+   +#+# +#+        +#+    
+    #+#    #+#    #+# #+#    #+# #+#    #+# #+#        #+#    
+    ###     ########   ########   ########  ########## ###    
+			`)
+		fmt.Println(centeredText("-= Core API Server =-", 63))
+		fmt.Println(centeredText(fmt.Sprintf("ver: %s", revision), 63))
+		fmt.Print("--------------------------------------------------------------\n\n")
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -77,17 +79,23 @@ func main() {
 		cancel()
 	}()
 
-	if opts.Toggly.Cache.Disabled {
-		log.Print("[WARN] Cache disabled")
+	if opts.Toggly.Cache == "" {
+		log.Print("[WARN] No cache plugin specified. Cache disabled.")
 	} else {
-		if opts.Toggly.Cache.InMemory {
-			if dataCache, err = cache.NewHashMapCache(); err != nil {
-				log.Fatalf("[FATAL] Can't connect to cache service: %v", err)
-			}
-			log.Print("[WARN] In-memory cache used")
-		} else {
-			log.Fatal("[FATAL] Only in-memory cache is available now. Use `--cache.in-memory` or `--cache.disable` flag.")
+		srcFile := opts.Toggly.Cache + "-cache.so"
+		plug, err := plugin.Open(srcFile)
+		if err != nil {
+			log.Fatalf("Can't load plugin source `%s`: %v", srcFile, err)
 		}
+		getCache, err := plug.Lookup("GetCache")
+		if err != nil {
+			log.Fatalf("Can't lookup GetCache function in plugin source: %v", err)
+		}
+		fn, ok := getCache.(func() cache.DataCache)
+		if !ok {
+			log.Fatalf("Can't cast GetCache function to `func() DataCache` interface")
+		}
+		dataCache = fn()
 	}
 
 	if dataStorage, err = mongo.NewMongoStorage(opts.Toggly.Store.Mongo.URL); err != nil {
@@ -100,7 +108,7 @@ func main() {
 			API:      cachedapi.NewCachedAPI(engine.NewTogglyAPI(&dataStorage), dataCache),
 			BasePath: opts.Toggly.BasePath,
 			Port:     opts.Toggly.Port,
-			IsDebug:  opts.Toggly.Debug,
+			IsDebug:  false,
 		},
 	}
 

@@ -18,7 +18,9 @@ func getEngineAndCache() (api.TogglyAPI, cache.DataCache) {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-	dataCache, err := cache.NewHashMapCache()
+	dataCache := &cache.InMemoryCache{
+		Storage: make(map[string][]byte, 0),
+	}
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
