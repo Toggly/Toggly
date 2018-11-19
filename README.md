@@ -1,5 +1,21 @@
 # Toggly
 
+- [Toggly](#toggly)
+  - [Description](#description)
+  - [Features](#features)
+  - [API](#api)
+  - [Usage](#usage)
+    - [Docker](#docker)
+      - [Docker Compose](#docker-compose)
+      - [Docker Run](#docker-run)
+    - [Parameters](#parameters)
+  - [Installation](#installation)
+  - [Build Docker image](#build-docker-image)
+  - [Development](#development)
+    - [Plugins](#plugins)
+
+## Description
+
 Toggle provides service for feature-flag/parameters based applications.
 Toggly API allows organizing your project configuration as standalone flexible and reliable service.
 
@@ -9,48 +25,55 @@ Toggly API allows organizing your project configuration as standalone flexible a
 - Multiple environment for each project
 - Different parameter types (bool, int, string, enum)
 - Flags/Properties inheritance
+- MongoDB as a storage
+- Cache layer plugins
 
 ## API
 
-See public [OpenAPI specification](https://app.swaggerhub.com/apis-docs/Toggly/Core/1.0.0)
+See public [OpenAPI specification](https://app.swaggerhub.com/apis-docs/Toggly/Core/1.0.0).
 
 ## Usage
 
 ### Docker
 
+See [Docker Store](https://store.docker.com/community/images/toggly/toggly-server) for details.
+
+#### Docker Compose
+
 ```bash
+docker-compose up -d
+```
+
+#### Docker Run
+
+```bash
+# Start MongoDB server
 docker run -it -v mongo:/data --network toggly --name mongo -p 27017:27017 -d mongo
 
-docker run -it --network toggly --name toggly-server -p 9090:8080 -d toggly/toggly-server --store.mongo.url=mongodb://mongo:27017/toggly
+# Start Toggly server
+docker run -it --network toggly --name toggly-server -p 8080:8080 -d toggly/toggly-server --store.mongo.url=mongodb://mongo:27017/toggly
 ```
 
-```bash
-Usage:
-  toggly-server [OPTIONS]
+### Parameters
 
-toggly:
-  -p, --port=            port (default: 8080) [$TOGGLY_API_PORT]
-      --base-path=       Base API Path (default: /api) [$TOGGLY_API_BASE_PATH]
-      --debug            Run in DEBUG mode
-
-mongo:
-      --store.mongo.url= mongo connection url [$TOGGLY_STORE_MONGO_URL]
-
-cache:
-      --cache.disable    Disable cache [$TOGGLY_CACHE_DISABLE]
-      --cache.in-memory  In-memory cache. Do not use for production. Only for development purposes. [$TOGGLY_CACHE_IN_MEMORY]
-
-redis:
-      --cache.redis.url= redis connection url [$TOGGLY_CACHE_REDIS_URL]
-
-Help Options:
-  -h, --help             Show this help message
-```
+| Short | Long              | Environment              | Default | Description                                                                                                                |
+| ----- | ----------------- | ------------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------- |
+| -v    | --version         |                          |         | Version                                                                                                                    |
+| -p    | --port            | `TOGGLY_API_PORT`        | `8080`  | Port                                                                                                                       |
+|       | --base-path       | `TOGGLY_API_BASE_PATH`   | `/api`  | Base API Path                                                                                                              |
+|       | --no-logo         |                          | `false` | Do not show application logo                                                                                               |
+|       | --cache-plugin    | `TOGGLY_CACHE_PLUGIN`    |         | Cache plugin file. Skip `-cache.so` suffix. For example: `--cache-plugin=in-memory` will lookup `in-memory-cache.so` file. |
+|       | --store.mongo.url | `TOGGLY_STORE_MONGO_URL` |         | Mongo connection url                                                                                                       |
+| -h    | --help            |                          |         | Show help message                                                                                                          |
 
 ## Installation
 
 ```bash
 cd cmd/toggly-server && go install
+```
+
+```bash
+toggly-server --version
 ```
 
 ## Build Docker image
@@ -66,3 +89,33 @@ To development run:
 ```bash
 go run cmd/toggly-server/main.go
 ```
+
+### Plugins
+
+Toggly supports plugins for caching layer. Plugins implementation base on native [Go plugin system](https://golang.org/pkg/plugin/)
+
+By default `in-memory` plugin is available.
+
+To use in-memory cache plugin `so` file has to be compiled:
+
+```bash
+go build -buildmode=plugin -o in-memory-cache.so ./internal/plugin/in-memory-cache/cache.go
+```
+
+Than use `--cache-plugin` option to enable caching:
+
+```bash
+toggly-server --cache-plugin=in-memory
+```
+
+To create your own plugin (for example for using Redis or Memcache) you have to implement [DataCache](internal/pkg/cache/cache.go) interface:
+
+```go
+type DataCache interface {
+	Get(key string) ([]byte, error)
+	Set(key string, data []byte) error
+	Flush(scopes ...string)
+}
+```
+
+Plugin package has to export `func GetCache() DataCache` function. See [in-memory-cache](internal/plugin/in-memory-cache/cache.go) as a reference.
