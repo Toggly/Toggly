@@ -2,7 +2,7 @@ openapi: 3.0.0
 servers:
 # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
-    url: https://virtserver.swaggerhub.com/Toggly/Core/1.0.0
+    url: https://virtserver.swaggerhub.com/Toggly/toggly-server/1.0.0
   - url: /v1
     description: V1
 
@@ -403,6 +403,38 @@ paths:
         '404':
           description: project|environment|object not found
 
+
+  '/project/{project_code}/env/{env_code}/object/{obj_code}/inheritors':
+  
+    get:
+      summary: List of objects for environment
+      tags:
+        - Object
+      security: 
+        - ApiKeyAuth: []
+      parameters: 
+        - $ref: '#/components/parameters/ownerId'
+        - $ref: '#/components/parameters/requestId'
+        - $ref: '#/components/parameters/projectCode'
+        - $ref: '#/components/parameters/envCode'
+        - $ref: '#/components/parameters/objectCode'
+      responses:
+        '200':
+          description: list of objects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objects:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ObjectResponse'
+        '400':
+          description: bad request
+        '404':
+          description: project|environment not found
+          
 components:
 
   securitySchemes:

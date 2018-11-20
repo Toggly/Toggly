@@ -1,0 +1,20 @@
+language: go
+
+go:
+  - "1.11.x"
+
+services:
+  - mongodb
+
+env:
+  - TOGGLY_STORE_MONGO_URL=mongodb://127.0.0.1:27017/toggly
+
+install:
+  - docker --version
+
+before_script:
+  - sleep 15
+
+script:
+  - go test ./...
+  - docker build .
