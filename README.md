@@ -22,7 +22,7 @@ Toggly API allows organizing your project configuration as standalone flexible a
 ## Features
 
 - Multiple projects
-- Multiple environment for each project
+- Multiple environments for each project
 - Different parameter types (bool, int, string, enum)
 - Flags/Properties inheritance
 - MongoDB as a storage
