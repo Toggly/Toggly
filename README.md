@@ -19,6 +19,8 @@
 Toggle provides service for feature-flag/parameters based applications.
 Toggly API allows organizing your project configuration as standalone flexible and reliable service.
 
+See [GitHub repository](https://github.com/Toggly/core) for reference.
+
 ## Features
 
 - Multiple projects
@@ -40,7 +42,7 @@ See [Docker Store](https://store.docker.com/community/images/toggly/toggly-serve
 
 #### Docker Compose
 
-See [`docker-compose.yml`](docker-compose.yml) file for details
+See [`docker-compose.yml`](https://github.com/Toggly/core/blob/master/docker-compose.yml) file for details
 
 ```bash
 docker-compose up -d
@@ -110,7 +112,7 @@ Than use `--cache-plugin` option to enable caching:
 toggly-server --cache-plugin=in-memory
 ```
 
-To create your own plugin (for example for using Redis or Memcache) you have to implement [DataCache](internal/pkg/cache/cache.go) interface:
+To create your own plugin (for example for using Redis or Memcache) you have to implement [DataCache](https://github.com/Toggly/core/blob/master/internal/pkg/cache/cache.go) interface:
 
 ```go
 type DataCache interface {
@@ -120,4 +122,4 @@ type DataCache interface {
 }
 ```
 
-Plugin package has to export `func GetCache() DataCache` function. See [in-memory-cache](internal/plugin/in-memory-cache/cache.go) as a reference.
+Plugin package has to export `func GetCache() DataCache` function. See [in-memory-cache](https://github.com/Toggly/core/blob/master/internal/pkg/cache/in_memory.go) as a reference.
