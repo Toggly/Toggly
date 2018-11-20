@@ -26,7 +26,7 @@ func TestProject(t *testing.T) {
 	assert.Equal(api.ErrProjectNotFound, err)
 	assert.Nil(pr)
 
-	pr, err = pApi.Update(&api.ProjectInfo{Code: ProjectCode})
+	pr, err = pApi.Update(&api.ProjectInfo{Code: ProjectCode, Status: domain.ProjectStatusActive})
 	assert.Equal(api.ErrProjectNotFound, err)
 	assert.Nil(pr)
 
@@ -34,6 +34,14 @@ func TestProject(t *testing.T) {
 	assert.Equal(api.ErrProjectNotFound, err)
 
 	pr, err = pApi.Create(&api.ProjectInfo{Description: "Description 1"})
+	assert.IsType(&api.ErrBadRequest{}, err)
+	assert.Nil(pr)
+
+	pr, err = pApi.Create(&api.ProjectInfo{
+		Code:        ProjectCode,
+		Description: "Description 1",
+		Status:      "wrong_status",
+	})
 	assert.IsType(&api.ErrBadRequest{}, err)
 	assert.Nil(pr)
 
@@ -53,7 +61,7 @@ func TestProject(t *testing.T) {
 	pl, err = pApi.List()
 	assert.Len(pl, 1)
 
-	_, err = pApi.Create(&api.ProjectInfo{Code: ProjectCode})
+	_, err = pApi.Create(&api.ProjectInfo{Code: ProjectCode, Status: domain.ProjectStatusActive})
 	assert.NotNil(err)
 	assert.IsType(&storage.UniqueIndexError{}, err)
 

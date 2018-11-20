@@ -22,7 +22,7 @@ Toggly API allows organizing your project configuration as standalone flexible a
 ## Features
 
 - Multiple projects
-- Multiple environment for each project
+- Multiple environments for each project
 - Different parameter types (bool, int, string, enum)
 - Flags/Properties inheritance
 - MongoDB as a storage
@@ -53,7 +53,7 @@ docker-compose up -d
 docker run -it -v mongo:/data --network toggly --name mongo -p 27017:27017 -d mongo
 
 # Start Toggly server
-docker run -it --network toggly --name toggly-server -p 8080:8080 -d toggly/toggly-server --store.mongo.url=mongodb://mongo:27017/toggly
+docker run -it --network toggly --name toggly-server -p 8080:8080 -d toggly/toggly-server --store.mongo.url=mongodb://mongo:27017/toggly --cache-plugin=in-memory
 ```
 
 ### Parameters
@@ -114,9 +114,9 @@ To create your own plugin (for example for using Redis or Memcache) you have to 
 
 ```go
 type DataCache interface {
-	Get(key string) ([]byte, error)
-	Set(key string, data []byte) error
-	Flush(scopes ...string)
+    Get(key string) ([]byte, error)
+    Set(key string, data []byte) error
+    Flush(scopes ...string)
 }
 ```
 
