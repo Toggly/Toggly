@@ -123,51 +123,65 @@ See public [OpenAPI specification](https://app.swaggerhub.com/apis-docs/Toggly/t
 
 ```json
 {
-    "owner": "owner1",                     //string
-    "code": "project1",                    //string
-    "description": "Project description",  //string
-    "status": "active",                    //string `active` or `disabled`
-    "reg_date": "2018-10-12T23:47:18.967Z" //string date in ISO 8601 format
+    "owner": "owner1",
+    "code": "project1",
+    "description": "Project description",
+    "status": "active",
+    "reg_date": "2018-10-12T23:47:18.967Z"
 }
 ```
+
+Where:
+
+- `status` can be _active_ or _disabled_
+- `reg_date` is date in ISO 8601 format
 
 #### Environment model
 
 ```json
 {
-    "owner": "owner1",                        //string
-    "project_code": "project1",               //string
-    "code": "dev",                            //string
-    "description": "Development environment", //string
-    "protected": false,                       //bool
-    "reg_date": "2018-10-12T23:47:18.967Z"    //string date in ISO 8601 format
+    "owner": "owner1",
+    "project_code": "project1",
+    "code": "dev",
+    "description": "Development environment",
+    "protected": false,
+    "reg_date": "2018-10-12T23:47:18.967Z"
 }
 ```
+
+Where:
+
+- `reg_date` is date in ISO 8601 format
 
 #### Object model
 
 ```json
 {
-    "code": "user",                        //string
-    "owner": "owner1",                     //string
-    "project_code": "project1",            //string
-    "env_code": "env1",                    //string
-    "description": "Object 1 description", //string
+    "code": "user",
+    "owner": "owner1",
+    "project_code": "project1",
+    "env_code": "env1",
+    "description": "Object 1 description",
     "inherits": {
-        "project_code": "project1",        //string
-        "env_code": "env1",                //string
-        "object_code": "obj0"              //string
+        "project_code": "project1",
+        "env_code": "env1",
+        "object_code": "obj0"
     },
     "parameters": [
         {
-            "code": "parameter1",          //string
-            "description": "Parameter 1",  //string
-            "type": "bool",                //string `bool`, `int`, `string`
-            "value": false                 //depends on type
+            "code": "parameter1",
+            "description": "Parameter 1",
+            "type": "bool",
+            "value": false
         }
     ]
 }
 ```
+
+Where:
+
+- `parameters.type` can be _boot_, _int_ or _string_
+- `parameters.value` depends on type
 
 ### Request headers
 
