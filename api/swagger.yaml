@@ -37,12 +37,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  projects:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ProjectResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProjectResponse'
         '404':
           description: not found
         '400':
@@ -162,12 +159,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  environments:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/EnvironmentResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/EnvironmentResponse'
         '404':
           description: not found
 
@@ -247,7 +241,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/EnvironmentResponse'
-        '400':
+        '404':
           description: project not found
 
     delete:
@@ -291,12 +285,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  objects:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ObjectResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ObjectResponse'
         '400':
           description: bad request
         '404':
@@ -424,12 +415,9 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  objects:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/ObjectResponse'
+                type: array
+                items:
+                  $ref: '#/components/schemas/ObjectResponse'
         '400':
           description: bad request
         '404':

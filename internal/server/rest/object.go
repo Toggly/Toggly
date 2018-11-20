@@ -65,10 +65,7 @@ func (a *ObjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	response := map[string]interface{}{
-		"objects": list,
-	}
-	JSONResponse(w, r, response)
+	JSONResponse(w, r, list)
 }
 
 func (a *ObjectRestAPI) getObject(w http.ResponseWriter, r *http.Request) {
@@ -97,10 +94,7 @@ func (a *ObjectRestAPI) getObjectInheritors(w http.ResponseWriter, r *http.Reque
 		ErrorResponse(w, r, err, http.StatusInternalServerError)
 		return
 	}
-	response := map[string]interface{}{
-		"inheritors": list,
-	}
-	JSONResponse(w, r, response)
+	JSONResponse(w, r, list)
 }
 
 func (a *ObjectRestAPI) deleteObject(w http.ResponseWriter, r *http.Request) {

@@ -61,10 +61,7 @@ func (a *EnvironmentRestAPI) list(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	response := map[string]interface{}{
-		"environments": list,
-	}
-	JSONResponse(w, r, response)
+	JSONResponse(w, r, list)
 }
 
 func (a *EnvironmentRestAPI) getEnvironment(w http.ResponseWriter, r *http.Request) {

@@ -24,7 +24,8 @@ func TestRestObject(t *testing.T) {
 			path:   "/api/v1/project/project2/env/env1/object",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Project not found", b["error"])
 			},
@@ -35,7 +36,8 @@ func TestRestObject(t *testing.T) {
 			path:   "/api/v1/project/project1/env/env2/object",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Environment not found", b["error"])
 			},
@@ -47,7 +49,8 @@ func TestRestObject(t *testing.T) {
 			path:   "/api/v1/project/project2/env/env1/object/obj1",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Project not found", b["error"])
 			},
@@ -58,7 +61,8 @@ func TestRestObject(t *testing.T) {
 			path:   "/api/v1/project/project1/env/env2/object/obj1",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Environment not found", b["error"])
 			},
@@ -74,7 +78,8 @@ func TestRestObject(t *testing.T) {
 			},
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Project not found", b["error"])
 			},
@@ -89,7 +94,8 @@ func TestRestObject(t *testing.T) {
 			},
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Environment not found", b["error"])
 			},
@@ -101,7 +107,8 @@ func TestRestObject(t *testing.T) {
 			path:   "/api/v1/project/project2/env/env1/object/obj1",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Project not found", b["error"])
 			},
@@ -112,7 +119,8 @@ func TestRestObject(t *testing.T) {
 			path:   "/api/v1/project/project1/env/env2/object/obj1",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Environment not found", b["error"])
 			},
@@ -124,9 +132,10 @@ func TestRestObject(t *testing.T) {
 			path:   "/api/v1/project/project1/env/env1/object",
 			status: http.StatusOK,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b []*domain.Object
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
-				assert.Empty(b["objects"])
+				assert.Empty(b)
 			},
 		},
 		{
@@ -135,7 +144,8 @@ func TestRestObject(t *testing.T) {
 			path:   "/api/v1/project/project1/env/env1/object/obj1",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Object not found", b["error"])
 			},
@@ -167,7 +177,8 @@ func TestRestObject(t *testing.T) {
 			},
 			status: http.StatusBadRequest,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Object parrent does not exists", b["error"])
 			},
@@ -204,7 +215,8 @@ func TestRestObject(t *testing.T) {
 			},
 			status: http.StatusBadRequest,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Unique index error: Object [env_code: env1, code: obj1]", b["error"])
 			},
@@ -232,7 +244,8 @@ func TestRestObject(t *testing.T) {
 			},
 			status: http.StatusBadRequest,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Object inheritor parameter type mismatch", b["error"])
 			},
@@ -290,7 +303,8 @@ func TestRestObject(t *testing.T) {
 			},
 			status: http.StatusBadRequest,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Object parameter `param1` error: Object parameter type changing restricted", b["error"])
 			},
@@ -312,7 +326,8 @@ func TestRestObject(t *testing.T) {
 			},
 			status: http.StatusBadRequest,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Object parameter `param2` error: Object parameter exists in inheritor: project1:env1:obj2", b["error"])
 			},
@@ -326,7 +341,8 @@ func TestRestObject(t *testing.T) {
 			},
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Object not found", b["error"])
 			},
@@ -343,7 +359,8 @@ func TestRestObject(t *testing.T) {
 			path:   "/api/v1/project/project1/env/env1/object/obj1",
 			status: http.StatusLocked,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Object has inheritors", b["error"])
 			},
@@ -354,8 +371,9 @@ func TestRestObject(t *testing.T) {
 			path:   "/api/v1/project/project1/env/env1/object/obj1/inheritors",
 			status: http.StatusOK,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
-				assert.Len(b["inheritors"], 1)
+				var b []*domain.Object
+				err := parseBodyTo(body, &b)
+				assert.Len(b, 1)
 				assert.Nil(err)
 			},
 		},
