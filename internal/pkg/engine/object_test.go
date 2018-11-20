@@ -164,7 +164,7 @@ func TestObjects(t *testing.T) {
 		Code:        "obj1",
 		Description: "Obj description",
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:        "param1",
 				Description: "Param 1",
 			},
@@ -176,7 +176,7 @@ func TestObjects(t *testing.T) {
 		Code:        "obj1",
 		Description: "Obj description",
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:        "param1",
 				Description: "Param 1",
 				Type:        domain.ParameterBool,
@@ -189,7 +189,7 @@ func TestObjects(t *testing.T) {
 		Code:        "obj1",
 		Description: "Obj description",
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:        "param1",
 				Description: "Param 1",
 				Type:        "wrong_type",
@@ -229,7 +229,7 @@ func TestObjects(t *testing.T) {
 	assert.Empty(obj.Parameters)
 
 	params := []*domain.Parameter{
-		&domain.Parameter{
+		{
 			Code:        "param1",
 			Description: "Param 1",
 			Type:        domain.ParameterBool,
@@ -307,13 +307,13 @@ func TestObjectsInheritance(t *testing.T) {
 	objApi.Create(&api.ObjectInfo{
 		Code: "obj1",
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:        "param1",
 				Description: "Param 1",
 				Type:        domain.ParameterBool,
 				Value:       true,
 			},
-			&domain.Parameter{
+			{
 				Code:        "param2",
 				Description: "Param 2",
 				Type:        domain.ParameterBool,
@@ -330,13 +330,13 @@ func TestObjectsInheritance(t *testing.T) {
 			ObjectCode:  "obj1",
 		},
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:        "param2",
 				Description: "Param 2 Child has to be overridden by original",
 				Type:        domain.ParameterBool,
 				Value:       false,
 			},
-			&domain.Parameter{
+			{
 				Code:        "param3",
 				Description: "Param 3",
 				Type:        domain.ParameterString,
@@ -371,7 +371,7 @@ func TestObjectsInheritance(t *testing.T) {
 		Code:     "obj3",
 		Inherits: &domain.ObjectInheritance{ProjectCode: ProjectCode, EnvCode: envCode, ObjectCode: "obj1"},
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:        "param2",
 				Description: "Param 2",
 				Type:        domain.ParameterString,
@@ -385,7 +385,7 @@ func TestObjectsInheritance(t *testing.T) {
 		Code:     "obj3",
 		Inherits: &domain.ObjectInheritance{ProjectCode: ProjectCode, EnvCode: envCode, ObjectCode: "obj2"},
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:        "param3",
 				Description: "Param 3 will be overridden",
 				Type:        domain.ParameterString,
@@ -449,7 +449,7 @@ func TestObjectsParameterInheritance(t *testing.T) {
 	_, err := objApi.Create(&api.ObjectInfo{
 		Code: "obj1",
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:  "param1",
 				Type:  domain.ParameterBool,
 				Value: true,
@@ -462,7 +462,7 @@ func TestObjectsParameterInheritance(t *testing.T) {
 		Code:     "obj2",
 		Inherits: &domain.ObjectInheritance{ProjectCode: ProjectCode, EnvCode: envCode, ObjectCode: "obj1"},
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:  "param1",
 				Type:  domain.ParameterBool,
 				Value: false,
@@ -475,7 +475,7 @@ func TestObjectsParameterInheritance(t *testing.T) {
 		Code:     "obj3",
 		Inherits: &domain.ObjectInheritance{ProjectCode: ProjectCode, EnvCode: envCode, ObjectCode: "obj2"},
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:  "param2",
 				Type:  domain.ParameterString,
 				Value: "value",
@@ -487,7 +487,7 @@ func TestObjectsParameterInheritance(t *testing.T) {
 	_, err = objApi.Update(&api.ObjectInfo{
 		Code: "obj1",
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:  "param1",
 				Type:  domain.ParameterString,
 				Value: "value",
@@ -505,7 +505,7 @@ func TestObjectsParameterInheritance(t *testing.T) {
 
 	_, err = objApi.Update(&api.ObjectInfo{
 		Code: "obj1",
-		Parameters: []*domain.Parameter{&domain.Parameter{
+		Parameters: []*domain.Parameter{{
 			Code:  "param1",
 			Type:  domain.ParameterString,
 			Value: "value",
@@ -517,7 +517,7 @@ func TestObjectsParameterInheritance(t *testing.T) {
 	_, err = objApi.Update(&api.ObjectInfo{
 		Code: "obj1",
 		Parameters: []*domain.Parameter{
-			&domain.Parameter{
+			{
 				Code:  "param2",
 				Type:  domain.ParameterBool,
 				Value: false,
