@@ -16,5 +16,6 @@ before_script:
   - sleep 15
 
 script:
-  - go test ./...
+  - go test -v -covermode=count -coverprofile=coverage.out 
+  - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
   - docker build .
