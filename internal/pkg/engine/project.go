@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/Toggly/core/internal/api"
@@ -35,6 +36,9 @@ func (p *ProjectAPI) Get(code domain.ProjectCode) (*domain.Project, error) {
 func checkProjectParams(code domain.ProjectCode, description string, status domain.ProjectStatus) error {
 	if code == "" {
 		return api.NewBadRequestError("Project code not specified")
+	}
+	if status != domain.ProjectStatusActive && status != domain.ProjectStatusDisabled {
+		return api.NewBadRequestError(fmt.Sprintf("Project status can be `%s` or `%s`", domain.ProjectStatusActive, domain.ProjectStatusDisabled))
 	}
 	return nil
 }

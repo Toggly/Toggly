@@ -22,7 +22,7 @@ func TestProjectCaching(t *testing.T) {
 	assert.Nil(err)
 	assert.Nil(b)
 
-	eng.Create(&api.ProjectInfo{Code: "project1", Description: "Description 1"})
+	eng.Create(&api.ProjectInfo{Code: "project1", Description: "Description 1", Status: domain.ProjectStatusActive})
 	b, err = cache.Get("/own/ow1/project")
 	assert.Nil(err)
 	assert.Nil(b)
@@ -54,7 +54,7 @@ func TestProjectCaching(t *testing.T) {
 	assert.Equal(domain.ProjectCode("project1"), proj.Code)
 	assert.Equal("Description 1", proj.Description)
 
-	eng.Update(&api.ProjectInfo{Code: "project1", Description: "Description 2"})
+	eng.Update(&api.ProjectInfo{Code: "project1", Description: "Description 2", Status: domain.ProjectStatusActive})
 	b, err = cache.Get("/own/ow1/project")
 	assert.Nil(err)
 	assert.Nil(b)

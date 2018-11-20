@@ -15,7 +15,7 @@ func TestEnvCaching(t *testing.T) {
 	BeforeTest()
 
 	engine, cache := getEngineAndCache()
-	engine.ForOwner("ow1").Projects().Create(&api.ProjectInfo{Code: "project1"})
+	engine.ForOwner("ow1").Projects().Create(&api.ProjectInfo{Code: "project1", Status: domain.ProjectStatusActive})
 	eng := engine.ForOwner("ow1").Projects().For("project1").Environments()
 
 	b, err := cache.Get("/own/ow1/project/project1/env")

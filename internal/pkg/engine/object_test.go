@@ -51,7 +51,7 @@ func TestObjectsWithNoEnvironment(t *testing.T) {
 	pApi := GetApi()
 	objApi := pApi.For(ProjectCode).Environments().For(envCode).Objects()
 
-	pApi.Create(&api.ProjectInfo{Code: ProjectCode})
+	pApi.Create(&api.ProjectInfo{Code: ProjectCode, Status: domain.ProjectStatusActive})
 
 	objList, err := objApi.List()
 	assert.Equal(api.ErrEnvironmentNotFound, err)
@@ -85,7 +85,7 @@ func TestObjectsCreateErrors(t *testing.T) {
 	envApi := pApi.For(ProjectCode).Environments()
 	objApi := envApi.For(envCode).Objects()
 
-	pApi.Create(&api.ProjectInfo{Code: ProjectCode})
+	pApi.Create(&api.ProjectInfo{Code: ProjectCode, Status: domain.ProjectStatusActive})
 	envApi.Create(&api.EnvironmentInfo{Code: envCode})
 
 	objList, err := objApi.List()
@@ -151,7 +151,7 @@ func TestObjects(t *testing.T) {
 	envApi := pApi.For(ProjectCode).Environments()
 	objApi := envApi.For(envCode).Objects()
 
-	pApi.Create(&api.ProjectInfo{Code: ProjectCode})
+	pApi.Create(&api.ProjectInfo{Code: ProjectCode, Status: domain.ProjectStatusActive})
 	envApi.Create(&api.EnvironmentInfo{Code: envCode})
 
 	_, err := objApi.Create(&api.ObjectInfo{Description: "Obj description"})
@@ -265,7 +265,7 @@ func TestObjectsDeleteWithInheritors(t *testing.T) {
 	envApi := pApi.For(ProjectCode).Environments()
 	objApi := envApi.For(envCode).Objects()
 
-	pApi.Create(&api.ProjectInfo{Code: ProjectCode})
+	pApi.Create(&api.ProjectInfo{Code: ProjectCode, Status: domain.ProjectStatusActive})
 	envApi.Create(&api.EnvironmentInfo{Code: envCode})
 
 	objApi.Create(&api.ObjectInfo{Code: "obj1"})
@@ -301,7 +301,7 @@ func TestObjectsInheritance(t *testing.T) {
 	envApi := pApi.For(ProjectCode).Environments()
 	objApi := envApi.For(envCode).Objects()
 
-	pApi.Create(&api.ProjectInfo{Code: ProjectCode})
+	pApi.Create(&api.ProjectInfo{Code: ProjectCode, Status: domain.ProjectStatusActive})
 	envApi.Create(&api.EnvironmentInfo{Code: envCode})
 
 	objApi.Create(&api.ObjectInfo{
@@ -443,7 +443,7 @@ func TestObjectsParameterInheritance(t *testing.T) {
 	envApi := pApi.For(ProjectCode).Environments()
 	objApi := envApi.For(envCode).Objects()
 
-	pApi.Create(&api.ProjectInfo{Code: ProjectCode})
+	pApi.Create(&api.ProjectInfo{Code: ProjectCode, Status: domain.ProjectStatusActive})
 	envApi.Create(&api.EnvironmentInfo{Code: envCode})
 
 	_, err := objApi.Create(&api.ObjectInfo{
