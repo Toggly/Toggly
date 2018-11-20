@@ -58,14 +58,6 @@ func AfterTest() {
 	DropDB()
 }
 
-func bodyJSON(body []byte) (map[string]interface{}, error) {
-	var dat map[string]interface{}
-	if err := json.Unmarshal(body, &dat); err != nil {
-		return nil, err
-	}
-	return dat, nil
-}
-
 func parseBodyTo(body []byte, obj interface{}) error {
 	if err := json.Unmarshal(body, obj); err != nil {
 		return err
@@ -151,7 +143,8 @@ func TestRestRequestHeaders(t *testing.T) {
 				req.Header[rest.XTogglyOwnerID] = nil
 			},
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Owner not found", b["error"])
 			},

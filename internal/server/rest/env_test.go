@@ -26,9 +26,10 @@ func TestRestEnvironment(t *testing.T) {
 			path:   "/api/v1/project/project1/env",
 			status: http.StatusOK,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b []*domain.Environment
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
-				assert.Empty(b["environments"])
+				assert.Empty(b)
 			},
 		},
 		{
@@ -37,7 +38,8 @@ func TestRestEnvironment(t *testing.T) {
 			path:   "/api/v1/project/project2/env",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Project not found", b["error"])
 			},
@@ -48,7 +50,8 @@ func TestRestEnvironment(t *testing.T) {
 			path:   "/api/v1/project/project1/env/env1",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Environment not found", b["error"])
 			},
@@ -59,7 +62,8 @@ func TestRestEnvironment(t *testing.T) {
 			path:   "/api/v1/project/project2/env/env1",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Project not found", b["error"])
 			},
@@ -71,7 +75,8 @@ func TestRestEnvironment(t *testing.T) {
 			body:   &rest.EnvironmentCreateRequest{},
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Project not found", b["error"])
 			},
@@ -83,7 +88,8 @@ func TestRestEnvironment(t *testing.T) {
 			body:   &rest.EnvironmentCreateRequest{},
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Project not found", b["error"])
 			},
@@ -94,7 +100,8 @@ func TestRestEnvironment(t *testing.T) {
 			path:   "/api/v1/project/project2/env/env1",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Project not found", b["error"])
 			},
@@ -146,7 +153,8 @@ func TestRestEnvironment(t *testing.T) {
 			},
 			status: http.StatusBadRequest,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Contains(b["error"], "Unique index error:")
 			},
@@ -175,7 +183,8 @@ func TestRestEnvironment(t *testing.T) {
 			},
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Environment not found", b["error"])
 			},
@@ -208,7 +217,8 @@ func TestRestEnvironment(t *testing.T) {
 			path:   "/api/v1/project/project1/env/env2",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal("Environment not found", b["error"])
 			},
@@ -230,7 +240,8 @@ func TestRestEnvironment(t *testing.T) {
 				rs.Client().Do(req)
 			},
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal(rest.ErrEnvironmentNotEmpty, b["error"])
 			},

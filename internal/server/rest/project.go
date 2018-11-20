@@ -58,10 +58,7 @@ func (a *ProjectRestAPI) list(w http.ResponseWriter, r *http.Request) {
 		ErrorResponse(w, r, err, http.StatusInternalServerError)
 		return
 	}
-	response := map[string]interface{}{
-		"projects": list,
-	}
-	JSONResponse(w, r, response)
+	JSONResponse(w, r, list)
 }
 
 func (a *ProjectRestAPI) getProject(w http.ResponseWriter, r *http.Request) {

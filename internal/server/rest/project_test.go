@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/Toggly/core/internal/domain"
-
 	"github.com/Toggly/core/internal/server/rest"
 	asserts "github.com/stretchr/testify/assert"
 )
@@ -27,9 +26,10 @@ func TestRestProject(t *testing.T) {
 			path:   "/api/v1/project",
 			status: http.StatusOK,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b []*domain.Project
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
-				assert.Empty(b["projects"])
+				assert.Empty(b)
 			},
 		},
 		{
@@ -38,7 +38,8 @@ func TestRestProject(t *testing.T) {
 			path:   "/api/v1/project/project1",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal(rest.ErrProjectNotFound, b["error"])
 			},
@@ -68,7 +69,7 @@ func TestRestProject(t *testing.T) {
 			},
 			validator: func(body []byte) {
 				b := &domain.Project{}
-				err := parseBodyTo(body, b)
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal(domain.ProjectCode("project1"), b.Code)
 				assert.Equal("Project 1", b.Description)
@@ -84,9 +85,10 @@ func TestRestProject(t *testing.T) {
 			path:   "/api/v1/project",
 			status: http.StatusOK,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b []*domain.Project
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
-				assert.Len(b["projects"], 1)
+				assert.Len(b, 1)
 			},
 		},
 		{
@@ -100,7 +102,8 @@ func TestRestProject(t *testing.T) {
 				Status:      domain.ProjectStatusActive,
 			},
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Contains(b["error"], "Unique index error:")
 			},
@@ -112,7 +115,7 @@ func TestRestProject(t *testing.T) {
 			status: http.StatusOK,
 			validator: func(body []byte) {
 				b := &domain.Project{}
-				err := parseBodyTo(body, b)
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal(domain.ProjectCode("project1"), b.Code)
 				assert.Equal("Project 1", b.Description)
@@ -132,7 +135,8 @@ func TestRestProject(t *testing.T) {
 				Status:      domain.ProjectStatusDisabled,
 			},
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal(rest.ErrProjectNotFound, b["error"])
 			},
@@ -149,7 +153,7 @@ func TestRestProject(t *testing.T) {
 			},
 			validator: func(body []byte) {
 				b := &domain.Project{}
-				err := parseBodyTo(body, b)
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal(domain.ProjectCode("project1"), b.Code)
 				assert.Equal("Project 1 Updated", b.Description)
@@ -164,7 +168,8 @@ func TestRestProject(t *testing.T) {
 			path:   "/api/v1/project/project2",
 			status: http.StatusNotFound,
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal(rest.ErrProjectNotFound, b["error"])
 			},
@@ -190,7 +195,8 @@ func TestRestProject(t *testing.T) {
 				rs.Client().Do(req)
 			},
 			validator: func(body []byte) {
-				b, err := bodyJSON(body)
+				var b map[string]interface{}
+				err := parseBodyTo(body, &b)
 				assert.Nil(err)
 				assert.Equal(rest.ErrProjectNotEmpty, b["error"])
 			},
