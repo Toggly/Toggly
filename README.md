@@ -1,18 +1,4 @@
-# Toggly
-
-- [Toggly](#toggly)
-  - [Description](#description)
-  - [Features](#features)
-  - [API](#api)
-  - [Usage](#usage)
-    - [Docker](#docker)
-      - [Docker Compose](#docker-compose)
-      - [Docker Run](#docker-run)
-    - [Parameters](#parameters)
-  - [Installation](#installation)
-  - [Build Docker image](#build-docker-image)
-  - [Development](#development)
-    - [Plugins](#plugins)
+# Toggly [![Go Report Card](https://goreportcard.com/badge/github.com/Toggly/core)](https://goreportcard.com/report/github.com/Toggly/core)
 
 ## Description
 

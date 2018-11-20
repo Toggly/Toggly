@@ -59,6 +59,7 @@ func TestProject(t *testing.T) {
 	assert.Equal(domain.ProjectStatusActive, pr.Status)
 
 	pl, err = pApi.List()
+	assert.Nil(err)
 	assert.Len(pl, 1)
 
 	_, err = pApi.Create(&api.ProjectInfo{Code: ProjectCode, Status: domain.ProjectStatusActive})
