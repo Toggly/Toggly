@@ -11,7 +11,9 @@ env:
 
 install:
   - docker --version
-
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+  
 before_script:
   - sleep 15
 
