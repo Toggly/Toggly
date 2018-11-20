@@ -19,6 +19,8 @@
 Toggle provides service for feature-flag/parameters based applications.
 Toggly API allows organizing your project configuration as standalone flexible and reliable service.
 
+See [GitHub repository](https://github.com/Toggly/core) for reference.
+
 ## Features
 
 - Multiple projects
