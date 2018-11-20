@@ -1,6 +1,17 @@
+language: go
+  go:
+    - "1.11.x"
+
 install:
   - docker --version
-  - docker-compose --version
+
+before_script:
+  - docker run -it --name mongo -p 27017:27017 -d mongo
 
 script:
+  - TOGGLY_STORE_MONGO_URL=mongodb://127.0.0.1:27017/toggly go test ./...
   - docker build .
+
+after_script:
+  - docker stop mongo
+  - docker rm mongo

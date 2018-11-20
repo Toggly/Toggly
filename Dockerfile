@@ -3,6 +3,12 @@ RUN apk update && apk add git gcc musl-dev
 WORKDIR /go/src/github.com/Toggly/core
 
 COPY . ./
+
+ADD cmd ./cmd
+ADD internal ./internal
+ADD vendor ./vendor
+ADD .git ./.git
+
 RUN version=$(git describe --always --tags) && \
     revision=${version}-$(date +%Y%m%d-%H:%M:%S) && \
     go build -buildmode=plugin -o in-memory-cache.so ./internal/plugin/in-memory-cache/cache.go && \

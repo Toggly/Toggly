@@ -1,6 +1,6 @@
 # Toggly
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/Toggly/core)](https://goreportcard.com/report/github.com/Toggly/core) [![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)](https://github.com/Toggly/core/tree/1.0.0) [![Docker](https://img.shields.io/badge/-Docker-blue.svg)](https://store.docker.com/community/images/toggly/toggly-server)
+[![Build Status](https://travis-ci.org/Toggly/core.svg?branch=master)](https://travis-ci.org/Toggly/core) [![Go Report Card](https://goreportcard.com/badge/github.com/Toggly/core)](https://goreportcard.com/report/github.com/Toggly/core) [![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)](https://github.com/Toggly/core/tree/1.0.0) [![Docker](https://img.shields.io/badge/-Docker-blue.svg)](https://store.docker.com/community/images/toggly/toggly-server)
 
 ## Description
 
