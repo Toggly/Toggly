@@ -7,3 +7,4 @@ sonar-report.json
 *.mongo
 toggly-server
 *.so
+coverage.out
