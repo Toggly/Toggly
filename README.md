@@ -1,11 +1,13 @@
-# Toggly [![Go Report Card](https://goreportcard.com/badge/github.com/Toggly/core)](https://goreportcard.com/report/github.com/Toggly/core)
+# Toggly
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/Toggly/core)](https://goreportcard.com/report/github.com/Toggly/core) [![Version](https://img.shields.io/badge/version-1.0.0-brightgreen.svg)](https://github.com/Toggly/core/tree/1.0.0) [![Docker](https://img.shields.io/badge/-Docker-blue.svg)](https://store.docker.com/community/images/toggly/toggly-server)
 
 ## Description
 
 Toggle provides service for feature-flag/parameters based applications.
 Toggly API allows organizing your project configuration as standalone flexible and reliable service.
 
-See [GitHub repository](https://github.com/Toggly/core) for reference.
+See [GitHub repository](https://github.com/Toggly/core) for source code.
 
 ## Features
 
@@ -16,9 +18,9 @@ See [GitHub repository](https://github.com/Toggly/core) for reference.
 - MongoDB as a storage
 - Cache layer plugins
 
-## API
+## REST API
 
-See public [OpenAPI specification](https://app.swaggerhub.com/apis-docs/Toggly/Core/1.0.0).
+See public [OpenAPI specification](https://app.swaggerhub.com/apis-docs/Toggly/toggly-server/1.0.0).
 
 ## Usage
 
