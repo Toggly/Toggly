@@ -114,9 +114,9 @@ To create your own plugin (for example for using Redis or Memcache) you have to 
 
 ```go
 type DataCache interface {
-	Get(key string) ([]byte, error)
-	Set(key string, data []byte) error
-	Flush(scopes ...string)
+    Get(key string) ([]byte, error)
+    Set(key string, data []byte) error
+    Flush(scopes ...string)
 }
 ```
 
