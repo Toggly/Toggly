@@ -6,7 +6,7 @@ import (
 
 	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
-	"github.com/Toggly/core/internal/pkg/cache"
+	"github.com/Toggly/core/pkg/cache"
 )
 
 type cachedProjectAPI struct {

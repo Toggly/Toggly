@@ -13,11 +13,11 @@ import (
 	"github.com/Toggly/core/internal/server"
 	"github.com/Toggly/core/internal/server/rest"
 
-	"github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/pkg/cache/cachedapi"
 	"github.com/Toggly/core/internal/pkg/engine"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/Toggly/core/internal/pkg/storage/mongo"
+	"github.com/Toggly/core/pkg/cache"
 	flags "github.com/jessevdk/go-flags"
 )
 
@@ -35,7 +35,12 @@ type Opts struct {
 				URL string `long:"url" env:"URL" description:"Mongo connection url"`
 			} `group:"mongo" namespace:"mongo" env-namespace:"MONGO"`
 		} `group:"store" namespace:"store" env-namespace:"STORE"`
-		Cache string `long:"cache-plugin" env:"CACHE_PLUGIN" description:"Cache plugin file.\n Skip '-cache.so' suffix.\n For example: '--cache-plugin=in-memory' will lookup 'in-memory-cache.so' file.\n"`
+		Cache struct {
+			Plugin struct {
+				Name       string            `long:"name" env:"NAME" description:"Cache plugin name.\n Skip '-cache.so' suffix.\nFor example: '--cache.plugin.name=in-memory' will lookup 'in-memory-cache.so' file.\n"`
+				Parameters map[string]string `long:"parameter" env:"PARAMETER" description:"Plugin parameter.\nFor example: '--cache.plugin.parameter=param:value'.\nMultiple entries supported.\n"`
+			} `group:"plugin" namespace:"plugin" env-namespace:"PLUGIN"`
+		} `group:"cache" namespace:"cache" env-namespace:"CACHE"`
 	} `group:"toggly" env-namespace:"TOGGLY"`
 }
 
@@ -79,10 +84,10 @@ func main() {
 		cancel()
 	}()
 
-	if opts.Toggly.Cache == "" {
+	if opts.Toggly.Cache.Plugin.Name == "" {
 		log.Print("[WARN] No cache plugin specified. Cache disabled.")
 	} else {
-		srcFile := opts.Toggly.Cache + "-cache.so"
+		srcFile := opts.Toggly.Cache.Plugin.Name + "-cache.so"
 		plug, err := plugin.Open(srcFile)
 		if err != nil {
 			log.Fatalf("Can't load plugin source `%s`: %v", srcFile, err)
@@ -91,11 +96,11 @@ func main() {
 		if err != nil {
 			log.Fatalf("Can't lookup GetCache function in plugin source: %v", err)
 		}
-		fn, ok := getCache.(func() cache.DataCache)
+		fn, ok := getCache.(func(map[string]string) cache.DataCache)
 		if !ok {
 			log.Fatalf("Can't cast GetCache function to `func() DataCache` interface")
 		}
-		dataCache = fn()
+		dataCache = fn(opts.Toggly.Cache.Plugin.Parameters)
 	}
 
 	if dataStorage, err = mongo.NewMongoStorage(opts.Toggly.Store.Mongo.URL); err != nil {

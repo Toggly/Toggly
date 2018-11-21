@@ -49,15 +49,16 @@ docker run -it --network toggly --name toggly-server -p 8080:8080 -d toggly/togg
 
 ### Parameters
 
-| Short | Long              | Environment              | Default | Description                                                                                                                |
-| ----- | ----------------- | ------------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------- |
-| -v    | --version         |                          |         | Version                                                                                                                    |
-| -p    | --port            | `TOGGLY_API_PORT`        | `8080`  | Port                                                                                                                       |
-|       | --base-path       | `TOGGLY_API_BASE_PATH`   | `/api`  | Base API Path                                                                                                              |
-|       | --no-logo         |                          | `false` | Do not show application logo                                                                                               |
-|       | --cache-plugin    | `TOGGLY_CACHE_PLUGIN`    |         | Cache plugin file. Skip `-cache.so` suffix. For example: `--cache-plugin=in-memory` will lookup `in-memory-cache.so` file. |
-|       | --store.mongo.url | `TOGGLY_STORE_MONGO_URL` |         | Mongo connection url                                                                                                       |
-| -h    | --help            |                          |         | Show help message                                                                                                          |
+| Short | Long                     | Environment                     | Default | Description                                                                                                                     |
+| ----- | ------------------------ | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| -v    | --version                |                                 |         | Version                                                                                                                         |
+| -p    | --port                   | `TOGGLY_API_PORT`               | `8080`  | Port                                                                                                                            |
+|       | --base-path              | `TOGGLY_API_BASE_PATH`          | `/api`  | Base API Path                                                                                                                   |
+|       | --no-logo                |                                 | `false` | Do not show application logo                                                                                                    |
+|       | --store.mongo.url        | `TOGGLY_STORE_MONGO_URL`        |         | Mongo connection url                                                                                                            |
+|       | --cache.plugin.name      | `TOGGLY_CACHE_PLUGIN_NAME`      |         | Cache plugin name. Skip '-cache.so' suffix. For example: '--cache.plugin.name=in-memory' will lookup 'in-memory-cache.so' file. |
+|       | --cache.plugin.parameter | `TOGGLY_CACHE_PLUGIN_PARAMETER` |         | Plugin parameter. For example: '--cache.plugin.parameter=param:value'. Multiple entries supported.                               |
+| -h    | --help                   |                                 |         | Show help message                                                                                                               |
 
 ## Installation
 
@@ -95,13 +96,19 @@ To use in-memory cache plugin `.so` file has to be compiled:
 go build -buildmode=plugin -o in-memory-cache.so ./internal/plugin/in-memory-cache/cache.go
 ```
 
-Than use `--cache-plugin` option to enable caching:
+Than use `--cache.plugin.*` options to enable caching:
 
 ```bash
-toggly-server --cache-plugin=in-memory
+toggly-server --cache.plugin.name=in-memory
 ```
 
-To create your own plugin (for example for using Redis or Memcache) you have to implement [DataCache](https://github.com/Toggly/core/blob/master/internal/pkg/cache/cache.go) interface:
+or
+
+```bash
+toggly-server --cache.plugin.name=my-plugin --cache.plugin.parameter=key1:val1 --cache.plugin.parameter=key2:val2
+```
+
+To create your own plugin (for example for using Redis or Memcache) you have to implement [DataCache](https://github.com/Toggly/core/blob/master/pkg/cache/cache.go) interface:
 
 ```go
 type DataCache interface {
@@ -111,7 +118,7 @@ type DataCache interface {
 }
 ```
 
-Plugin package has to export `func GetCache() DataCache` function. See [in-memory-cache](https://github.com/Toggly/core/blob/master/internal/pkg/cache/in_memory.go) as a reference.
+Plugin package has to export `func GetCache(parameters map[string]string) DataCache` function. See [in-memory-cache](https://github.com/Toggly/core/blob/master/internal/plugin/in-memory-cache/cache.go) as a reference.
 
 ## REST API
 

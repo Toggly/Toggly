@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/Toggly/core/internal/api"
-	"github.com/Toggly/core/internal/pkg/cache"
+	"github.com/Toggly/core/pkg/cache"
 )
 
 // NewCachedAPI returns cached API implementation

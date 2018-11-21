@@ -4,10 +4,11 @@ import (
 	"log"
 
 	"github.com/Toggly/core/internal/api"
-	"github.com/Toggly/core/internal/pkg/cache"
+	in "github.com/Toggly/core/internal/pkg/cache"
 	"github.com/Toggly/core/internal/pkg/cache/cachedapi"
 	"github.com/Toggly/core/internal/pkg/engine"
 	"github.com/Toggly/core/internal/pkg/storage/mongo"
+	"github.com/Toggly/core/pkg/cache"
 	"github.com/globalsign/mgo"
 )
 
@@ -18,7 +19,7 @@ func getEngineAndCache() (api.TogglyAPI, cache.DataCache) {
 	if err != nil {
 		log.Fatalf(err.Error())
 	}
-	dataCache := &cache.InMemoryCache{
+	dataCache := &in.InMemoryCache{
 		Storage: make(map[string][]byte, 0),
 	}
 	if err != nil {
