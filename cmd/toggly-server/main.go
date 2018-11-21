@@ -17,7 +17,6 @@ import (
 	"github.com/Toggly/core/internal/pkg/engine"
 	"github.com/Toggly/core/internal/pkg/storage"
 	"github.com/Toggly/core/internal/pkg/storage/mongo"
-	"github.com/Toggly/core/pkg/cache"
 	flags "github.com/jessevdk/go-flags"
 )
 
@@ -46,7 +45,7 @@ type Opts struct {
 
 func main() {
 	var dataStorage storage.DataStorage
-	var dataCache cache.DataCache
+	var dataCache cachedapi.DataCache
 	var err error
 
 	var opts Opts
@@ -96,10 +95,11 @@ func main() {
 		if err != nil {
 			log.Fatalf("Can't lookup GetCache function in plugin source: %v", err)
 		}
-		fn, ok := getCache.(func(map[string]string) cache.DataCache)
-		if !ok {
-			log.Fatalf("Can't cast GetCache function to `func(map[string]string) DataCache` interface")
-		}
+		fn := getCache.(func(map[string]string) interface {
+			Get(key string) ([]byte, error)
+			Set(key string, data []byte) error
+			Flush(scopes ...string) error
+		})
 		dataCache = fn(opts.Toggly.Cache.Plugin.Parameters)
 	}
 

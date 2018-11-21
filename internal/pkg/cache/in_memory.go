@@ -23,9 +23,10 @@ func (c *InMemoryCache) Set(key string, data []byte) error {
 }
 
 // Flush data
-func (c *InMemoryCache) Flush(scopes ...string) {
+func (c *InMemoryCache) Flush(scopes ...string) error {
 	for _, s := range scopes {
 		fmt.Printf("[DEBUG] Invalidate cache for key: %s\n", s)
 		delete(c.Storage, s)
 	}
+	return nil
 }

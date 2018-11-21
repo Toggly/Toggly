@@ -565,14 +565,24 @@ or
 toggly-server --cache.plugin.name=my-plugin --cache.plugin.parameter=key:val
 ```
 
-To create your own plugin (for example for using Redis or Memcache) you have to implement [DataCache](https://github.com/Toggly/core/blob/master/pkg/cache/cache.go) interface:
+To create your own plugin (for example for using Redis or Memcache) you have to implement cache interface:
 
 ```go
-type DataCache interface {
+interface {
     Get(key string) ([]byte, error)
     Set(key string, data []byte) error
     Flush(scopes ...string)
 }
 ```
 
-Plugin package has to export `func GetCache(parameters map[string]string) DataCache` function. See [in-memory-cache](https://github.com/Toggly/core/blob/master/internal/plugin/in-memory-cache/cache.go) as a reference.
+Plugin package has to export `GetCache` function:
+
+```go
+func GetCache(parameters map[string]string) interface {
+    Get(key string) ([]byte, error)
+    Set(key string, data []byte) error
+    Flush(scopes ...string) error
+}
+```
+
+See [in-memory-cache](https://github.com/Toggly/core/blob/master/internal/plugin/in-memory-cache/cache.go) as a reference.

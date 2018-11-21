@@ -6,13 +6,12 @@ import (
 
 	"github.com/Toggly/core/internal/api"
 	"github.com/Toggly/core/internal/domain"
-	"github.com/Toggly/core/pkg/cache"
 )
 
 type cachedProjectAPI struct {
 	owner  string
 	engine api.ProjectAPI
-	cache  cache.DataCache
+	cache  DataCache
 }
 
 func (c *cachedProjectAPI) basePath() string {
@@ -98,7 +97,7 @@ type cachedForProjectAPI struct {
 	owner       string
 	projectCode domain.ProjectCode
 	engine      api.EnvironmentAPI
-	cache       cache.DataCache
+	cache       DataCache
 }
 
 func (c *cachedForProjectAPI) Environments() api.EnvironmentAPI {

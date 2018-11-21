@@ -4,7 +4,6 @@ WORKDIR /go/src/github.com/Toggly/core
 
 ADD cmd ./cmd
 ADD internal ./internal
-ADD pkg ./pkg
 ADD vendor ./vendor
 ADD .git ./.git
 
