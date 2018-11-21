@@ -38,7 +38,7 @@ type Opts struct {
 		Cache struct {
 			Plugin struct {
 				Name       string            `long:"name" env:"NAME" description:"Cache plugin name.\n Skip '-cache.so' suffix.\nFor example: '--cache.plugin.name=in-memory' will lookup 'in-memory-cache.so' file.\n"`
-				Parameters map[string]string `long:"parameter" env:"PARAMETER" description:"Plugin parameter.\nFor example: '--cache.plugin.parameter=param:value'.\nMultiple entries supported.\n"`
+				Parameters map[string]string `long:"parameter" env:"PARAMETER" env-delim:"," description:"Plugin parameter.\nFor example: '--cache.plugin.parameter=param:value'.\n"`
 			} `group:"plugin" namespace:"plugin" env-namespace:"PLUGIN"`
 		} `group:"cache" namespace:"cache" env-namespace:"CACHE"`
 	} `group:"toggly" env-namespace:"TOGGLY"`
@@ -104,7 +104,7 @@ func main() {
 	}
 
 	if dataStorage, err = mongo.NewMongoStorage(opts.Toggly.Store.Mongo.URL); err != nil {
-		log.Fatalf("[FATAL] Can't connect to storage: %v", err)
+		log.Fatalf("[FATAL] Can't connect to storage: %+v", err)
 	}
 
 	server := &server.Application{

@@ -23,7 +23,7 @@ See [GitHub repository](https://github.com/Toggly/core) for source code.
 - MongoDB as a storage
 - Cache layer plugins
 
-## Usage
+## REST API Server
 
 ### Docker
 
@@ -44,23 +44,48 @@ docker-compose up -d
 docker run -it -v mongo:/data --network toggly --name mongo -p 27017:27017 -d mongo
 
 # Start Toggly server
-docker run -it --network toggly --name toggly-server -p 8080:8080 -d toggly/toggly-server --store.mongo.url=mongodb://mongo:27017/toggly --cache-plugin=in-memory
+docker run -it -d --network toggly \
+    -p 8080:8080 \
+    --name toggly-server \
+    toggly/toggly-server \
+    --store.mongo.url=mongodb://mongo:27017/toggly \
+    --cache-plugin=in-memory
 ```
 
 ### Parameters
 
-| Short | Long                     | Environment                     | Default | Description                                                                                                                     |
-| ----- | ------------------------ | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| -v    | --version                |                                 |         | Version                                                                                                                         |
-| -p    | --port                   | `TOGGLY_API_PORT`               | `8080`  | Port                                                                                                                            |
-|       | --base-path              | `TOGGLY_API_BASE_PATH`          | `/api`  | Base API Path                                                                                                                   |
-|       | --no-logo                |                                 | `false` | Do not show application logo                                                                                                    |
-|       | --store.mongo.url        | `TOGGLY_STORE_MONGO_URL`        |         | Mongo connection url                                                                                                            |
-|       | --cache.plugin.name      | `TOGGLY_CACHE_PLUGIN_NAME`      |         | Cache plugin name. Skip '-cache.so' suffix. For example: '--cache.plugin.name=in-memory' will lookup 'in-memory-cache.so' file. |
-|       | --cache.plugin.parameter | `TOGGLY_CACHE_PLUGIN_PARAMETER` |         | Plugin parameter. For example: '--cache.plugin.parameter=param:value'. Multiple entries supported.                               |
-| -h    | --help                   |                                 |         | Show help message                                                                                                               |
+| Short | Long                     | Environment                     | Default | Description                  |
+| ----- | ------------------------ | ------------------------------- | ------- | ---------------------------- |
+| -v    | --version                |                                 |         | Show version                 |
+| -p    | --port                   | `TOGGLY_API_PORT`               | `8080`  | Port                         |
+|       | --base-path              | `TOGGLY_API_BASE_PATH`          | `/api`  | Base API Path                |
+|       | --no-logo                |                                 | `false` | Do not show application logo |
+|       | --store.mongo.url        | `TOGGLY_STORE_MONGO_URL`        |         | Mongo connection url         |
+|       | --cache.plugin.name      | `TOGGLY_CACHE_PLUGIN_NAME`      |         | Cache plugin name.           |
+|       | --cache.plugin.parameter | `TOGGLY_CACHE_PLUGIN_PARAMETER` |         | Plugin parameter.            |
+| -h    | --help                   |                                 |         | Show help message            |
 
-## Installation
+#### Details
+
+- **`cache.plugin.name`**
+
+   Skip `-cache.so` suffix.
+
+   For example: `--cache.plugin.name=in-memory` will lookup `in-memory-cache.so` file.
+
+- **`cache.plugin.parameter`**
+
+   Represented as `key:value` map.
+
+   For example: `--cache.plugin.parameter=key:value`
+
+   Multiple entries supported.
+
+   For environment variable with multiple entries use coma as separator:
+
+   `TOGGLY_CACHE_PLUGIN_PARAMETER=key1:val1,key2:val2`
+
+### Installation
 
 ```bash
 cd cmd/toggly-server && go install
@@ -70,63 +95,19 @@ cd cmd/toggly-server && go install
 toggly-server --version
 ```
 
-## Build Docker image
+### Build Docker image
 
 ```bash
 docker build -t toggly/toggly-server .
 ```
 
-## Development
-
-To development run:
-
-```bash
-go run cmd/toggly-server/main.go
-```
-
-### Plugins
-
-Toggly supports plugins for caching layer. Plugins implementation base on native [Go plugin system](https://golang.org/pkg/plugin/)
-
-By default `in-memory` plugin is available.
-
-To use in-memory cache plugin `.so` file has to be compiled:
-
-```bash
-go build -buildmode=plugin -o in-memory-cache.so ./internal/plugin/in-memory-cache/cache.go
-```
-
-Than use `--cache.plugin.*` options to enable caching:
-
-```bash
-toggly-server --cache.plugin.name=in-memory
-```
-
-or
-
-```bash
-toggly-server --cache.plugin.name=my-plugin --cache.plugin.parameter=key1:val1 --cache.plugin.parameter=key2:val2
-```
-
-To create your own plugin (for example for using Redis or Memcache) you have to implement [DataCache](https://github.com/Toggly/core/blob/master/pkg/cache/cache.go) interface:
-
-```go
-type DataCache interface {
-    Get(key string) ([]byte, error)
-    Set(key string, data []byte) error
-    Flush(scopes ...string)
-}
-```
-
-Plugin package has to export `func GetCache(parameters map[string]string) DataCache` function. See [in-memory-cache](https://github.com/Toggly/core/blob/master/internal/plugin/in-memory-cache/cache.go) as a reference.
-
-## REST API
+### REST API
 
 See public [OpenAPI specification](https://app.swaggerhub.com/apis-docs/Toggly/toggly-server/1.0.0).
 
-### Models
+#### Models
 
-#### Project model
+##### Project model
 
 ```json
 {
@@ -143,7 +124,7 @@ Where:
 - `status` can be _active_ or _disabled_
 - `reg_date` is date in ISO 8601 format
 
-#### Environment model
+##### Environment model
 
 ```json
 {
@@ -160,7 +141,7 @@ Where:
 
 - `reg_date` is date in ISO 8601 format
 
-#### Object model
+##### Object model
 
 ```json
 {
@@ -190,7 +171,7 @@ Where:
 - `parameters.type` can be _boot_, _int_ or _string_
 - `parameters.value` depends on type
 
-### Request headers
+#### Request headers
 
 Each request has to specify followed headers:
 
@@ -199,9 +180,9 @@ Each request has to specify followed headers:
 | X-Toggly-Request-Id | No       | Request ID for request tracking. Automatically generated If not specified |
 | X-Toggly-Owner-Id   | Yes      | Owner identifier                                                          |
 
-### Project
+#### Project
 
-#### `GET /v1/project` - projects list for owner
+##### `GET /v1/project` - projects list for owner
 
 Response:
 
@@ -217,7 +198,7 @@ Response:
 ]
 ```
 
-#### `POST /v1/project` - create project
+##### `POST /v1/project` - create project
 
 Request:
 
@@ -241,7 +222,7 @@ Response:
 }
 ```
 
-#### `PUT /v1/project` - update project
+##### `PUT /v1/project` - update project
 
 Request:
 
@@ -265,7 +246,7 @@ Response:
 }
 ```
 
-#### `GET /v1/project/{project_code}` - get project information
+##### `GET /v1/project/{project_code}` - get project information
 
 Response:
 
@@ -279,11 +260,11 @@ Response:
 }
 ```
 
-#### `DELETE /v1/project/{project_code}` - delete project
+##### `DELETE /v1/project/{project_code}` - delete project
 
-### Environment
+#### Environment
 
-#### `GET /v1/project/{project_code}/env` - environments list for project
+##### `GET /v1/project/{project_code}/env` - environments list for project
 
 Response:
 
@@ -302,7 +283,7 @@ Response:
 }
 ```
 
-#### `POST /project/{project_code}/env` - create environment
+##### `POST /project/{project_code}/env` - create environment
 
 Request:
 
@@ -327,7 +308,7 @@ Response:
 }
 ```
 
-#### `PUT /project/{project_code}/env` - update environment
+##### `PUT /project/{project_code}/env` - update environment
 
 Request:
 
@@ -352,7 +333,7 @@ Response:
 }
 ```
 
-#### `GET /project/{project_code}/env/{env_code}` - get environment information
+##### `GET /project/{project_code}/env/{env_code}` - get environment information
 
 Response:
 
@@ -367,11 +348,11 @@ Response:
 }
 ```
 
-#### `DELETE /project/{project_code}/env/{env_code}` - delete environment
+##### `DELETE /project/{project_code}/env/{env_code}` - delete environment
 
-### Object
+#### Object
 
-#### `GET /project/{project_code}/env/{env_code}/object` - get objects list
+##### `GET /project/{project_code}/env/{env_code}/object` - get objects list
 
 Response:
 
@@ -400,7 +381,7 @@ Response:
 ]
 ```
 
-#### `POST /project/{project_code}/env/{env_code}/object` - create object
+##### `POST /project/{project_code}/env/{env_code}/object` - create object
 
 Request:
 
@@ -451,7 +432,7 @@ Response:
 
 ```
 
-#### `PUT /project/{project_code}/env/{env_code}/object` - create object
+##### `PUT /project/{project_code}/env/{env_code}/object` - create object
 
 Request:
 
@@ -500,7 +481,7 @@ Response:
 }
 ```
 
-#### `GET /project/{project_code}/env/{env_code}/object/{obj_code}` - get object information
+##### `GET /project/{project_code}/env/{env_code}/object/{obj_code}` - get object information
 
 Response:
 
@@ -527,9 +508,9 @@ Response:
 }
 ```
 
-#### `DELETE /project/{project_code}/env/{env_code}/object/{obj_code}` - delete object
+##### `DELETE /project/{project_code}/env/{env_code}/object/{obj_code}` - delete object
 
-#### `GET /project/{project_code}/env/{env_code}/object/{obj_code}/inheritors` - get all object inheritors as flat list
+##### `GET /project/{project_code}/env/{env_code}/object/{obj_code}/inheritors` - get all object inheritors as flat list
 
 Response:
 
@@ -557,3 +538,41 @@ Response:
     }
 ]
 ```
+
+## Development
+
+### Plugins
+
+Toggly supports plugins for caching layer. Plugins implementation base on native [Go plugin system](https://golang.org/pkg/plugin/)
+
+By default `in-memory` plugin is available.
+
+To use in-memory cache plugin `.so` file has to be compiled:
+
+```bash
+go build -buildmode=plugin -o in-memory-cache.so ./internal/plugin/in-memory-cache/cache.go
+```
+
+Than use `--cache.plugin.*` options to enable caching:
+
+```bash
+toggly-server --cache.plugin.name=in-memory
+```
+
+or
+
+```bash
+toggly-server --cache.plugin.name=my-plugin --cache.plugin.parameter=key:val
+```
+
+To create your own plugin (for example for using Redis or Memcache) you have to implement [DataCache](https://github.com/Toggly/core/blob/master/pkg/cache/cache.go) interface:
+
+```go
+type DataCache interface {
+    Get(key string) ([]byte, error)
+    Set(key string, data []byte) error
+    Flush(scopes ...string)
+}
+```
+
+Plugin package has to export `func GetCache(parameters map[string]string) DataCache` function. See [in-memory-cache](https://github.com/Toggly/core/blob/master/internal/plugin/in-memory-cache/cache.go) as a reference.
