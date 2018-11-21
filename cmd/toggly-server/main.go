@@ -98,7 +98,7 @@ func main() {
 		}
 		fn, ok := getCache.(func(map[string]string) cache.DataCache)
 		if !ok {
-			log.Fatalf("Can't cast GetCache function to `func() DataCache` interface")
+			log.Fatalf("Can't cast GetCache function to `func(map[string]string) DataCache` interface")
 		}
 		dataCache = fn(opts.Toggly.Cache.Plugin.Parameters)
 	}
