@@ -5,15 +5,21 @@ import (
 	"log"
 
 	"github.com/Toggly/core/internal/api"
-	"github.com/Toggly/core/internal/pkg/cache"
 )
 
+// DataCache type
+type DataCache interface {
+	Get(key string) ([]byte, error)
+	Set(key string, data []byte) error
+	Flush(scopes ...string) error
+}
+
 // NewCachedAPI returns cached API implementation
-func NewCachedAPI(engine api.TogglyAPI, cache cache.DataCache) api.TogglyAPI {
+func NewCachedAPI(engine api.TogglyAPI, cache DataCache) api.TogglyAPI {
 	return &cachedAPI{engine: engine, cache: cache}
 }
 
-func withCache(cache cache.DataCache, key string, fn func() (interface{}, error)) ([]byte, error) {
+func withCache(cache DataCache, key string, fn func() (interface{}, error)) ([]byte, error) {
 	bytes, err := cache.Get(key)
 	if err != nil {
 		return nil, err
@@ -40,7 +46,7 @@ func withCache(cache cache.DataCache, key string, fn func() (interface{}, error)
 
 type cachedAPI struct {
 	engine api.TogglyAPI
-	cache  cache.DataCache
+	cache  DataCache
 }
 
 func (c *cachedAPI) ForOwner(owner string) api.OwnerAPI {
@@ -57,7 +63,7 @@ func (c *cachedAPI) ForOwner(owner string) api.OwnerAPI {
 type cachedOwnerAPI struct {
 	owner  string
 	engine api.OwnerAPI
-	cache  cache.DataCache
+	cache  DataCache
 }
 
 func (c *cachedOwnerAPI) Projects() api.ProjectAPI {

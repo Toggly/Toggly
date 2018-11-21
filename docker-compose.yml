@@ -6,7 +6,7 @@ services:
     container_name: toggly-server
     environment:
       TOGGLY_STORE_MONGO_URL: mongodb://db:27017/toggly
-      TOGGLY_CACHE_PLUGIN: in-memory
+      TOGGLY_CACHE_PLUGIN_NAME: in-memory
     ports:
       - "8080:8080"
     networks:
