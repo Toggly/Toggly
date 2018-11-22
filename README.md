@@ -49,7 +49,7 @@ docker run -it -d --network toggly \
     --name toggly-server \
     toggly/toggly-server \
     --store.mongo.url=mongodb://mongo:27017/toggly \
-    --cache-plugin=in-memory
+    --cache.plugin.name=in-memory
 ```
 
 ### Parameters
@@ -61,8 +61,8 @@ docker run -it -d --network toggly \
 |       | --base-path              | `TOGGLY_API_BASE_PATH`          | `/api`  | Base API Path                |
 |       | --no-logo                |                                 | `false` | Do not show application logo |
 |       | --store.mongo.url        | `TOGGLY_STORE_MONGO_URL`        |         | Mongo connection url         |
-|       | --cache.plugin.name      | `TOGGLY_CACHE_PLUGIN_NAME`      |         | Cache plugin name.           |
-|       | --cache.plugin.parameter | `TOGGLY_CACHE_PLUGIN_PARAMETER` |         | Plugin parameter.            |
+|       | --cache.plugin.name      | `TOGGLY_CACHE_PLUGIN_NAME`      |         | Cache plugin name            |
+|       | --cache.plugin.parameter | `TOGGLY_CACHE_PLUGIN_PARAMETER` |         | Plugin parameter             |
 | -h    | --help                   |                                 |         | Show help message            |
 
 #### Details
