@@ -21,7 +21,8 @@ See [GitHub repository](https://github.com/Toggly/core) for source code.
 - Different parameter types (bool, int, string)
 - Flags/Properties inheritance
 - MongoDB as a storage
-- Cache layer plugins
+- In-memory cache
+- Redis cache
 
 ## REST API Server
 
