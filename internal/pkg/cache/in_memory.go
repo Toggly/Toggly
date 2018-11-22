@@ -4,6 +4,13 @@ import (
 	"fmt"
 )
 
+// NewInMemoryCache returns in-memory cache implementation
+func NewInMemoryCache() DataCache {
+	return &InMemoryCache{
+		Storage: make(map[string][]byte, 0),
+	}
+}
+
 // InMemoryCache type
 type InMemoryCache struct {
 	Storage map[string][]byte

@@ -3,10 +3,13 @@ services:
   toggly-server:
     build: .
     image: toggly/toggly-server
-    container_name: toggly-server
+    depends_on: 
+      - "db"
+      - "redis"
     environment:
       TOGGLY_STORE_MONGO_URL: mongodb://db:27017/toggly
-      TOGGLY_CACHE_PLUGIN_NAME: in-memory
+      TOGGLY_CACHE_TYPE: redis
+      TOGGLY_CACHE_REDIS_URL: redis://redis:6379
     ports:
       - "8080:8080"
     networks:
@@ -14,9 +17,15 @@ services:
 
   db:
     image: mongo
-    container_name: toggly-db
     volumes:
       - db-data:/data
+    networks:
+      - toggly
+
+  redis:
+    image: redis
+    volumes:
+      - redis-data:/data
     networks:
       - toggly
 
@@ -25,3 +34,4 @@ networks:
 
 volumes:
   db-data:
+  redis-data:
