@@ -13,7 +13,7 @@ import (
 
 const MongoTestUrl = "mongodb://localhost:27017/toggly_cache_test"
 
-func getEngineAndCache() (api.TogglyAPI, cachedapi.DataCache) {
+func getEngineAndCache() (api.TogglyAPI, cache.DataCache) {
 	dataStorage, err := mongo.NewMongoStorage(MongoTestUrl)
 	if err != nil {
 		log.Fatalf(err.Error())

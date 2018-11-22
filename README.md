@@ -41,7 +41,10 @@ docker-compose up -d
 
 ```bash
 # Start MongoDB server
-docker run -it -v mongo:/data --network toggly --name mongo -p 27017:27017 -d mongo
+docker run -d -v mongo:/data --network toggly --name mongo mongo
+
+# Start Redis server
+docker run -d -v redis:/data --network toggly --name redis redis
 
 # Start Toggly server
 docker run -it -d --network toggly \
@@ -49,41 +52,22 @@ docker run -it -d --network toggly \
     --name toggly-server \
     toggly/toggly-server \
     --store.mongo.url=mongodb://mongo:27017/toggly \
-    --cache.plugin.name=in-memory
+    --cache.type=redis \
+    --cache.redis.url=redis://redis:6379
 ```
 
 ### Parameters
 
-| Short | Long                     | Environment                     | Default | Description                  |
-| ----- | ------------------------ | ------------------------------- | ------- | ---------------------------- |
-| -v    | --version                |                                 |         | Show version                 |
-| -p    | --port                   | `TOGGLY_API_PORT`               | `8080`  | Port                         |
-|       | --base-path              | `TOGGLY_API_BASE_PATH`          | `/api`  | Base API Path                |
-|       | --no-logo                |                                 | `false` | Do not show application logo |
-|       | --store.mongo.url        | `TOGGLY_STORE_MONGO_URL`        |         | Mongo connection url         |
-|       | --cache.plugin.name      | `TOGGLY_CACHE_PLUGIN_NAME`      |         | Cache plugin name            |
-|       | --cache.plugin.parameter | `TOGGLY_CACHE_PLUGIN_PARAMETER` |         | Plugin parameter             |
-| -h    | --help                   |                                 |         | Show help message            |
-
-#### Details
-
-- **`cache.plugin.name`**
-
-   Skip `-cache.so` suffix.
-
-   For example: `--cache.plugin.name=in-memory` will lookup `in-memory-cache.so` file.
-
-- **`cache.plugin.parameter`**
-
-   Represented as `key:value` map.
-
-   For example: `--cache.plugin.parameter=key:value`
-
-   Multiple entries supported.
-
-   For environment variable with multiple entries use coma as separator:
-
-   `TOGGLY_CACHE_PLUGIN_PARAMETER=key1:val1,key2:val2`
+| Short | Long                     | Environment       | Default | Description                  |
+| ----- | ----------------- | ------------------------ | ------- | ---------------------------- |
+| -v    | --version         |                          |         | Show version                 |
+| -p    | --port            | `TOGGLY_API_PORT`        | `8080`  | Port                         |
+|       | --base-path       | `TOGGLY_API_BASE_PATH`   | `/api`  | Base API Path                |
+|       | --no-logo         |                          | `false` | Do not show application logo |
+|       | --store.mongo.url | `TOGGLY_STORE_MONGO_URL` |         | Mongo connection url         |
+|       | --cache.type      | `TOGGLY_CACHE_TYPE`      |         | Cache type [memory\|redis]   |
+|       | --cache.redis.url | `TOGGLY_CACHE_REDIS_URL` |         | Redis connection url         |
+| -h    | --help            |                          |         | Show help message            |
 
 ### Installation
 
@@ -538,51 +522,3 @@ Response:
     }
 ]
 ```
-
-## Development
-
-### Plugins
-
-Toggly supports plugins for caching layer. Plugins implementation base on native [Go plugin system](https://golang.org/pkg/plugin/)
-
-By default `in-memory` plugin is available.
-
-To use in-memory cache plugin `.so` file has to be compiled:
-
-```bash
-go build -buildmode=plugin -o in-memory-cache.so ./internal/plugin/in-memory-cache/cache.go
-```
-
-Than use `--cache.plugin.*` options to enable caching:
-
-```bash
-toggly-server --cache.plugin.name=in-memory
-```
-
-or
-
-```bash
-toggly-server --cache.plugin.name=my-plugin --cache.plugin.parameter=key:val
-```
-
-To create your own plugin (for example for using Redis or Memcache) you have to implement cache interface:
-
-```go
-interface {
-    Get(key string) ([]byte, error)
-    Set(key string, data []byte) error
-    Flush(scopes ...string)
-}
-```
-
-Plugin package has to export `GetCache` function:
-
-```go
-func GetCache(parameters map[string]string) interface {
-    Get(key string) ([]byte, error)
-    Set(key string, data []byte) error
-    Flush(scopes ...string) error
-}
-```
-
-See [in-memory-cache](https://github.com/Toggly/core/blob/master/internal/plugin/in-memory-cache/cache.go) as a reference.
