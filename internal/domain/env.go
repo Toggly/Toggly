@@ -13,4 +13,5 @@ type Environment struct {
 	Description string          `json:"description"`
 	Protected   bool            `json:"protected"`
 	RegDate     time.Time       `json:"reg_date" bson:"reg_date"`
+	Inherits    EnvironmentCode `json:"inherits"`
 }

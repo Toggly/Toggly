@@ -10,8 +10,8 @@ type Object struct {
 	ProjectCode ProjectCode        `json:"project_code" bson:"project_code"`
 	EnvCode     EnvironmentCode    `json:"env_code" bson:"env_code"`
 	Description string             `json:"description"`
-	Inherits    *ObjectInheritance `json:"inherits"`
-	Parameters  []*Parameter       `json:"parameters"`
+	Inherits    *ObjectInheritance `json:"inherits,omitempty"`
+	Parameters  []*Parameter       `json:"parameters,omitempty"`
 }
 
 // ObjectInheritance type

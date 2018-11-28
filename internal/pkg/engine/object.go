@@ -155,7 +155,13 @@ func checkObjParams(code domain.ObjectCode, description string, inherits *domain
 				return api.NewBadRequestError("Parameter value not specified")
 			}
 			if !isParameterType(p.Type) {
-				return api.NewBadRequestError("Parameter type not specified")
+				return api.NewBadRequestError("Parameter type not specified or wrong")
+			}
+			if p.AllowedValues != nil {
+				err := checkAllowedValue(p.Type, p.Value, p.AllowedValues)
+				if err != nil {
+					return api.NewBadRequestError(err.Error())
+				}
 			}
 		}
 	}
@@ -163,7 +169,26 @@ func checkObjParams(code domain.ObjectCode, description string, inherits *domain
 }
 
 func isParameterType(t domain.ParameterType) bool {
-	return t == domain.ParameterBool || t == domain.ParameterEnum || t == domain.ParameterInt || t == domain.ParameterString
+	return t == domain.ParameterBool || t == domain.ParameterInt || t == domain.ParameterString
+}
+
+func checkAllowedValue(t domain.ParameterType, v interface{}, allowed []interface{}) error {
+	switch t {
+	case domain.ParameterBool:
+		if _, ok := v.(bool); !ok {
+			return fmt.Errorf("Can't cast parameter value `%v` to bool", v)
+		}
+	case domain.ParameterInt:
+		if _, ok := v.(int); !ok {
+			return fmt.Errorf("Can't cast parameter value `%v` to int", v)
+		}
+	case domain.ParameterString:
+		if _, ok := v.(string); !ok {
+			return fmt.Errorf("Can't cast parameter value `%v` to string", v)
+		}
+	}
+
+	return nil
 }
 
 // Create object
