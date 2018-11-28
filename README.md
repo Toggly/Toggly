@@ -13,16 +13,76 @@ Toggly API allows organizing your project configuration as standalone flexible a
 
 See [GitHub repository](https://github.com/Toggly/core) for source code.
 
-## Features
+## Release Notes
+
+### Version 1.1
+
+- Nested environments
+- Parameter allowed values
+
+### Version 1.0
 
 - Multiple projects
 - Multiple environments for each project
-- Multiple transports applicable ([REST API implemented](#rest-api))
+- REST API server
 - Different parameter types (bool, int, string)
 - Flags/Properties inheritance
 - MongoDB as a storage
 - In-memory cache
 - Redis cache
+
+## In details
+
+The basic primitive is a `Parameter`. Parameter can be `bool`, `int` or `string` type. For each type allowed values can be specified.
+
+The lower lever abstraction under parameter is `Object`. Object is basically a group of parameters, which describes some entity.
+
+For example, it can be a _User_ entity with parameters:
+
+`User`
+
+- `can_write: false`
+- `can_read: true`
+- `icon: "user.png"`
+
+The `Object` can inherit other object and override it's parameter values and add other parameters:
+
+`Admin` (inherits User)
+
+- `can_write: true`
+- `icon: "admin.png`
+- `group: 1`
+
+The result parameters for `Admin` will be:
+
+- `can_write: true`
+- `can_read: true`
+- `icon: "admin.png`
+- `group: 1`
+
+Objects are grouped to `Projects`. Project can have number of `Environments`. One environment can inherit other and override/add objects.
+
+```text
+Project 1
+ |
+ |-- Dev Environment
+ |     |
+ |     |-- User Object
+ |     |     |
+ |     |     |- can_write: false
+ |     |     |- can_read: true
+ |     |     `- icon: user.png
+ |     |
+ |     `-- Admin Object [inherits: User Object]
+ |           |
+ |           |- can_write: true
+ |           `- icon: admin.png
+ |
+ `-- Prod Environment [inherits: Dev Environment]
+       |
+       .
+       .
+```
 
 ## REST API Server
 
