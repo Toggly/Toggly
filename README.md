@@ -76,7 +76,8 @@ Project 1
  |     `-- Admin Object [inherits: User Object]
  |           |
  |           |- can_write: true
- |           `- icon: admin.png
+ |           |- icon: admin.png
+ |           `- group: 1
  |
  `-- Prod Environment [inherits: Dev Environment]
        |
